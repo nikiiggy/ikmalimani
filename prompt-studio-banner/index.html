@@ -38,134 +38,6 @@
       margin: 0 auto;
     }
 
-    /* Modal Authentication & Payment */
-    .auth-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.75);
-      backdrop-filter: blur(8px);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 999;
-      padding: 20px;
-    }
-
-    .auth-box {
-      background: #ffffff;
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius-lg);
-      padding: 30px;
-      width: 100%;
-      max-width: 440px;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-      text-align: center;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-
-    .auth-box h2 {
-      margin: 0 0 6px 0;
-      font-size: 1.35rem;
-      background: linear-gradient(90deg, #4f46e5, #06b6d4);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-
-    .auth-box p {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      margin-bottom: 20px;
-    }
-
-    .pin-group {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 20px;
-    }
-
-    .pin-input {
-      width: 45px !important;
-      height: 50px;
-      text-align: center;
-      font-size: 1.2rem !important;
-      font-weight: 700;
-      padding: 0 !important;
-      border-radius: 8px !important;
-    }
-
-    .auth-error {
-      color: #ef4444;
-      font-size: 0.8rem;
-      margin-top: -8px;
-      margin-bottom: 14px;
-      display: none;
-      font-weight: 600;
-    }
-
-    /* Modern Payment Section */
-    .price-tag-box {
-      background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
-      color: #ffffff;
-      padding: 14px;
-      border-radius: var(--radius-md);
-      margin-bottom: 16px;
-      text-align: center;
-    }
-
-    .price-tag-box .price-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9; }
-    .price-tag-box .price-amount { font-size: 1.5rem; font-weight: 700; margin: 2px 0; }
-    .price-tag-box .price-desc { font-size: 0.8rem; opacity: 0.9; }
-
-    .qris-box {
-      background: #f8fafc;
-      border: 1px solid var(--card-border);
-      border-radius: var(--radius-md);
-      padding: 16px;
-      margin-bottom: 16px;
-      text-align: center;
-    }
-
-    .qris-image {
-      max-width: 180px;
-      width: 100%;
-      height: auto;
-      border-radius: 8px;
-      border: 1px solid #cbd5e1;
-      margin: 8px 0;
-    }
-
-    .payment-instruction {
-      font-size: 0.8rem;
-      color: #334155;
-      line-height: 1.4;
-      text-align: left;
-      background: #eff6ff;
-      border-left: 3px solid #3b82f6;
-      padding: 10px 12px;
-      border-radius: 4px;
-      margin-bottom: 16px;
-    }
-
-    .btn-wa-confirm {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      background: #25d366;
-      color: white;
-      text-decoration: none;
-      padding: 10px 16px;
-      border-radius: 20px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      margin-bottom: 16px;
-      width: 100%;
-    }
-
-    .btn-wa-confirm:hover { background: #1da851; }
-
     /* Layout Header */
     header {
       background: var(--card-bg);
@@ -199,57 +71,15 @@
       margin-top: 2px;
     }
 
-    .user-profile-box {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .user-phone-tag {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--text-muted);
-      background: #f1f5f9;
-      padding: 6px 12px;
-      border-radius: 20px;
-    }
-
-    .badge-credit {
+    .badge-unlimited {
       background: rgba(99, 102, 241, 0.1);
       color: #4f46e5;
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       font-weight: 700;
       padding: 6px 14px;
       border-radius: 20px;
       border: 1px solid rgba(99, 102, 241, 0.2);
     }
-
-    .btn-topup {
-      background: #10b981;
-      color: #ffffff;
-      border: none;
-      padding: 6px 14px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: background 0.2s;
-    }
-
-    .btn-topup:hover { background: #059669; }
-
-    .btn-logout {
-      background: #f1f5f9;
-      color: #64748b;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-
-    .btn-logout:hover { background: #e2e8f0; color: #0f172a; }
 
     .card {
       background: var(--card-bg);
@@ -282,7 +112,7 @@
       letter-spacing: 0.5px;
     }
 
-    input[type="text"], input[type="tel"], select, textarea {
+    input[type="text"], select, textarea {
       width: 100%;
       padding: 12px 14px;
       background: var(--input-bg);
@@ -301,7 +131,7 @@
 
     textarea { resize: vertical; min-height: 90px; }
 
-    /* Custom Modern Upload Box - Center Aligned */
+    /* Custom Upload Area - Center Aligned */
     .upload-zone {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
@@ -413,15 +243,9 @@
       width: 100%;
     }
 
-    .btn-primary:hover:not(:disabled) {
+    .btn-primary:hover {
       transform: translateY(-2px);
       box-shadow: 0 15px 30px -5px rgba(99, 102, 241, 0.4);
-    }
-
-    .btn-primary:disabled {
-      background: #94a3b8;
-      box-shadow: none;
-      cursor: not-allowed;
     }
 
     .btn-secondary {
@@ -471,83 +295,9 @@
     .btn-copy-main:hover { background: #059669; }
 
     input[type="file"] { display: none; }
-    .hidden { display: none !important; }
   </style>
 </head>
 <body>
-
-  <!-- MODAL 1: LOGIN NOMOR HP & 4 DIGIT PIN -->
-  <div id="loginModal" class="auth-overlay">
-    <div class="auth-box">
-      <h2>Prompt Studio Banner</h2>
-      <p>Masukan Nomor HP dan 4 Digit Kode PIN Akses</p>
-      
-      <div style="text-align: left; margin-bottom: 16px;">
-        <label>Nomor WhatsApp / HP</label>
-        <input type="tel" id="loginPhone" placeholder="Contoh: 08123456789">
-      </div>
-
-      <div style="text-align: left; margin-bottom: 8px;">
-        <label>4 Digit Kode PIN</label>
-        <div class="pin-group">
-          <input type="text" maxlength="1" class="pin-input" oninput="movePinFocus(this, 1)">
-          <input type="text" maxlength="1" class="pin-input" oninput="movePinFocus(this, 2)">
-          <input type="text" maxlength="1" class="pin-input" oninput="movePinFocus(this, 3)">
-          <input type="text" maxlength="1" class="pin-input" oninput="movePinFocus(this, 4)">
-        </div>
-      </div>
-
-      <div id="loginError" class="auth-error">Kombinasi Nomor HP atau PIN Salah!</div>
-      <button type="button" class="btn-primary" onclick="processLogin()">Masuk Studio</button>
-    </div>
-  </div>
-
-  <!-- MODAL 2: ISI ULANG KREDIT & PEMBAYARAN QRIS / WA -->
-  <div id="topupModal" class="auth-overlay hidden">
-    <div class="auth-box" style="text-align: left;">
-      <h2 style="font-size: 1.25rem; text-align: center;">Isi Ulang Kredit Studio</h2>
-      <p style="text-align: center; margin-bottom: 14px;">Scan QRIS di bawah ini untuk membeli lisensi kredit baru.</p>
-
-      <!-- Paket Harga -->
-      <div class="price-tag-box">
-        <div class="price-title">Daftar Paket Kredit</div>
-        <div class="price-amount">Rp 50.000</div>
-        <div class="price-desc">Mendapatkan 100 Kredit Prompt Studio</div>
-      </div>
-
-      <!-- Tampilan QRIS -->
-      <div class="qris-box">
-        <div style="font-size: 0.75rem; font-weight: 700; color: #475569; letter-spacing: 0.5px;">SCAN QRIS PEMBAYARAN</div>
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=QRIS_PROMPT_STUDIO_PAYMENT" alt="QRIS Pembayaran" class="qris-image">
-        <div style="font-size: 0.75rem; color: #64748b;">Mendukung Semua e-Wallet & Bank QRIS</div>
-      </div>
-
-      <!-- Instruksi Pembayaran & WhatsApp -->
-      <div class="payment-instruction">
-        <strong>Langkah Aktivasi:</strong><br>
-        1. Scan & selesaikan pembayaran QRIS Rp 50.000.<br>
-        2. Kirim bukti transfer QRIS ke WhatsApp admin.<br>
-        3. Kamu akan menerima <strong>Kode Redeem Kredit</strong> dari admin.
-      </div>
-
-      <a href="https://wa.me/6285155091238?text=Halo%20Admin,%20saya%20mau%20konfirmasi%20bukti%20transfer%20QRIS%20Rp%2050.000%20untuk%20Redeem%20100%20Kredit%20Prompt%20Studio." target="_blank" class="btn-wa-confirm">
-        <span>Chat Admin WA (085155091238)</span>
-      </a>
-
-      <!-- Input Kode Redeem dari Admin -->
-      <div style="margin-bottom: 14px;">
-        <label>Masukan Kode Redeem Kredit (Dari Admin)</label>
-        <input type="text" id="topupCodeInput" placeholder="Masukkan 4 digit kode redeem">
-      </div>
-
-      <div id="topupError" class="auth-error">Kode Redeem Kredit tidak valid!</div>
-
-      <div style="display: flex; gap: 10px;">
-        <button type="button" class="btn-primary" onclick="processTopUp()">Aktivasi Kredit</button>
-        <button type="button" class="btn-secondary" style="flex: inherit; padding: 12px 18px;" onclick="closeTopUpModal()">Batal</button>
-      </div>
-    </div>
-  </div>
 
   <!-- MAIN APP CONTAINER -->
   <div class="container">
@@ -556,12 +306,7 @@
         <h1>Prompt Studio Banner</h1>
         <span class="subtitle">Unlimited by ikmalimani</span>
       </div>
-      <div class="user-profile-box">
-        <div class="user-phone-tag" id="displayUserPhone">0812...</div>
-        <div class="badge-credit">Kredit: <span id="creditCount">100</span></div>
-        <button type="button" class="btn-topup" onclick="openTopUpModal()">+ Isi Kredit</button>
-        <button type="button" class="btn-logout" onclick="logout()">Keluar</button>
-      </div>
+      <div class="badge-unlimited">UNLIMITED ACCESS</div>
     </header>
 
     <form id="promptForm" onsubmit="event.preventDefault();">
@@ -690,7 +435,105 @@
     </div>
   </div>
 
-  <!-- MEMANGGIL FILE JAVASCRIPT TERPISAH -->
-  <script src="script.js"></script>
+  <!-- INLINE JAVASCRIPT LOGIC -->
+  <script>
+    let uploadedData = { logoContainer: [], produkContainer: [], refContainer: [] };
+
+    function handleFiles(input, containerId) {
+      const container = document.getElementById(containerId);
+
+      Array.from(input.files).forEach((file) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const base64Data = e.target.result;
+          const fileIndex = uploadedData[containerId].length;
+          uploadedData[containerId].push({ name: file.name, data: base64Data });
+
+          const card = document.createElement('div');
+          card.className = 'preview-card';
+          card.innerHTML = `
+            <img src="${base64Data}" alt="preview">
+            <div class="preview-overlay">
+              <button class="btn-copy-img" onclick="copyImageBase64('${containerId}', ${fileIndex})">Copy Base64</button>
+            </div>
+          `;
+          container.insertBefore(card, container.lastElementChild);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    // Salin string Base64 gambar ke clipboard secara silent
+    function copyImageBase64(category, index) {
+      const item = uploadedData[category][index];
+      if (item) {
+        navigator.clipboard.writeText(item.data);
+      }
+    }
+
+    // Generate prompt berformat JSON Object secara bebas dan unlimited
+    function generatePrompt() {
+      const structuredPrompt = {
+        PROMPT_CONFIG: {
+          SYSTEM_AUTHOR: "Prompt Studio Banner Unlimited by ikmalimani",
+          ACCESS_TYPE: "SINGLE_FILE_UNLIMITED",
+          VERSION: "4.5-OFFLINE"
+        },
+        DATA_INFORMASI: {
+          JUDUL_UTAMA: document.getElementById('judulUtama').value || "-",
+          SUB_JUDUL: document.getElementById('subJudul').value || "-",
+          DESKRIPSI: document.getElementById('deskripsi').value || "-",
+          SLOGAN: document.getElementById('slogan').value || "-",
+          CALL_TO_ACTION: document.getElementById('cta').value || "-"
+        },
+        PANEL_KONTAK_ALAMAT: {
+          WHATSAPP: document.getElementById('wa').value || "-",
+          TIKTOK: document.getElementById('tiktok').value || "-",
+          INSTAGRAM: document.getElementById('ig').value || "-",
+          YOUTUBE: document.getElementById('yt').value || "-",
+          FACEBOOK: document.getElementById('fb').value || "-",
+          ALAMAT: document.getElementById('alamat').value || "-"
+        },
+        SPESIFIKASI_REFERENSI: {
+          ORIENTASI: document.getElementById('orientasi').value,
+          UKURAN: document.getElementById('ukuran').value || "-",
+          WARNA_DOMINAN: document.getElementById('warna').value || "-",
+          TEMA_DESAIN: document.getElementById('tema').value || "-",
+          TOTAL_GAMBAR_REFERENSI: uploadedData.refContainer.length
+        },
+        RINGKASAN_ASSET_VISUAL: {
+          TOTAL_LOGO: uploadedData.logoContainer.length,
+          TOTAL_FOTO_PRODUK: uploadedData.produkContainer.length
+        },
+        PERINTAH_KHUSUS: document.getElementById('perintahKhusus').value || "-",
+        AI_DIRECTIVE: "Generate visual banner desain profesional modern berbasis data terstruktur di atas. Susun komposisi hirarki visual yang seimbang antara Judul Utama, Foto Produk, dan Kontak."
+      };
+
+      const finalOutput = JSON.stringify(structuredPrompt, null, 2);
+      document.getElementById('outputArea').value = finalOutput;
+    }
+
+    // Salin prompt output utama secara silent
+    function copyOutput() {
+      const output = document.getElementById('outputArea');
+      if (!output.value) return;
+      output.select();
+      navigator.clipboard.writeText(output.value);
+    }
+
+    // Kosongkan seluruh data form
+    function resetForm() {
+      document.getElementById('promptForm').reset();
+      document.getElementById('outputArea').value = '';
+      
+      ['logoContainer', 'produkContainer', 'refContainer'].forEach(id => {
+        const container = document.getElementById(id);
+        const uploadBtn = container.querySelector('.upload-btn');
+        container.innerHTML = '';
+        container.appendChild(uploadBtn);
+        uploadedData[id] = [];
+      });
+    }
+  </script>
 </body>
 </html>
