@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aesthetic Shipping Label Generator - Mini Preview</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,400&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-page: #fbf9f5;
+      --card-bg: #ffffff;
+      --accent-dark: #1c1917;
+      --accent-soft: #f4efe6;
+      --border-color: #e7e0d3;
+      --text-main: #1c1917;
+      --text-muted: #78716c;
+      --warning-bg: #fff7ed;
+      --warning-border: #fdba74;
+      --warning-text: #c2410c;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    body {
+      background-color: #f1efe9;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      color: var(--text-main);
+    }
+
+    /* --- FORM INPUT CONTROLLER --- */
+    .form-container {
+      background: #ffffff;
+      width: 100%;
+      max-width: 210mm;
+      padding: 28px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.03);
+      border: 1px solid var(--border-color);
+    }
+
+    .form-header {
+      border-bottom: 2px solid var(--accent-soft);
+      padding-bottom: 14px;
+      margin-bottom: 20px;
+    }
+
+    .form-header h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 22px;
+      color: var(--accent-dark);
+      font-weight: 800;
+    }
+
+    .form-header p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .form-section {
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px dashed var(--border-color);
+    }
+
+    .form-section h3 {
+      font-size: 12px;
+      margin-bottom: 12px;
+      color: var(--text-muted);
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    label {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent-dark);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    textarea {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      font-size: 13px;
+      outline: none;
+      background: var(--bg-page);
+    }
+
+    textarea:focus {
+      border-color: var(--accent-dark);
+      background: #ffffff;
+    }
+
+    .penerima-card-input {
+      background: var(--bg-page);
+      border: 1px solid var(--border-color);
+      padding: 16px;
+      border-radius: 12px;
+      margin-bottom: 14px;
+      position: relative;
+    }
+
+    .btn-del {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      background: #ef4444;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .btn-add {
+      background: var(--accent-soft);
+      color: var(--accent-dark);
+      border: 1px solid var(--border-color);
+      padding: 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 700;
+      width: 100%;
+      margin-bottom: 14px;
+    }
+
+    .btn-print {
+      background: var(--accent-dark);
+      color: white;
+      border: none;
+      padding: 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 800;
+      font-size: 15px;
+      width: 100%;
+      letter-spacing: 1px;
+    }
+
+    /* --- NAVIGASI PREVIOUS & NEXT --- */
+    .pagination-bar {
+      width: 100%;
+      max-width: 210mm;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #ffffff;
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+    }
+
+    .nav-btn {
+      background: var(--accent-dark);
+      color: #ffffff;
+      border: none;
+      padding: 8px 18px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .nav-btn:disabled {
+      background: #cbd5e1;
+      cursor: not-allowed;
+    }
+
+    .page-indicator {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--accent-dark);
+    }
+
+    /* --- CONTAINER PREVIEW SEPEREMPAT LAYAR --- */
+    .preview-wrapper {
+      width: 100%;
+      max-width: 210mm;
+      height: 380px; /* Ukuran Mini / Ringkas */
+      overflow-y: auto;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      background: #e2dfd8;
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      box-shadow: inset 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    /* SCALE DOWN A4 SHEET FOR PREVIEW */
+    .a4-page {
+      width: 210mm;
+      height: 297mm;
+      background: var(--bg-page);
+      padding: 10mm 12mm;
+      box-sizing: border-box;
+      display: none;
+      flex-direction: column;
+      justify-content: flex-start;
+      gap: 6mm;
+      transform: scale(0.55); /* Diperkecil menjadi ~50% layar */
+      transform-origin: top center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      margin-bottom: -130mm; /* Menghilangkan sisa margin karena scaling */
+    }
+
+    .a4-page.active-page {
+      display: flex;
+    }
+
+    .slot-resi {
+      width: 100%;
+      border: 2px solid var(--accent-dark);
+      border-radius: 16px;
+      padding: 18px;
+      background: var(--card-bg);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .brand-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid var(--accent-dark);
+      padding-bottom: 10px;
+    }
+
+    .brand-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--accent-dark);
+    }
+
+    .badge-express {
+      background: var(--accent-dark);
+      color: #ffffff;
+      padding: 6px 16px;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      border-radius: 30px;
+    }
+
+    .table-box {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border: 2px solid var(--accent-dark);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .table-box td { padding: 0; vertical-align: top; }
+
+    .col-pengirim { 
+      width: 42%; 
+      border-right: 2px solid var(--accent-dark);
+      background: var(--bg-page);
+    }
+
+    .col-penerima { width: 58%; background: #ffffff; }
+
+    .header-tag-block {
+      background: var(--accent-dark);
+      color: #ffffff;
+      padding: 8px 14px;
+      font-size: 13px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .text-content-container { padding: 16px; }
+
+    .text-content {
+      font-size: 19px;
+      font-weight: 800;
+      line-height: 1.45;
+      color: var(--accent-dark);
+      white-space: pre-wrap;
+    }
+
+    .warning-area {
+      border: 1px dashed var(--warning-border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      text-align: center;
+      background-color: var(--warning-bg);
+    }
+
+    .warning-flex {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    .svg-icon {
+      width: 32px;
+      height: 32px;
+      fill: var(--warning-text);
+      flex-shrink: 0;
+    }
+
+    .warning-text-container { color: var(--warning-text); font-weight: 800; }
+    .warning-main { font-size: 15px; text-transform: uppercase; }
+    .warning-sub { font-size: 13px; opacity: 0.9; }
+
+    .footer-area {
+      border-top: 1px solid var(--border-color);
+      padding-top: 10px;
+      text-align: center;
+    }
+
+    .kendala-text {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+    }
+
+    .cut-line {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin: 2mm 0;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .cut-line::before, .cut-line::after {
+      content: '';
+      flex: 1;
+      border-bottom: 2px dashed var(--border-color);
+    }
+
+    .cut-icon { width: 16px; height: 16px; fill: var(--text-muted); }
+
+    /* PRINT MEDIA RULES (OTOMATIS A4 SKALA 100% UTUH) */
+    @media print {
+      body { background: none; padding: 0; }
+      .form-container, .pagination-bar, .preview-wrapper::-webkit-scrollbar { display: none !important; }
+      .preview-wrapper {
+        border: none;
+        padding: 0;
+        height: auto;
+        background: transparent;
+        overflow: visible;
+        display: block;
+      }
+      .a4-page { 
+        display: flex !important; 
+        transform: scale(1) !important; /* Kembalikan ke ukuran normal saat cetak */
+        margin-bottom: 0 !important;
+        box-shadow: none; 
+        padding: 6mm 8mm; 
+        gap: 2mm; 
+        background: #ffffff !important; 
+        page-break-after: always;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- FORM CONTAINER CONTROL -->
+  <div class="form-container">
+    <div class="form-header">
+      <h2>Aesthetic Shipping Label Generator</h2>
+      <p>Template Cetak Resi Studio & Olshop Minimalis A4</p>
+    </div>
+    
+    <div class="form-section">
+      <h3>1. Data Pengirim</h3>
+      <div>
+        <label>Detail Pengirim (Baris pertama otomatis menjadi Nama Studio / Brand)</label>
+        <textarea id="pengirimTeks" rows="4" oninput="render()">NAMA BISNIS KAMU
+No. HP: No. HP Dummy
+Alamat: Alamat Dummy
+Barang: Barang Dummy</textarea>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <h3>2. Data Penerima (1 Form per Resi)</h3>
+      <div id="penerimaInputList"></div>
+      <button class="btn-add" onclick="addPenerima()">+ Tambah Penerima Lain</button>
+    </div>
+
+    <button class="btn-print" onclick="window.print()">PRINT / SIMPAN PDF (A4)</button>
+  </div>
+
+  <!-- CONTROL PREVIOUS & NEXT -->
+  <div class="pagination-bar">
+    <button class="nav-btn" id="prevBtn" onclick="changePage(-1)">← Previous</button>
+    <div class="page-indicator" id="pageIndicator">Halaman 1 dari 1</div>
+    <button class="nav-btn" id="nextBtn" onclick="changePage(1)">Next →</button>
+  </div>
+
+  <!-- CONTAINER PREVIEW RINGKAS -->
+  <div class="preview-wrapper">
+    <div id="printContainer"></div>
+  </div>
+
+  <script>
+    let listPenerima = [
+`Nama : Nama Dummy
+No. HP : Nomor Dummy
+Alamat : Alamat Dummy`,
+
+`Nama : Nama Dummy
+No. HP : Nomor Dummy
+Alamat : Alamat Dummy`,
+
+`Nama : Nama Dummy
+No. HP : Nomor Dummy
+Alamat : Alamat Dummy`,
+
+`Nama : Nama Dummy
+No. HP : Nomor Dummy
+Alamat : Alamat Dummy`,
+
+`Nama : Nama Dummy
+No. HP : Nomor Dummy
+Alamat : Alamat Dummy`,
+
+`Nama : Nama Dummy
+No. HP : Nomor Dummy
+Alamat : Alamat Dummy`
+    ];
+
+    let currentPage = 1;
+
+    function renderForm() {
+      const container = document.getElementById('penerimaInputList');
+      container.innerHTML = '';
+      listPenerima.forEach((teksWa, index) => {
+        container.innerHTML += `
+          <div class="penerima-card-input">
+            <div style="font-weight:700; margin-bottom: 8px; font-size: 13px; color: var(--accent-dark);">Penerima #${index + 1}</div>
+            ${listPenerima.length > 1 ? `<button class="btn-del" onclick="delPenerima(${index})">Hapus</button>` : ''}
+            <div>
+              <label>Format Chat / Detail Penerima</label>
+              <textarea rows="3" placeholder="Paste detail penerima..." oninput="updateData(${index}, this.value)">${teksWa}</textarea>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function addPenerima() {
+      listPenerima.push('');
+      renderForm();
+      render();
+    }
+
+    function delPenerima(index) {
+      listPenerima.splice(index, 1);
+      renderForm();
+      render();
+    }
+
+    function updateData(index, val) {
+      listPenerima[index] = val;
+      render();
+    }
+
+    function changePage(direction) {
+      const totalPages = Math.ceil(listPenerima.length / 2) || 1;
+      currentPage += direction;
+
+      if (currentPage < 1) currentPage = 1;
+      if (currentPage > totalPages) currentPage = totalPages;
+
+      updatePageVisibility();
+    }
+
+    function updatePageVisibility() {
+      const totalPages = Math.ceil(listPenerima.length / 2) || 1;
+      const pages = document.querySelectorAll('.a4-page');
+
+      pages.forEach((page, idx) => {
+        if (idx + 1 === currentPage) {
+          page.classList.add('active-page');
+        } else {
+          page.classList.remove('active-page');
+        }
+      });
+
+      document.getElementById('pageIndicator').innerText = `Halaman ${currentPage} dari ${totalPages}`;
+      document.getElementById('prevBtn').disabled = (currentPage === 1);
+      document.getElementById('nextBtn').disabled = (currentPage === totalPages);
+    }
+
+    function render() {
+      const container = document.getElementById('printContainer');
+      container.innerHTML = '';
+
+      const teksPengirim = document.getElementById('pengirimTeks').value;
+      const barisPengirim = teksPengirim.trim().split('\n');
+      let namaBrand = barisPengirim[0] ? barisPengirim[0].replace(/^-?\s*(Nama\s*Toko|Nama|Brand|Studio)\s*:\s*/i, '') : 'YOUR BRAND';
+
+      const totalPages = Math.ceil(listPenerima.length / 2) || 1;
+      if (currentPage > totalPages) currentPage = totalPages;
+
+      let pageCounter = 1;
+
+      for (let i = 0; i < listPenerima.length; i += 2) {
+        const item1 = listPenerima[i];
+        const item2 = listPenerima[i + 1];
+
+        const activeClass = (pageCounter === currentPage) ? 'active-page' : '';
+
+        let pageHtml = `<div class="a4-page ${activeClass}" id="page-${pageCounter}">`;
+        pageHtml += buildSlot(namaBrand, teksPengirim, item1);
+        
+        if (item2 !== undefined) {
+          pageHtml += `
+            <div class="cut-line">
+              <svg class="cut-icon" viewBox="0 0 24 24">
+                <path d="M19 3l-6 6 2 2 7-7V3h-3zm-10 10l-4-4 1.5-1.5L10.5 11 9 13zm-3 3c-.8 0-1.5-.7-1.5-1.5S5.2 13 6 13s1.5.7 1.5 1.5S6.8 16 6 16zm12-3c-.8 0-1.5.7-1.5 1.5s.7 1.5 1.5 1.5 1.5-.7 1.5-1.5-.7-1.5-1.5-1.5zM6 8c-1.7 0-3 1.3-3 3s1.3 3 3 3 3-1.3 3-3-1.3-3-3-3zm12 0c-1.7 0-3 1.3-3 3s1.3 3 3 3 3-1.3 3-3-1.3-3-3-3z"/>
+              </svg>
+              POTONG DI SINI
+            </div>
+          `;
+          pageHtml += buildSlot(namaBrand, teksPengirim, item2);
+        }
+        
+        pageHtml += `</div>`;
+        container.innerHTML += pageHtml;
+        pageCounter++;
+      }
+
+      updatePageVisibility();
+    }
+
+    function buildSlot(namaBrand, teksPengirim, teksPenerima) {
+      return `
+        <div class="slot-resi">
+          <div class="brand-header">
+            <div class="brand-title">${namaBrand}</div>
+            <div class="badge-express">FRAGILE / HANDLE WITH CARE</div>
+          </div>
+
+          <table class="table-box">
+            <tr>
+              <td class="col-pengirim">
+                <div class="header-tag-block">PENGIRIM</div>
+                <div class="text-content-container">
+                  <div class="text-content">${teksPengirim || ''}</div>
+                </div>
+              </td>
+              <td class="col-penerima">
+                <div class="header-tag-block">PENERIMA</div>
+                <div class="text-content-container">
+                  <div class="text-content">${teksPenerima || ''}</div>
+                </div>
+              </td>
+            </tr>
+          </table>
+
+          <div class="warning-area">
+            <div class="warning-flex">
+              <svg class="svg-icon" viewBox="0 0 24 24">
+                <path d="M12 2L1 21h22L12 2zm0 3.45L20.15 19H3.85L12 5.45zM11 10h2v4h-2zm0 5h2v2h-2z"/>
+              </svg>
+              <div class="warning-text-container">
+                <div class="warning-main">JANGAN DIBANTING / DILEMPAR</div>
+                <div class="warning-sub">HARAP HANDLE DENGAN HATI-HATI • PAKET RAWAN PECAH</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="footer-area">
+            <div class="kendala-text">
+              ✨ TERIMA KASIH TELAH BERBELANJA • WAJIB VIDEO UNBOXING UNTUK KLAIM GARANSI
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    renderForm();
+    render();
+  </script>
+</body>
+</html>
