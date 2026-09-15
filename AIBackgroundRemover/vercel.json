@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "rewrites": [
+    {
+      "source": "/api/remove-bg",
+      "destination": "/api/remove-bg.js"
+    }
+  ]
+}
