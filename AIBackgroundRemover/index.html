@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Background Remover by ikmal imani</title>
   
-  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -170,7 +169,7 @@
       background-color: #ffffff;
     }
 
-    .img-box img, .img-box canvas {
+    .img-box img {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
@@ -240,12 +239,6 @@
       font-weight: 700;
     }
 
-    .status-percent {
-      font-size: 0.85rem;
-      color: var(--text-muted);
-      font-weight: 600;
-    }
-
     .progress-bar-bg {
       width: 100%;
       height: 8px;
@@ -258,7 +251,7 @@
       height: 100%;
       width: 0%;
       background: linear-gradient(90deg, var(--gradient-start), var(--gradient-end));
-      transition: width 0.2s ease;
+      transition: width 0.3s ease;
     }
 
     .status-step-detail {
@@ -280,7 +273,7 @@
   <header>
     <h1>AI Background Remover</h1>
     <p>by ikmal imani</p>
-    <div class="badge">Client-Side AI • Gratis &amp; Privat</div>
+    <div class="badge">Vercel Cloud Serverless • 100% Cepat &amp; Gratis</div>
   </header>
 
   <div class="main-card">
@@ -306,7 +299,7 @@
         <h3>Hasil Pemotongan</h3>
         <div class="img-box transparent-bg">
           <span class="placeholder-text" id="resPlaceholder">Menunggu proses</span>
-          <canvas id="resultCanvas" style="display:none;"></canvas>
+          <img id="resultImg" src="" alt="" style="display:none;">
         </div>
       </div>
     </div>
@@ -315,13 +308,12 @@
     <div class="control-area">
       <div class="status-container" id="statusContainer">
         <div class="status-header">
-          <span class="status-text" id="statusText">Menyiapkan AI...</span>
-          <span class="status-percent" id="statusPercent">0%</span>
+          <span class="status-text" id="statusText">Memproses Gambar...</span>
         </div>
         <div class="progress-bar-bg">
           <div class="progress-bar-fill" id="progressBar"></div>
         </div>
-        <div class="status-step-detail" id="statusDetail">Mengunduh AI RMBG Ultra-Light...</div>
+        <div class="status-step-detail" id="statusDetail">Mengirim gambar ke server Vercel AI...</div>
       </div>
 
       <button type="button" class="btn-action" id="processBtn" disabled>
@@ -335,23 +327,17 @@
   </div>
 
   <footer>
-    &copy; 2026 AI Background Remover by ikmal imani.
+    &copy; 2026 AI Background Remover by ikmal imani. Hosted on Vercel.
   </footer>
 
-  <script type="module">
-    import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
-
-    // Pengaturan environment agar ramah browser & CDN HuggingFace
-    env.allowLocalModels = false;
-    env.backends.onnx.wasm.numThreads = 1;
-
+  <script>
     const triggerBtn = document.getElementById('triggerBtn');
     const fileInput = document.getElementById('fileInput');
     const dropZone = document.getElementById('dropZone');
 
     const originalImg = document.getElementById('originalImg');
     const origPlaceholder = document.getElementById('origPlaceholder');
-    const resultCanvas = document.getElementById('resultCanvas');
+    const resultImg = document.getElementById('resultImg');
     const resPlaceholder = document.getElementById('resPlaceholder');
 
     const processBtn = document.getElementById('processBtn');
@@ -359,12 +345,11 @@
 
     const statusContainer = document.getElementById('statusContainer');
     const statusText = document.getElementById('statusText');
-    const statusPercent = document.getElementById('statusPercent');
     const statusDetail = document.getElementById('statusDetail');
     const progressBar = document.getElementById('progressBar');
 
-    let currentFile = null;
-    let segmenter = null;
+    let base64Image = null;
+    let resultBase64 = null;
 
     triggerBtn.addEventListener('click', () => fileInput.click());
 
@@ -397,15 +382,14 @@
         return;
       }
 
-      currentFile = file;
-
       const reader = new FileReader();
       reader.onload = (event) => {
-        originalImg.src = event.target.result;
+        base64Image = event.target.result;
+        originalImg.src = base64Image;
         originalImg.style.display = 'block';
         origPlaceholder.style.display = 'none';
 
-        resultCanvas.style.display = 'none';
+        resultImg.style.display = 'none';
         resPlaceholder.innerText = 'Siap diproses';
         resPlaceholder.style.display = 'block';
         downloadBtn.style.display = 'none';
@@ -417,76 +401,35 @@
     }
 
     processBtn.addEventListener('click', async () => {
-      if (!currentFile) return;
+      if (!base64Image) return;
 
       processBtn.disabled = true;
       statusContainer.style.display = 'block';
-      progressBar.style.width = '10%';
-      statusPercent.innerText = '10%';
-      statusText.innerText = '📥 Mengunduh AI Model (RMBG-1.4)...';
-      statusDetail.innerText = 'Memuat model ringan (~10 MB)...';
+      progressBar.style.width = '30%';
+      statusText.innerText = '⚡ Mengirim Gambar...';
+      statusDetail.innerText = 'Memproses potongan gambar via AI Serverless...';
 
       try {
-        // Menggunakan model Xenova/rmbg-1.4 yang jauh lebih ringan dan stabil
-        if (!segmenter) {
-          segmenter = await pipeline('image-segmentation', 'Xenova/rmbg-1.4', {
-            progress_callback: (p) => {
-              if (p.status === 'progress') {
-                const percent = Math.round(p.progress || 0);
-                progressBar.style.width = `${percent}%`;
-                statusPercent.innerText = `${percent}%`;
-                statusDetail.innerText = `Mengunduh aset: ${p.file} (${percent}%)`;
-              }
-            }
-          });
-        }
-
-        statusText.innerText = '⚡ Memotong Latar Belakang...';
-        statusDetail.innerText = 'Menganalisis subjek dan membuat transparansi...';
-        progressBar.style.width = '85%';
-        statusPercent.innerText = '85%';
-
-        // Jalankan Prediksi Segmentasi AI
-        const output = await segmenter(originalImg.src);
+        progressBar.style.width = '60%';
         
-        // Ambil hasil mask gambar
-        const maskDataUrl = output[0].mask.toDataURL();
+        // Memanggil API Serverless Function Vercel
+        const response = await fetch('/api/remove-bg', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ image: base64Image })
+        });
 
-        // Render hasil gabungan foto asli + mask ke Canvas
-        const canvas = resultCanvas;
-        const ctx = canvas.getContext('2d');
+        const data = await response.json();
 
-        const width = originalImg.naturalWidth;
-        const height = originalImg.naturalHeight;
-        canvas.width = width;
-        canvas.height = height;
-
-        // Render Foto Asli
-        ctx.drawImage(originalImg, 0, 0, width, height);
-        const imgData = ctx.getImageData(0, 0, width, height);
-
-        // Render Masking
-        const maskImg = new Image();
-        maskImg.src = maskDataUrl;
-        await new Promise((resolve) => { maskImg.onload = resolve; });
-
-        const maskCanvas = document.createElement('canvas');
-        maskCanvas.width = width;
-        maskCanvas.height = height;
-        const maskCtx = maskCanvas.getContext('2d');
-        maskCtx.drawImage(maskImg, 0, 0, width, height);
-
-        const maskPixels = maskCtx.getImageData(0, 0, width, height).data;
-
-        // Terapkan Alpha Transparansi ke Pixel Asli
-        for (let i = 0; i < imgData.data.length; i += 4) {
-          imgData.data[i + 3] = maskPixels[i]; // Ambil channel merah dari mask sebagai Alpha
+        if (!response.ok || data.error) {
+          throw new Error(data.error || 'Gagal memproses gambar');
         }
 
-        ctx.putImageData(imgData, 0, 0);
+        progressBar.style.width = '100%';
+        resultBase64 = data.result;
 
-        // Selesai
-        resultCanvas.style.display = 'block';
+        resultImg.src = resultBase64;
+        resultImg.style.display = 'block';
         resPlaceholder.style.display = 'none';
 
         statusContainer.style.display = 'none';
@@ -495,16 +438,17 @@
         downloadBtn.style.display = 'block';
         downloadBtn.onclick = () => {
           const a = document.createElement('a');
-          a.href = canvas.toDataURL('image/png');
+          a.href = resultBase64;
           a.download = `remove-bg-ikmal-${Date.now()}.png`;
           a.click();
         };
 
       } catch (err) {
         console.error('Error Detail:', err);
-        statusText.innerText = '❌ Terjadi Kesalahan Memori';
-        statusDetail.innerText = 'Gunakan gambar berukuran lebih kecil (dibawah 5MB) atau refresh halaman.';
+        statusText.innerText = '❌ Gagal Memproses';
+        statusDetail.innerText = err.message || 'Terjadi kesalahan pada server.';
         processBtn.disabled = false;
+        progressBar.style.width = '0%';
       }
     });
   </script>
