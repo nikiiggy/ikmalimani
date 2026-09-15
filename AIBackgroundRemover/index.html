@@ -85,8 +85,9 @@
       box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.05);
     }
 
-    /* Kotak Upload dengan Input bawaan yang menutupi seluruh area */
-    .upload-zone {
+    /* Target area upload menggunakan label html asli */
+    .upload-label {
+      display: block;
       border: 2px dashed #cbd5e1;
       border-radius: 16px;
       padding: 45px 20px;
@@ -94,26 +95,13 @@
       cursor: pointer;
       transition: all 0.25s ease;
       background: #f8fafc;
-      position: relative;
     }
 
-    .upload-zone:hover {
+    .upload-label:hover {
       border-color: var(--gradient-start);
       background: #f0f9ff;
       transform: translateY(-2px);
       box-shadow: 0 10px 25px -5px rgba(6, 182, 212, 0.1);
-    }
-
-    /* Input file transparan persis di atas kotak upload */
-    .file-input-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      opacity: 0;
-      cursor: pointer;
-      z-index: 10;
     }
 
     .plus-btn-wrapper {
@@ -135,17 +123,21 @@
       stroke-width: 2.5;
     }
 
-    .upload-zone p {
+    .upload-label p {
       font-size: 1rem;
       font-weight: 700;
       color: var(--text-main);
     }
 
-    .upload-zone span {
+    .upload-label span {
       font-size: 0.85rem;
       color: var(--text-muted);
       display: block;
       margin-top: 4px;
+    }
+
+    #fileInput {
+      display: none;
     }
 
     /* Status Loading */
@@ -303,10 +295,8 @@
   </header>
 
   <div class="main-card">
-    <div class="upload-zone" id="dropZone">
-      <!-- Input file transparan melingkupi seluruh kotak -->
-      <input type="file" id="fileInput" class="file-input-overlay" accept="image/*">
-      
+    <!-- Menggunakan <label for="fileInput"> sebagai pemicu native browser -->
+    <label for="fileInput" class="upload-label" id="dropZone">
       <div class="plus-btn-wrapper">
         <svg class="plus-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
           <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -315,7 +305,9 @@
       </div>
       <p>Pilih Foto atau Seret ke Sini</p>
       <span>Format PNG, JPG, WebP</span>
-    </div>
+    </label>
+    
+    <input type="file" id="fileInput" accept="image/*">
 
     <!-- Loading Bar -->
     <div class="status-container" id="statusContainer">
@@ -358,11 +350,11 @@
     &copy; 2026 AI Background Remover by ikmal imani. Powered by WebAssembly &amp; ONNX.
   </footer>
 
- <!-- Module Script -->
   <script type="module">
     import imglyRemoveBackground from 'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.5.5/+esm';
 
     const fileInput = document.getElementById('fileInput');
+    const dropZone = document.getElementById('dropZone');
     const statusContainer = document.getElementById('statusContainer');
     const statusText = document.getElementById('statusText');
     const statusPercent = document.getElementById('statusPercent');
@@ -374,9 +366,31 @@
 
     let processedBlobUrl = null;
 
+    // Event Listener bawaan HTML change
     fileInput.addEventListener('change', (e) => {
-      if (e.target.files.length > 0) {
+      if (e.target.files && e.target.files[0]) {
         handleFile(e.target.files[0]);
+      }
+    });
+
+    // Support Drag and Drop
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.style.borderColor = 'var(--gradient-start)';
+      dropZone.style.background = '#f0f9ff';
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.style.borderColor = '#cbd5e1';
+      dropZone.style.background = '#f8fafc';
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.style.borderColor = '#cbd5e1';
+      dropZone.style.background = '#f8fafc';
+      if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+        handleFile(e.dataTransfer.files[0]);
       }
     });
 
@@ -386,21 +400,21 @@
         return;
       }
 
+      // Langsung Tampilkan Gambar Asli
       const originalUrl = URL.createObjectURL(file);
       originalImg.src = originalUrl;
       originalImg.style.display = 'block';
 
+      // Reset UI & Tampilkan Progress Bar
       resultImg.style.display = 'none';
       downloadBtn.disabled = true;
       statusContainer.style.display = 'block';
       progressBar.style.width = '0%';
       statusPercent.innerText = '0%';
-      statusText.innerText = 'Mengunduh Model ONNX...';
-      statusDetail.innerText = 'Mengunduh aset AI dari CDN unpkg...';
+      statusText.innerText = 'Menyiapkan AI...';
+      statusDetail.innerText = 'Memuat aset pendukung...';
 
       try {
-        // PERBAIKAN UTAMA UNTUK GITHUB PAGES:
-        // Menambahkan publicPath agar CDN model ONNX tidak kena blokir CORS/404
         const blob = await imglyRemoveBackground(file, {
           publicPath: 'https://unpkg.com/@imgly/background-removal-data@1.5.5/dist/',
           progress: (key, current, total) => {
@@ -414,7 +428,7 @@
                 statusDetail.innerText = `File: ${key} (${(current / (1024 * 1024)).toFixed(1)}MB / ${(total / (1024 * 1024)).toFixed(1)}MB)`;
               } else {
                 statusText.innerText = '⚡ Memproses Gambar dengan AI...';
-                statusDetail.innerText = 'Menganalisis subjek dan menghapus latar belakang...';
+                statusDetail.innerText = 'Menganalisis subjek foto...';
               }
             }
           }
@@ -436,9 +450,9 @@
         };
 
       } catch (error) {
-        console.error('Error Detail:', error);
-        statusText.innerText = '❌ Gagal memproses gambar.';
-        statusDetail.innerText = 'Coba buka Inspect Element (F12) Console untuk melihat detail error.';
+        console.error('Error detail:', error);
+        statusText.innerText = '❌ Terjadi Kesalahan.';
+        statusDetail.innerText = error.message || 'Gagal memproses gambar.';
         progressBar.style.width = '0%';
       }
     }
