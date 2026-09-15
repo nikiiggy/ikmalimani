@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI Background Remover by ikmal imani</title>
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -85,12 +86,11 @@
       box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.05);
     }
 
-    /* Target area upload menggunakan label html asli */
     .upload-label {
       display: block;
       border: 2px dashed #cbd5e1;
       border-radius: 16px;
-      padding: 45px 20px;
+      padding: 40px 20px;
       text-align: center;
       cursor: pointer;
       transition: all 0.25s ease;
@@ -101,13 +101,12 @@
       border-color: var(--gradient-start);
       background: #f0f9ff;
       transform: translateY(-2px);
-      box-shadow: 0 10px 25px -5px rgba(6, 182, 212, 0.1);
     }
 
     .plus-btn-wrapper {
-      width: 54px;
-      height: 54px;
-      margin: 0 auto 14px auto;
+      width: 50px;
+      height: 50px;
+      margin: 0 auto 12px auto;
       border-radius: 50%;
       background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
       display: flex;
@@ -117,8 +116,8 @@
     }
 
     .plus-icon {
-      width: 28px;
-      height: 28px;
+      width: 24px;
+      height: 24px;
       stroke: #ffffff;
       stroke-width: 2.5;
     }
@@ -140,14 +139,116 @@
       display: none;
     }
 
-    /* Status Loading */
+    /* Preview Layout */
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-top: 30px;
+    }
+
+    .preview-card {
+      background: #ffffff;
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .preview-card h3 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-muted);
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .img-box {
+      width: 100%;
+      height: 260px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      border: 1px solid #f1f5f9;
+      background-color: #f8fafc;
+      position: relative;
+    }
+
+    .img-box.transparent-bg {
+      background-image: 
+        linear-gradient(45deg, #e2e8f0 25%, transparent 25%), 
+        linear-gradient(-45deg, #e2e8f0 25%, transparent 25%), 
+        linear-gradient(45deg, transparent 75%, #e2e8f0 75%), 
+        linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
+      background-size: 16px 16px;
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+      background-color: #ffffff;
+    }
+
+    .img-box img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+    }
+
+    .placeholder-text {
+      color: #cbd5e1;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+
+    /* Action & Status Controls */
+    .control-area {
+      margin-top: 30px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .btn-futuristic {
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      color: #ffffff;
+      font-weight: 700;
+      font-size: 0.95rem;
+      padding: 14px 32px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      box-shadow: 0 10px 20px -5px rgba(6, 182, 212, 0.35);
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-futuristic:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 24px -5px rgba(6, 182, 212, 0.5);
+    }
+
+    .btn-futuristic:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      box-shadow: none;
+    }
+
+    .btn-secondary {
+      background: #0284c7;
+      box-shadow: 0 8px 16px -4px rgba(2, 132, 199, 0.3);
+    }
+
+    /* Status Loading Container */
     .status-container {
-      margin-top: 25px;
+      width: 100%;
       display: none;
       background: #f0f9ff;
       border: 1px solid rgba(6, 182, 212, 0.2);
       border-radius: 14px;
-      padding: 20px;
+      padding: 16px;
     }
 
     .status-header {
@@ -190,93 +291,6 @@
       margin-top: 8px;
     }
 
-    /* Preview Layout */
-    .preview-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 24px;
-      margin-top: 35px;
-    }
-
-    .preview-card {
-      background: #ffffff;
-      border: 1px solid var(--border-color);
-      border-radius: 16px;
-      padding: 16px;
-      text-align: center;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
-    }
-
-    .preview-card h3 {
-      font-size: 0.8rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--text-muted);
-      font-weight: 700;
-      margin-bottom: 12px;
-    }
-
-    .img-box {
-      width: 100%;
-      height: 280px;
-      border-radius: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      border: 1px solid #f1f5f9;
-      background-color: #f8fafc;
-    }
-
-    .img-box.transparent-bg {
-      background-image: 
-        linear-gradient(45deg, #e2e8f0 25%, transparent 25%), 
-        linear-gradient(-45deg, #e2e8f0 25%, transparent 25%), 
-        linear-gradient(45deg, transparent 75%, #e2e8f0 75%), 
-        linear-gradient(-45deg, transparent 75%, #e2e8f0 75%);
-      background-size: 16px 16px;
-      background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
-      background-color: #ffffff;
-    }
-
-    .img-box img {
-      max-width: 100%;
-      max-height: 100%;
-      object-fit: contain;
-    }
-
-    .action-area {
-      margin-top: 30px;
-      text-align: center;
-    }
-
-    .btn-futuristic {
-      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
-      color: #ffffff;
-      font-weight: 700;
-      font-size: 0.95rem;
-      padding: 14px 32px;
-      border: none;
-      border-radius: 12px;
-      cursor: pointer;
-      transition: all 0.25s ease;
-      box-shadow: 0 10px 20px -5px rgba(6, 182, 212, 0.35);
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .btn-futuristic:hover:not(:disabled) {
-      transform: translateY(-2px);
-      box-shadow: 0 14px 24px -5px rgba(6, 182, 212, 0.5);
-    }
-
-    .btn-futuristic:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-      box-shadow: none;
-    }
-
     footer {
       margin-top: auto;
       padding-top: 40px;
@@ -295,7 +309,7 @@
   </header>
 
   <div class="main-card">
-    <!-- Menggunakan <label for="fileInput"> sebagai pemicu native browser -->
+    <!-- Pilihan Upload -->
     <label for="fileInput" class="upload-label" id="dropZone">
       <div class="plus-btn-wrapper">
         <svg class="plus-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
@@ -309,37 +323,46 @@
     
     <input type="file" id="fileInput" accept="image/*">
 
-    <!-- Loading Bar -->
-    <div class="status-container" id="statusContainer">
-      <div class="status-header">
-        <span class="status-text" id="statusText">Menyiapkan AI...</span>
-        <span class="status-percent" id="statusPercent">0%</span>
-      </div>
-      <div class="progress-bar-bg">
-        <div class="progress-bar-fill" id="progressBar"></div>
-      </div>
-      <div class="status-step-detail" id="statusDetail">Mengunduh aset model ONNX...</div>
-    </div>
-
-    <!-- Preview Box -->
+    <!-- Preview Grid -->
     <div class="preview-grid">
       <div class="preview-card">
         <h3>Gambar Asli</h3>
         <div class="img-box">
+          <span class="placeholder-text" id="origPlaceholder">Belum ada foto</span>
           <img id="originalImg" src="" alt="" style="display:none;">
         </div>
       </div>
       <div class="preview-card">
         <h3>Hasil Pemotongan</h3>
         <div class="img-box transparent-bg">
+          <span class="placeholder-text" id="resPlaceholder">Menunggu proses</span>
           <img id="resultImg" src="" alt="" style="display:none;">
         </div>
       </div>
     </div>
 
-    <!-- Tombol Download -->
-    <div class="action-area">
-      <button class="btn-futuristic" id="downloadBtn" disabled>
+    <!-- Area Kontrol Tombol & Status -->
+    <div class="control-area">
+      <!-- Loading Status Bar -->
+      <div class="status-container" id="statusContainer">
+        <div class="status-header">
+          <span class="status-text" id="statusText">Menyiapkan AI...</span>
+          <span class="status-percent" id="statusPercent">0%</span>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="progressBar"></div>
+        </div>
+        <div class="status-step-detail" id="statusDetail">Mengunduh aset AI...</div>
+      </div>
+
+      <!-- Tombol Eksekusi AI -->
+      <button class="btn-futuristic btn-secondary" id="processBtn" disabled>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        Hapus Background Sekarang
+      </button>
+
+      <!-- Tombol Unduh -->
+      <button class="btn-futuristic" id="downloadBtn" style="display:none;">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
         Unduh PNG Transparan
       </button>
@@ -355,25 +378,31 @@
 
     const fileInput = document.getElementById('fileInput');
     const dropZone = document.getElementById('dropZone');
+    
+    const originalImg = document.getElementById('originalImg');
+    const origPlaceholder = document.getElementById('origPlaceholder');
+    const resultImg = document.getElementById('resultImg');
+    const resPlaceholder = document.getElementById('resPlaceholder');
+
+    const processBtn = document.getElementById('processBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
+
     const statusContainer = document.getElementById('statusContainer');
     const statusText = document.getElementById('statusText');
     const statusPercent = document.getElementById('statusPercent');
     const statusDetail = document.getElementById('statusDetail');
     const progressBar = document.getElementById('progressBar');
-    const originalImg = document.getElementById('originalImg');
-    const resultImg = document.getElementById('resultImg');
-    const downloadBtn = document.getElementById('downloadBtn');
 
+    let selectedFile = null;
     let processedBlobUrl = null;
 
-    // Event Listener bawaan HTML change
+    // 1. Tampilkan Preview Gambar Saat File Dipilih
     fileInput.addEventListener('change', (e) => {
       if (e.target.files && e.target.files[0]) {
-        handleFile(e.target.files[0]);
+        previewFile(e.target.files[0]);
       }
     });
 
-    // Support Drag and Drop
     dropZone.addEventListener('dragover', (e) => {
       e.preventDefault();
       dropZone.style.borderColor = 'var(--gradient-start)';
@@ -390,32 +419,51 @@
       dropZone.style.borderColor = '#cbd5e1';
       dropZone.style.background = '#f8fafc';
       if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-        handleFile(e.dataTransfer.files[0]);
+        previewFile(e.dataTransfer.files[0]);
       }
     });
 
-    async function handleFile(file) {
+    function previewFile(file) {
       if (!file.type.startsWith('image/')) {
-        alert('Harap masukkan file gambar valid!');
+        alert('Harap pilih file gambar (JPG, PNG, WebP)!');
         return;
       }
 
-      // Langsung Tampilkan Gambar Asli
-      const originalUrl = URL.createObjectURL(file);
-      originalImg.src = originalUrl;
-      originalImg.style.display = 'block';
+      selectedFile = file;
 
-      // Reset UI & Tampilkan Progress Bar
+      // Render Preview Foto Asli Langsung
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        originalImg.src = e.target.result;
+        originalImg.style.display = 'block';
+        origPlaceholder.style.display = 'none';
+      };
+      reader.readAsDataURL(file);
+
+      // Reset tampilan hasil sebelumnya
       resultImg.style.display = 'none';
-      downloadBtn.disabled = true;
+      resPlaceholder.innerText = 'Siap diproses';
+      resPlaceholder.style.display = 'block';
+      downloadBtn.style.display = 'none';
+
+      // Aktifkan Tombol 'Hapus Background'
+      processBtn.disabled = false;
+      processBtn.style.display = 'inline-flex';
+    }
+
+    // 2. Jalankan Proses Remove Background Saat Tombol Diklik
+    processBtn.addEventListener('click', async () => {
+      if (!selectedFile) return;
+
+      processBtn.disabled = true;
       statusContainer.style.display = 'block';
       progressBar.style.width = '0%';
       statusPercent.innerText = '0%';
-      statusText.innerText = 'Menyiapkan AI...';
-      statusDetail.innerText = 'Memuat aset pendukung...';
+      statusText.innerText = 'Menginisialisasi AI...';
+      statusDetail.innerText = 'Menyiapkan modul ONNX...';
 
       try {
-        const blob = await imglyRemoveBackground(file, {
+        const blob = await imglyRemoveBackground(selectedFile, {
           publicPath: 'https://unpkg.com/@imgly/background-removal-data@1.5.5/dist/',
           progress: (key, current, total) => {
             if (total > 0) {
@@ -428,7 +476,7 @@
                 statusDetail.innerText = `File: ${key} (${(current / (1024 * 1024)).toFixed(1)}MB / ${(total / (1024 * 1024)).toFixed(1)}MB)`;
               } else {
                 statusText.innerText = '⚡ Memproses Gambar dengan AI...';
-                statusDetail.innerText = 'Menganalisis subjek foto...';
+                statusDetail.innerText = 'Menghapus latar belakang...';
               }
             }
           }
@@ -439,9 +487,12 @@
 
         resultImg.src = processedBlobUrl;
         resultImg.style.display = 'block';
-        statusContainer.style.display = 'none';
+        resPlaceholder.style.display = 'none';
 
-        downloadBtn.disabled = false;
+        statusContainer.style.display = 'none';
+        processBtn.style.display = 'none';
+
+        downloadBtn.style.display = 'inline-flex';
         downloadBtn.onclick = () => {
           const a = document.createElement('a');
           a.href = processedBlobUrl;
@@ -451,11 +502,12 @@
 
       } catch (error) {
         console.error('Error detail:', error);
-        statusText.innerText = '❌ Terjadi Kesalahan.';
+        statusText.innerText = '❌ Terjadi Kesalahan';
         statusDetail.innerText = error.message || 'Gagal memproses gambar.';
         progressBar.style.width = '0%';
+        processBtn.disabled = false;
       }
-    }
+    });
   </script>
 </body>
 </html>
