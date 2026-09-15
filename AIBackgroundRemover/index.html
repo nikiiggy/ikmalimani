@@ -94,6 +94,12 @@
       cursor: pointer;
       transition: all 0.25s ease;
       background: #f8fafc;
+      position: relative;
+    }
+
+    /* PENTING: pointer-events: none membuat klik menembus teks/icon langsung ke upload-zone */
+    .upload-zone * {
+      pointer-events: none;
     }
 
     .upload-zone:hover {
@@ -103,12 +109,23 @@
       box-shadow: 0 10px 25px -5px rgba(6, 182, 212, 0.1);
     }
 
-    .upload-icon {
-      width: 50px;
-      height: 50px;
-      margin-bottom: 14px;
-      fill: none;
-      stroke: var(--primary-accent);
+    .plus-btn-wrapper {
+      width: 54px;
+      height: 54px;
+      margin: 0 auto 14px auto;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--gradient-start), var(--gradient-end));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 16px -4px rgba(6, 182, 212, 0.4);
+    }
+
+    .plus-icon {
+      width: 28px;
+      height: 28px;
+      stroke: #ffffff;
+      stroke-width: 2.5;
     }
 
     .upload-zone p {
@@ -280,16 +297,18 @@
   <header>
     <h1>AI Background Remover</h1>
     <p>by ikmal imani</p>
-    <div class="badge">Gratis &amp; Mudah</div>
+    <div class="badge">Client-Side AI • Gratis &amp; Privat</div>
   </header>
 
   <div class="main-card">
     <div class="upload-zone" id="dropZone">
-      <svg class="upload-icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-        <polyline points="17 8 12 3 7 8"></polyline>
-        <line x1="12" y1="3" x2="12" y2="15"></line>
-      </svg>
+      <!-- Tombol Plus Bulat Modern -->
+      <div class="plus-btn-wrapper">
+        <svg class="plus-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+      </div>
       <p>Pilih Foto atau Seret ke Sini</p>
       <span>Format PNG, JPG, WebP</span>
       <input type="file" id="fileInput" accept="image/*">
@@ -353,7 +372,10 @@
 
     let processedBlobUrl = null;
 
-    dropZone.addEventListener('click', () => fileInput.click());
+    // Trigger input file saat dropZone diklik
+    dropZone.addEventListener('click', (e) => {
+      fileInput.click();
+    });
 
     dropZone.addEventListener('dragover', (e) => {
       e.preventDefault();
@@ -407,7 +429,6 @@
               progressBar.style.width = `${percent}%`;
               statusPercent.innerText = `${percent}%`;
 
-              // Membedakan tahap unduh model vs pemrosesan AI
               if (key.includes('fetch') || key.includes('download')) {
                 statusText.innerText = '📥 Mengunduh Model ONNX...';
                 statusDetail.innerText = `File: ${key} (${(current / (1024 * 1024)).toFixed(1)}MB / ${(total / (1024 * 1024)).toFixed(1)}MB)`;
