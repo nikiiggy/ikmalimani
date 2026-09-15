@@ -1,4 +1,4 @@
-// File: api/remove-bg.js (Berjalan gratis di server Vercel)
+// File: AIBackgroundRemover/api/remove-bg.js
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
@@ -10,11 +10,11 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'No image provided' });
     }
 
-    // Mengonversi data Base64 gambar
+    // Ekstrak data base64 gambar
     const base64Data = image.replace(/^data:image\/\w+;base64,/, '');
     const imageBuffer = Buffer.from(base64Data, 'base64');
 
-    // Memanggil Model RMBG-1.4 gratis dari Hugging Face Inference API
+    // Panggil model AI RMBG-1.4 gratis dari Hugging Face
     const response = await fetch(
       'https://api-inference.huggingface.co/models/briaai/RMBG-1.4',
       {
