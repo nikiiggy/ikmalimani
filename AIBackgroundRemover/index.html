@@ -412,14 +412,22 @@
       try {
         progressBar.style.width = '60%';
         
-        // Memanggil endpoint relatif ke Vercel Serverless Function
-        const response = await fetch('/api/remove-bg', {
+        // Pemanggilan API dengan path relatif 'api/remove-bg'
+        const response = await fetch('api/remove-bg', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ image: base64Image })
         });
 
-        const data = await response.json();
+        // Ambil teks mentah terlebih dahulu untuk mencegah error JSON.parse jika responnya berupa HTML/Error
+        const rawText = await response.text();
+        let data;
+        
+        try {
+          data = JSON.parse(rawText);
+        } catch (e) {
+          throw new Error(`Server Error (${response.status}): Endpoint API tidak ditemukan atau terjadi crash pada server.`);
+        }
 
         if (!response.ok || data.error) {
           throw new Error(data.error || 'Gagal memproses gambar');
