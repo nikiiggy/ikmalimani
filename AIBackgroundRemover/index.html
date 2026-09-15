@@ -9,9 +9,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  
-  <!-- CDN UMD Library background-removal (Lebih Stabil & Tanpa Issue Import Module) -->
-  <script src="https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.5.5/dist/index.umd.js"></script>
 
   <style>
     :root {
@@ -88,7 +85,6 @@
       box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.05);
     }
 
-    /* Area Upload Sederhana & Kuat */
     .upload-box {
       border: 2px dashed #cbd5e1;
       border-radius: 16px;
@@ -127,7 +123,6 @@
       display: none;
     }
 
-    /* Grid Preview */
     .preview-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -161,6 +156,7 @@
       overflow: hidden;
       border: 1px solid #f1f5f9;
       background-color: #f8fafc;
+      position: relative;
     }
 
     .img-box.transparent-bg {
@@ -174,7 +170,7 @@
       background-color: #ffffff;
     }
 
-    .img-box img {
+    .img-box img, .img-box canvas {
       max-width: 100%;
       max-height: 100%;
       object-fit: contain;
@@ -186,7 +182,6 @@
       font-weight: 600;
     }
 
-    /* Controls Area */
     .control-area {
       margin-top: 30px;
       display: flex;
@@ -223,7 +218,6 @@
       box-shadow: 0 10px 20px -5px rgba(6, 182, 212, 0.35);
     }
 
-    /* Progress Status Bar */
     .status-container {
       width: 100%;
       display: none;
@@ -296,12 +290,10 @@
         Pilih Foto dari Komputer / HP
       </button>
       <p style="font-size: 0.85rem; color: var(--text-muted);">atau seret gambar ke area ini</p>
-      
-      <!-- Input Asli -->
       <input type="file" id="fileInput" accept="image/*">
     </div>
 
-    <!-- Preview Box -->
+    <!-- Preview Grid -->
     <div class="preview-grid">
       <div class="preview-card">
         <h3>Gambar Asli</h3>
@@ -312,14 +304,14 @@
       </div>
       <div class="preview-card">
         <h3>Hasil Pemotongan</h3>
-        <div class="img-box transparent-bg">
+        <div class="img-box transparent-bg" id="resultBox">
           <span class="placeholder-text" id="resPlaceholder">Menunggu proses</span>
-          <img id="resultImg" src="" alt="" style="display:none;">
+          <canvas id="resultCanvas" style="display:none;"></canvas>
         </div>
       </div>
     </div>
 
-    <!-- Control Area -->
+    <!-- Controls -->
     <div class="control-area">
       <div class="status-container" id="statusContainer">
         <div class="status-header">
@@ -329,7 +321,7 @@
         <div class="progress-bar-bg">
           <div class="progress-bar-fill" id="progressBar"></div>
         </div>
-        <div class="status-step-detail" id="statusDetail">Mengunduh aset model ONNX...</div>
+        <div class="status-step-detail" id="statusDetail">Mengunduh model AI ringan (~15 MB)...</div>
       </div>
 
       <button type="button" class="btn-action" id="processBtn" disabled>
@@ -346,75 +338,74 @@
     &copy; 2026 AI Background Remover by ikmal imani.
   </footer>
 
-  <script>
-    // Ambil Elemen HTML
-    var triggerBtn = document.getElementById('triggerBtn');
-    var fileInput = document.getElementById('fileInput');
-    var dropZone = document.getElementById('dropZone');
+  <!-- Script AI Transformers JS ESM Module -->
+  <script type="module">
+    import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
 
-    var originalImg = document.getElementById('originalImg');
-    var origPlaceholder = document.getElementById('origPlaceholder');
-    var resultImg = document.getElementById('resultImg');
-    var resPlaceholder = document.getElementById('resPlaceholder');
+    // Izinkan remote model dari Hugging Face CDN
+    env.allowLocalModels = false;
 
-    var processBtn = document.getElementById('processBtn');
-    var downloadBtn = document.getElementById('downloadBtn');
+    const triggerBtn = document.getElementById('triggerBtn');
+    const fileInput = document.getElementById('fileInput');
+    const dropZone = document.getElementById('dropZone');
 
-    var statusContainer = document.getElementById('statusContainer');
-    var statusText = document.getElementById('statusText');
-    var statusPercent = document.getElementById('statusPercent');
-    var statusDetail = document.getElementById('statusDetail');
-    var progressBar = document.getElementById('progressBar');
+    const originalImg = document.getElementById('originalImg');
+    const origPlaceholder = document.getElementById('origPlaceholder');
+    const resultCanvas = document.getElementById('resultCanvas');
+    const resPlaceholder = document.getElementById('resPlaceholder');
 
-    var currentFile = null;
-    var processedBlobUrl = null;
+    const processBtn = document.getElementById('processBtn');
+    const downloadBtn = document.getElementById('downloadBtn');
 
-    // Trigger Tombol Pilih File
-    triggerBtn.onclick = function() {
-      fileInput.click();
-    };
+    const statusContainer = document.getElementById('statusContainer');
+    const statusText = document.getElementById('statusText');
+    const statusPercent = document.getElementById('statusPercent');
+    const statusDetail = document.getElementById('statusDetail');
+    const progressBar = document.getElementById('progressBar');
 
-    // Saat File Ditentukan
-    fileInput.onchange = function(e) {
+    let currentFile = null;
+    let segmenter = null;
+
+    triggerBtn.addEventListener('click', () => fileInput.click());
+
+    fileInput.addEventListener('change', (e) => {
       if (e.target.files && e.target.files[0]) {
         handleFileSelect(e.target.files[0]);
       }
-    };
+    });
 
-    // Drag and Drop
-    dropZone.ondragover = function(e) {
+    dropZone.addEventListener('dragover', (e) => {
       e.preventDefault();
       dropZone.style.borderColor = 'var(--gradient-start)';
-    };
-    dropZone.ondragleave = function() {
+    });
+
+    dropZone.addEventListener('dragleave', () => {
       dropZone.style.borderColor = '#cbd5e1';
-    };
-    dropZone.ondrop = function(e) {
+    });
+
+    dropZone.addEventListener('drop', (e) => {
       e.preventDefault();
       dropZone.style.borderColor = '#cbd5e1';
       if (e.dataTransfer.files && e.dataTransfer.files[0]) {
         handleFileSelect(e.dataTransfer.files[0]);
       }
-    };
+    });
 
-    // Fungsi Render Preview Foto
     function handleFileSelect(file) {
       if (!file.type.startsWith('image/')) {
-        alert('Harap pilih file gambar yang valid (JPG, PNG, WebP)!');
+        alert('Harap pilih file gambar yang valid!');
         return;
       }
 
       currentFile = file;
 
-      // Render foto menggunakan FileReader lokal
-      var reader = new FileReader();
-      reader.onload = function(event) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
         originalImg.src = event.target.result;
         originalImg.style.display = 'block';
         origPlaceholder.style.display = 'none';
 
-        // Reset state
-        resultImg.style.display = 'none';
+        resultCanvas.style.display = 'none';
         resPlaceholder.innerText = 'Siap diproses';
         resPlaceholder.style.display = 'block';
         downloadBtn.style.display = 'none';
@@ -425,68 +416,97 @@
       reader.readAsDataURL(file);
     }
 
-    // Eksekusi Hapus Background
-    processBtn.onclick = function() {
+    processBtn.addEventListener('click', async () => {
       if (!currentFile) return;
 
       processBtn.disabled = true;
       statusContainer.style.display = 'block';
-      progressBar.style.width = '0%';
-      statusPercent.innerText = '0%';
-      statusText.innerText = 'Menyiapkan AI...';
+      progressBar.style.width = '10%';
+      statusPercent.innerText = '10%';
+      statusText.innerText = '📥 Memuat Model AI RMBG-1.4...';
+      statusDetail.innerText = 'Mengunduh model ringan dari Hugging Face CDN...';
 
-      // Panggil UMD Library Global `imglyRemoveBackground`
-      var removeBG = window.imglyRemoveBackground || window.removeBackground;
-
-      if (!removeBG) {
-        alert('Gagal memuat library AI. Cek koneksi internet kamu.');
-        processBtn.disabled = false;
-        return;
-      }
-
-      removeBG(currentFile, {
-        progress: function(key, current, total) {
-          if (total > 0) {
-            var percent = Math.round((current / total) * 100);
-            progressBar.style.width = percent + '%';
-            statusPercent.innerText = percent + '%';
-
-            if (key.includes('fetch') || key.includes('download')) {
-              statusText.innerText = '📥 Mengunduh Model ONNX...';
-              statusDetail.innerText = 'Mengunduh data AI (' + (current / 1048576).toFixed(1) + ' MB / ' + (total / 1048576).toFixed(1) + ' MB)';
-            } else {
-              statusText.innerText = '⚡ Memproses Gambar...';
-              statusDetail.innerText = 'Menghapus latar belakang...';
+      try {
+        // Inisialisasi pipeline AI jika belum ada
+        if (!segmenter) {
+          segmenter = await pipeline('image-segmentation', 'Xenova/birefnet-general', {
+            progress_callback: (p) => {
+              if (p.status === 'progress') {
+                const percent = Math.round(p.progress || 0);
+                progressBar.style.width = `${percent}%`;
+                statusPercent.innerText = `${percent}%`;
+                statusDetail.innerText = `Mengunduh file: ${p.file} (${percent}%)`;
+              }
             }
-          }
+          });
         }
-      })
-      .then(function(blob) {
-        if (processedBlobUrl) URL.revokeObjectURL(processedBlobUrl);
-        processedBlobUrl = URL.createObjectURL(blob);
 
-        resultImg.src = processedBlobUrl;
-        resultImg.style.display = 'block';
+        statusText.innerText = '⚡ Menghapus Background...';
+        statusDetail.innerText = 'Memproses pemotongan subjek gambar...';
+        progressBar.style.width = '90%';
+        statusPercent.innerText = '90%';
+
+        // Jalankan Segmentasi AI
+        const output = await segmenter(originalImg.src);
+        
+        // Render Hasil Masking ke Canvas
+        const mask = output[0].mask;
+        const canvas = resultCanvas;
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = originalImg.naturalWidth;
+        canvas.height = originalImg.naturalHeight;
+
+        // Gambar Asli
+        ctx.drawImage(originalImg, 0, 0);
+
+        // Ambil Pixel Data
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imgData.data;
+
+        // Buat temporary canvas untuk membaca mask
+        const maskCanvas = document.createElement('canvas');
+        maskCanvas.width = canvas.width;
+        maskCanvas.height = canvas.height;
+        const maskCtx = maskCanvas.getContext('2d');
+        
+        // Render mask image
+        const maskImg = new Image();
+        maskImg.src = mask.toDataURL();
+        await new Promise((resolve) => { maskImg.onload = resolve; });
+        maskCtx.drawImage(maskImg, 0, 0, canvas.width, canvas.height);
+
+        const maskData = maskCtx.getImageData(0, 0, canvas.width, canvas.height).data;
+
+        // Terapkan Alpha Masking Transparan
+        for (let i = 0; i < data.length; i += 4) {
+          data[i + 3] = maskData[i]; // Set transparansi berdasarkan nilai grayscale mask
+        }
+
+        ctx.putImageData(imgData, 0, 0);
+
+        // Tampilkan Hasil
+        resultCanvas.style.display = 'block';
         resPlaceholder.style.display = 'none';
 
         statusContainer.style.display = 'none';
         processBtn.style.display = 'none';
 
         downloadBtn.style.display = 'block';
-        downloadBtn.onclick = function() {
-          var a = document.createElement('a');
-          a.href = processedBlobUrl;
-          a.download = 'remove-bg-' + Date.now() + '.png';
+        downloadBtn.onclick = () => {
+          const a = document.createElement('a');
+          a.href = canvas.toDataURL('image/png');
+          a.download = `remove-bg-ikmal-${Date.now()}.png`;
           a.click();
         };
-      })
-      .catch(function(err) {
-        console.error('Error:', err);
-        statusText.innerText = '❌ Gagal Memproses';
-        statusDetail.innerText = 'Terjadi kesalahan saat menjalankan AI.';
+
+      } catch (err) {
+        console.error('Error detail:', err);
+        statusText.innerText = '❌ Terjadi Kesalahan';
+        statusDetail.innerText = 'Gagal memproses gambar. Coba muat ulang halaman.';
         processBtn.disabled = false;
-      });
-    };
+      }
+    });
   </script>
 </body>
 </html>
