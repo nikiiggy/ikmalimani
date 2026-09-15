@@ -273,7 +273,7 @@
   <header>
     <h1>AI Background Remover</h1>
     <p>by ikmal imani</p>
-    <div class="badge">Vercel Cloud Serverless • 100% Cepat &amp; Gratis</div>
+    <div class="badge">Vercel Serverless • 100% Cepat &amp; Gratis</div>
   </header>
 
   <div class="main-card">
@@ -313,7 +313,7 @@
         <div class="progress-bar-bg">
           <div class="progress-bar-fill" id="progressBar"></div>
         </div>
-        <div class="status-step-detail" id="statusDetail">Mengirim gambar ke server Vercel AI...</div>
+        <div class="status-step-detail" id="statusDetail">Mengirim gambar ke server AI...</div>
       </div>
 
       <button type="button" class="btn-action" id="processBtn" disabled>
@@ -327,7 +327,7 @@
   </div>
 
   <footer>
-    &copy; 2026 AI Background Remover by ikmal imani. Hosted on Vercel.
+    &copy; 2026 AI Background Remover by ikmal imani.
   </footer>
 
   <script>
@@ -412,7 +412,7 @@
       try {
         progressBar.style.width = '60%';
         
-        // Memanggil API Serverless Function Vercel
+        // Memanggil endpoint relatif ke Vercel Serverless Function
         const response = await fetch('/api/remove-bg', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
