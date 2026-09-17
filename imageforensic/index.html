@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UNIT FORENSIK DIGITAL — EXIF METADATA SCANNER</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700;800;900&family=Chakra+Petch:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+    :root {
+      --bg-0: #04070d;
+      --bg-1: #070d18;
+      --panel: rgba(11, 20, 36, 0.68);
+      --panel-solid: #0b1424;
+      --line: rgba(90, 150, 220, 0.22);
+      --line-strong: rgba(120, 200, 255, 0.45);
+      --cyan: #35e7ff;
+      --blue: #5b8cff;
+      --amber: #ffb238;
+      --red: #ff3d63;
+      --green: #34e3a0;
+      --ink-0: #eaf3ff;
+      --ink-1: #a9c0dc;
+      --ink-2: #63799a;
+      --radius: 10px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Chakra Petch', sans-serif;
+      margin: 0;
+      padding: 28px 20px 60px;
+      background: var(--bg-0);
+      color: var(--ink-0);
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* ---------- ambient background ---------- */
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(91, 140, 255, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(91, 140, 255, 0.05) 1px, transparent 1px);
+      background-size: 42px 42px;
+      mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, black 40%, transparent 90%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 15% -10%, rgba(53, 231, 255, 0.10), transparent 45%),
+                  radial-gradient(circle at 100% 10%, rgba(91, 140, 255, 0.10), transparent 40%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    @keyframes sweepDown {
+      0%   { transform: translateY(-100%); opacity: 0; }
+      8%   { opacity: 1; }
+      92%  { opacity: 1; }
+      100% { transform: translateY(1200%); opacity: 0; }
+    }
+
+    .scanline {
+      position: fixed;
+      left: 0; right: 0; top: 0;
+      height: 140px;
+      background: linear-gradient(180deg, rgba(53,231,255,0) 0%, rgba(53,231,255,0.06) 50%, rgba(53,231,255,0) 100%);
+      animation: sweepDown 5.5s ease-in-out 0.2s 1;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .scanline { animation: none; display: none; }
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 2;
+    }
+
+    /* ---------- header ---------- */
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding-bottom: 18px;
+      margin-bottom: 22px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand { display: flex; align-items: center; gap: 14px; }
+
+    .badge-mark {
+      width: 46px; height: 46px;
+      flex-shrink: 0;
+    }
+
+    .brand-text h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 800;
+      font-size: 1.28rem;
+      letter-spacing: 0.5px;
+      margin: 0;
+      color: var(--ink-0);
+      text-shadow: 0 0 18px rgba(53, 231, 255, 0.35);
+    }
+
+    .brand-text p {
+      margin: 3px 0 0;
+      font-size: 0.75rem;
+      color: var(--cyan);
+      letter-spacing: 2.5px;
+      font-weight: 500;
+    }
+
+    .status-cluster {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .status-chip {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 7px 12px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      font-size: 0.7rem;
+      letter-spacing: 1px;
+      color: var(--ink-1);
+      backdrop-filter: blur(6px);
+    }
+
+    .status-chip .dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 8px var(--green);
+    }
+    .status-chip .dot.amber { background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+
+    .status-chip b { color: var(--ink-0); font-weight: 600; }
+
+    /* ---------- layout ---------- */
+    .grid {
+      display: grid;
+      grid-template-columns: minmax(280px, 380px) 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    @media (max-width: 880px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      backdrop-filter: blur(10px);
+      position: relative;
+      padding: 20px;
+    }
+
+    .panel-corner {
+      position: absolute;
+      width: 14px; height: 14px;
+      border: 2px solid var(--line-strong);
+      opacity: 0.8;
+    }
+    .panel-corner.tl { top: -1px; left: -1px; border-right: none; border-bottom: none; border-top-left-radius: 6px; }
+    .panel-corner.tr { top: -1px; right: -1px; border-left: none; border-bottom: none; border-top-right-radius: 6px; }
+    .panel-corner.bl { bottom: -1px; left: -1px; border-right: none; border-top: none; border-bottom-left-radius: 6px; }
+    .panel-corner.br { bottom: -1px; right: -1px; border-left: none; border-top: none; border-bottom-right-radius: 6px; }
+
+    .panel-label {
+      position: absolute;
+      top: -10px;
+      left: 16px;
+      background: var(--bg-0);
+      padding: 0 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 2px;
+      color: var(--ink-2);
+    }
+
+    .stack { display: flex; flex-direction: column; gap: 16px; }
+
+    /* ---------- upload ---------- */
+    .upload-area {
+      border: 1.5px dashed rgba(53, 231, 255, 0.4);
+      border-radius: 8px;
+      padding: 30px 18px;
+      text-align: center;
+      cursor: pointer;
+      background: rgba(53, 231, 255, 0.03);
+      transition: border-color 0.2s ease, background 0.2s ease;
+    }
+
+    .upload-area:hover,
+    .upload-area:focus-visible {
+      border-color: var(--cyan);
+      background: rgba(53, 231, 255, 0.07);
+      outline: none;
+    }
+
+    .upload-icon {
+      width: 34px; height: 34px;
+      margin: 0 auto 10px;
+      color: var(--cyan);
+    }
+
+    .upload-area .primary {
+      margin: 0;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--ink-0);
+      letter-spacing: 0.4px;
+    }
+
+    .upload-area .secondary {
+      margin: 6px 0 0;
+      font-size: 0.72rem;
+      color: var(--ink-2);
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="file"] { display: none; }
+
+    /* ---------- preview ---------- */
+    .preview-box {
+      display: none;
+      text-align: center;
+    }
+
+    .preview-frame {
+      position: relative;
+      display: inline-block;
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      padding: 6px;
+      background: rgba(0,0,0,0.35);
+    }
+
+    .preview-frame img {
+      display: block;
+      max-width: 100%;
+      max-height: 210px;
+      border-radius: 3px;
+    }
+
+    .preview-frame::before,
+    .preview-frame::after {
+      content: "";
+      position: absolute;
+      width: 12px; height: 12px;
+      border: 2px solid var(--cyan);
+    }
+    .preview-frame::before { top: -1px; left: -1px; border-right: none; border-bottom: none; }
+    .preview-frame::after { bottom: -1px; right: -1px; border-left: none; border-top: none; }
+
+    /* ---------- gps badge ---------- */
+    .gps-badge {
+      display: none;
+      padding: 14px 16px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      line-height: 1.5;
+    }
+
+    .gps-success {
+      background: rgba(52, 227, 160, 0.08);
+      border: 1px solid rgba(52, 227, 160, 0.4);
+      color: var(--ink-0);
+    }
+
+    .gps-warning {
+      background: rgba(255, 61, 99, 0.08);
+      border: 1px solid rgba(255, 61, 99, 0.4);
+      color: var(--ink-0);
+    }
+
+    .gps-badge .label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 1.5px;
+      color: var(--green);
+      margin-bottom: 4px;
+    }
+
+    .gps-warning .label { color: var(--red); }
+
+    .gps-badge .pulse-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: currentColor;
+      box-shadow: 0 0 8px currentColor;
+      animation: pulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+
+    .gps-badge a {
+      color: var(--cyan);
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      border-bottom: 1px solid rgba(53, 231, 255, 0.4);
+    }
+    .gps-badge a:hover { color: var(--ink-0); border-color: var(--ink-0); }
+
+    /* ---------- right panel: data ---------- */
+    .data-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 14px;
+    }
+
+    .data-head h2 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.95rem;
+      letter-spacing: 1px;
+      margin: 0;
+      color: var(--ink-0);
+      font-weight: 700;
+    }
+
+    .tag-count {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.72rem;
+      color: var(--ink-2);
+    }
+
+    .search-box {
+      width: 100%;
+      padding: 11px 14px;
+      margin-bottom: 14px;
+      border-radius: 6px;
+      border: 1px solid var(--line);
+      background: rgba(0, 0, 0, 0.35);
+      color: var(--cyan);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82rem;
+    }
+    .search-box::placeholder { color: var(--ink-2); }
+    .search-box:focus { outline: none; border-color: var(--cyan); }
+
+    .table-scroll {
+      max-height: 420px;
+      overflow-y: auto;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .table-scroll::-webkit-scrollbar { width: 8px; }
+    .table-scroll::-webkit-scrollbar-track { background: transparent; }
+    .table-scroll::-webkit-scrollbar-thumb { background: rgba(91,140,255,0.35); border-radius: 4px; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+
+    thead th {
+      position: sticky;
+      top: 0;
+      background: #0e1830;
+      color: var(--cyan);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      letter-spacing: 1.2px;
+      text-align: left;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line-strong);
+      z-index: 1;
+    }
+
+    td {
+      padding: 9px 12px;
+      border-bottom: 1px solid rgba(90, 150, 220, 0.12);
+      vertical-align: top;
+      word-break: break-word;
+    }
+
+    tbody tr:hover { background: rgba(53, 231, 255, 0.04); }
+
+    .tag-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 500;
+      color: var(--blue);
+      width: 38%;
+      font-size: 0.75rem;
+    }
+
+    .tag-value { color: var(--ink-1); }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 60px 20px;
+      color: var(--ink-2);
+      text-align: center;
+    }
+
+    .empty-state svg { width: 40px; height: 40px; opacity: 0.5; }
+    .empty-state p { margin: 0; font-size: 0.82rem; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.5px; }
+
+    /* ---------- export button ---------- */
+    .btn-export {
+      background: linear-gradient(135deg, var(--cyan), var(--blue));
+      color: #051019;
+      border: none;
+      padding: 14px 18px;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 16px;
+      display: none;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      box-shadow: 0 6px 24px rgba(53, 231, 255, 0.25);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .btn-export:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 28px rgba(53, 231, 255, 0.38);
+    }
+    .btn-export:active { transform: translateY(0); }
+
+    footer {
+      max-width: 1180px;
+      margin: 30px auto 0;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--ink-2);
+      letter-spacing: 0.5px;
+      position: relative;
+      z-index: 2;
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/exifreader@4.20.0/dist/exif-reader.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+
+<div class="scanline"></div>
+
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand">
+      <svg class="badge-mark" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M24 3L42 10V22C42 33 34.5 41 24 45C13.5 41 6 33 6 22V10L24 3Z" stroke="#35e7ff" stroke-width="1.6" fill="rgba(53,231,255,0.06)"/>
+        <path d="M24 3L42 10V22C42 33 34.5 41 24 45" stroke="#5b8cff" stroke-width="1.6"/>
+        <circle cx="24" cy="21" r="7" stroke="#35e7ff" stroke-width="1.4" fill="none"/>
+        <path d="M24 15V27M18 21H30" stroke="#35e7ff" stroke-width="1.2" opacity="0.7"/>
+        <path d="M16 32L32 32" stroke="#5b8cff" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      <div class="brand-text">
+        <h1>UNIT FORENSIK METADATA</h1>
+        <p>DIVISI ANALISIS DIGITAL &amp; JEJAK LOKASI</p>
+      </div>
+    </div>
+
+    <div class="status-cluster">
+      <div class="status-chip"><span class="dot"></span>SISTEM <b>AKTIF</b></div>
+      <div class="status-chip"><span class="dot amber"></span>AKSES <b>TERBATAS · LV.4</b></div>
+      <div class="status-chip" id="clockChip">WAKTU <b id="clockValue">--:--:--</b></div>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <!-- LEFT: intake -->
+    <div class="stack">
+      <div class="panel">
+        <span class="panel-corner tl"></span><span class="panel-corner tr"></span>
+        <span class="panel-corner bl"></span><span class="panel-corner br"></span>
+        <span class="panel-label">01 · BARANG BUKTI</span>
+
+        <div class="stack" style="gap:16px;">
+          <div class="upload-area" tabindex="0" role="button" aria-label="Unggah berkas bukti"
+               onclick="document.getElementById('fileInput').click()"
+               onkeydown="if(event.key==='Enter'||event.key===' '){document.getElementById('fileInput').click()}">
+            <svg class="upload-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 15V4M12 4L7.5 8.5M12 4L16.5 8.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M4 15V17.5C4 18.88 5.12 20 6.5 20H17.5C18.88 20 20 18.88 20 17.5V15" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <p class="primary">Unggah berkas bukti</p>
+            <p class="secondary">JPG · PNG · HEIC</p>
+            <input type="file" id="fileInput" accept="image/*">
+          </div>
+
+          <div id="previewContainer" class="preview-box">
+            <div class="preview-frame">
+              <img id="imgPreview" src="" alt="Pratinjau bukti">
+            </div>
+          </div>
+
+          <div id="gpsContainer" class="gps-badge"></div>
+          <div id="integrityContainer" class="gps-badge"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: analysis -->
+    <div class="panel">
+      <span class="panel-corner tl"></span><span class="panel-corner tr"></span>
+      <span class="panel-corner bl"></span><span class="panel-corner br"></span>
+      <span class="panel-label">02 · HASIL EKSTRAKSI METADATA</span>
+
+      <div class="data-head">
+        <h2>ATRIBUT METADATA</h2>
+        <span class="tag-count" id="tagCount"></span>
+      </div>
+
+      <input type="text" id="searchInput" class="search-box" placeholder="Cari tag metadata..." style="display:none;" onkeyup="filterTable()">
+
+      <div class="table-scroll">
+        <table id="exifTable" style="display:none;">
+          <thead>
+            <tr>
+              <th>ATRIBUT</th>
+              <th>NILAI</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+
+        <div class="empty-state" id="emptyState">
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.3"/>
+            <path d="M8 12H16M8 8H16M8 16H12" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+          </svg>
+          <p>BELUM ADA BUKTI DIUNGGAH</p>
+        </div>
+      </div>
+
+      <button id="exportBtn" class="btn-export">Unduh Laporan PDF Satu Halaman (Landscape)</button>
+    </div>
+  </div>
+
+  <footer>
+    <span>UNIT FORENSIK METADATA © <span id="yearNow"></span></span>
+    <span>SELURUH PEMROSESAN BERJALAN LOKAL DI PERAMBAN ANDA</span>
+  </footer>
+</div>
+
+<script>
+  // live clock (cosmetic only)
+  function tickClock() {
+    const now = new Date();
+    document.getElementById('clockValue').textContent = now.toLocaleTimeString('id-ID', { hour12: false });
+  }
+  tickClock();
+  setInterval(tickClock, 1000);
+  document.getElementById('yearNow').textContent = new Date().getFullYear();
+
+  let allTagsData = [];
+  let googleMapsUrl = "";
+  let preciseGpsPosition = "";
+  let currentFileName = "";
+  let imageBase64 = null;
+  let fileHashHex = "";
+
+  function bufferToHex(buffer) {
+    return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  document.getElementById('fileInput').addEventListener('change', async function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    currentFileName = file.name;
+    allTagsData = [];
+    googleMapsUrl = "";
+    preciseGpsPosition = "";
+
+    const reader = new FileReader();
+    reader.onload = function(evt) {
+      imageBase64 = evt.target.result;
+      document.getElementById('imgPreview').src = imageBase64;
+      document.getElementById('previewContainer').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+
+    const gpsBox = document.getElementById('gpsContainer');
+    gpsBox.style.display = 'none';
+    gpsBox.classList.remove('gps-success', 'gps-warning');
+
+    const integrityBoxReset = document.getElementById('integrityContainer');
+    integrityBoxReset.style.display = 'none';
+    integrityBoxReset.classList.remove('gps-success', 'gps-warning');
+    fileHashHex = "";
+
+    try {
+      // Hash SHA-256 dihitung dari byte asli file untuk bukti integritas (chain of custody).
+      // Dilakukan sebelum parsing EXIF agar mencerminkan berkas persis seperti saat diunggah.
+      const fileBuffer = await file.arrayBuffer();
+      const hashBuffer = await crypto.subtle.digest('SHA-256', fileBuffer);
+      fileHashHex = bufferToHex(hashBuffer);
+
+      const tags = await ExifReader.load(file, { expanded: true });
+
+      allTagsData.push({ name: 'FILE_NAME', value: file.name });
+      allTagsData.push({ name: 'FILE_SIZE', value: formatBytes(file.size) });
+      allTagsData.push({ name: 'MIME_TYPE', value: file.type || 'UNKNOWN' });
+      allTagsData.push({ name: 'SHA256_INTEGRITY_HASH', value: fileHashHex });
+
+      let rawLat = null, rawLatRef = null, rawLng = null, rawLngRef = null;
+
+      for (const group in tags) {
+        if (typeof tags[group] === 'object' && tags[group] !== null) {
+          for (const tagName in tags[group]) {
+            const tag = tags[group][tagName];
+            if (tag && tag.description !== undefined) {
+              allTagsData.push({ name: tagName, value: tag.description });
+
+              if (tagName === 'GPSLatitude') rawLat = tag;
+              if (tagName === 'GPSLatitudeRef') rawLatRef = tag;
+              if (tagName === 'GPSLongitude') rawLng = tag;
+              if (tagName === 'GPSLongitudeRef') rawLngRef = tag;
+            }
+          }
+        }
+      }
+
+      // --- Sumber koordinat: prioritaskan hasil pre-computed ExifReader (tags.gps) ---
+      // ExifReader dengan {expanded:true} sudah menyediakan grup "gps" berisi Latitude/
+      // Longitude/Altitude dalam desimal bertanda (+/-) yang sudah memperhitungkan referensi
+      // arah (N/S/E/W). Ini jauh lebih akurat daripada parsing manual string derajat-menit-
+      // detik, karena tidak bergantung pada format teks deskripsi yang bisa berbeda antar
+      // kamera/perangkat. Parsing manual lama tetap disimpan sebagai fallback jika grup gps
+      // tidak tersedia (mis. versi library lama atau data GPS tidak lengkap).
+      let latDecimal = null, lngDecimal = null, altitudeMeters = null;
+
+      if (tags.gps && typeof tags.gps.Latitude === 'number' && typeof tags.gps.Longitude === 'number') {
+        latDecimal = tags.gps.Latitude;
+        lngDecimal = tags.gps.Longitude;
+        if (typeof tags.gps.Altitude === 'number') altitudeMeters = tags.gps.Altitude;
+      } else if (rawLat && rawLng) {
+        latDecimal = parseGpsCoordinate(rawLat, rawLatRef);
+        lngDecimal = parseGpsCoordinate(rawLng, rawLngRef);
+      }
+
+      if (latDecimal !== null && lngDecimal !== null && !isNaN(latDecimal) && !isNaN(lngDecimal)) {
+        preciseGpsPosition = `${latDecimal.toFixed(7)}, ${lngDecimal.toFixed(7)}`;
+        googleMapsUrl = `https://www.google.com/maps?q=${latDecimal.toFixed(7)},${lngDecimal.toFixed(7)}`;
+
+        allTagsData.unshift({ name: 'TARGET_GPS_URL', value: googleMapsUrl });
+        if (altitudeMeters !== null) {
+          allTagsData.unshift({ name: 'TARGET_ALTITUDE_M', value: `${altitudeMeters.toFixed(1)} m` });
+        }
+        allTagsData.unshift({ name: 'TARGET_COORDINATES', value: preciseGpsPosition });
+
+        gpsBox.classList.add('gps-success');
+        gpsBox.innerHTML = `
+          <div class="label"><span class="pulse-dot"></span>LOKASI TERKUNCI</div>
+          <b>${preciseGpsPosition}</b>${altitudeMeters !== null ? ` &middot; ${altitudeMeters.toFixed(1)} m` : ''}<br>
+          <a href="${googleMapsUrl}" target="_blank">Buka di Peta Satelit →</a>
+        `;
+        gpsBox.style.display = 'block';
+      } else {
+        gpsBox.classList.add('gps-warning');
+        gpsBox.innerHTML = `
+          <div class="label"><span class="pulse-dot"></span>TIDAK ADA DATA GPS</div>
+          Tidak ditemukan data lokasi pada metadata berkas ini.
+        `;
+        gpsBox.style.display = 'block';
+      }
+
+      // --- Indikasi editing: bandingkan tanggal capture vs modify, dan cek tag Software ---
+      // Ini adalah HEURISTIK, bukan bukti pasti manipulasi. Banyak alasan sah kenapa tanggal
+      // bisa berbeda (mis. proses ekspor ulang oleh galeri HP), jadi labelnya "indikasi".
+      const findTag = (n) => {
+        const f = allTagsData.find(x => x.name === n);
+        return f ? f.value : null;
+      };
+      const dateOriginal = findTag('DateTimeOriginal');
+      const dateModified = findTag('ModifyDate') || findTag('DateTime');
+      const softwareUsed = findTag('Software');
+
+      const integrityNotes = [];
+      if (dateOriginal && dateModified && dateOriginal !== dateModified) {
+        integrityNotes.push(`Tanggal pengambilan (${dateOriginal}) berbeda dari tanggal modifikasi terakhir (${dateModified}).`);
+      }
+      if (softwareUsed) {
+        integrityNotes.push(`Tag software terdeteksi: ${softwareUsed}`);
+      }
+
+      const integrityBox = document.getElementById('integrityContainer');
+      integrityBox.classList.remove('gps-success', 'gps-warning');
+      if (integrityNotes.length > 0) {
+        integrityBox.classList.add('gps-warning');
+        integrityBox.innerHTML = `
+          <div class="label"><span class="pulse-dot"></span>INDIKASI PERUBAHAN TERDETEKSI</div>
+          ${integrityNotes.map(n => `• ${escapeHtml(n)}`).join('<br>')}
+          <br><span style="color:var(--ink-2); font-size:0.72rem;">Ini indikasi awal, bukan bukti pasti. Verifikasi lanjutan tetap diperlukan.</span>
+        `;
+      } else {
+        integrityBox.classList.add('gps-success');
+        integrityBox.innerHTML = `
+          <div class="label"><span class="pulse-dot"></span>TIDAK ADA INDIKASI PERUBAHAN</div>
+          Tanggal metadata konsisten dan tidak ada jejak software editing pada tag EXIF.
+        `;
+      }
+      integrityBox.style.display = 'block';
+
+      renderTable();
+
+      document.getElementById('searchInput').style.display = 'block';
+      document.getElementById('exifTable').style.display = 'table';
+      document.getElementById('emptyState').style.display = 'none';
+      document.getElementById('exportBtn').style.display = 'block';
+
+    } catch (error) {
+      alert('GAGAL MEMBACA METADATA BERKAS.');
+      console.error(error);
+    }
+  });
+
+  function parseGpsCoordinate(gpsObj, refObj) {
+    if (!gpsObj) return null;
+    let decimal = null;
+
+    if (Array.isArray(gpsObj.value)) {
+      const d = Number(gpsObj.value[0]);
+      const m = Number(gpsObj.value[1]);
+      const s = Number(gpsObj.value[2]);
+      decimal = d + (m / 60) + (s / 3600);
+    } else if (typeof gpsObj.description === 'string') {
+      const str = gpsObj.description;
+      const matches = str.match(/(\d+)\s*deg\s*(\d+)'\s*([\d.]+)"/i) || str.match(/(\d+)\D+(\d+)\D+([\d.]+)/);
+      if (matches) {
+        const d = parseFloat(matches[1]);
+        const m = parseFloat(matches[2]);
+        const s = parseFloat(matches[3]);
+        decimal = d + (m / 60) + (s / 3600);
+      } else {
+        decimal = parseFloat(str);
+      }
+    }
+
+    if (isNaN(decimal)) return null;
+
+    let ref = refObj ? (refObj.description || refObj.value || '').toString().toUpperCase() : '';
+    if (ref.includes('S') || ref.includes('SOUTH') || ref.includes('W') || ref.includes('WEST')) {
+      decimal = -Math.abs(decimal);
+    }
+
+    return decimal;
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML = '';
+
+    allTagsData.forEach(item => {
+      const tr = document.createElement('tr');
+      let valHtml = escapeHtml(item.value);
+
+      if (item.name === 'TARGET_GPS_URL') {
+        valHtml = `<a href="${item.value}" target="_blank" style="color:var(--green); font-weight:600;">${item.value} ↗</a>`;
+      }
+
+      tr.innerHTML = `
+        <td class="tag-name">${escapeHtml(item.name)}</td>
+        <td class="tag-value">${valHtml}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById('tagCount').textContent = allTagsData.length + ' TAG DITEMUKAN';
+  }
+
+  function filterTable() {
+    const input = document.getElementById('searchInput').value.toLowerCase();
+    const rows = document.querySelectorAll('#tableBody tr');
+
+    rows.forEach(row => {
+      const text = row.innerText.toLowerCase();
+      row.style.display = text.includes(input) ? '' : 'none';
+    });
+  }
+
+  function escapeHtml(text) {
+    return String(text).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  }
+
+  function formatBytes(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  // EXPORT PDF LANDSCAPE 1 HALAMAN LENGKAP 2 KOLOM
+  document.getElementById('exportBtn').addEventListener('click', function() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF('l', 'mm', 'a4');
+
+    const caseNumber = `CIA-EVI-${Math.floor(100000 + Math.random() * 900000)}`;
+    const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+
+    doc.setFont("courier", "bold");
+    doc.setFontSize(14);
+    doc.setTextColor(200, 0, 0);
+    doc.text("TOP SECRET // RESTRICTED / NOFORN", 148.5, 11, { align: "center" });
+
+    doc.setFontSize(8);
+    doc.setTextColor(80, 80, 80);
+    doc.text("CENTRAL INTELLIGENCE AGENCY — FULL LANDSCAPE DUAL-COLUMN EVIDENCE DOSSIER", 148.5, 15, { align: "center" });
+    doc.line(10, 17, 287, 17);
+
+    doc.setFontSize(7.5);
+    doc.setTextColor(0, 0, 0);
+    doc.text(`CASE FILE ID : ${caseNumber}`, 10, 22);
+    doc.text(`ANALYSED AT  : ${timestamp}`, 10, 26);
+    doc.text(`FILE NAME    : ${currentFileName.substring(0, 35)}`, 10, 30);
+
+    doc.setFontSize(45);
+    doc.setTextColor(235, 210, 210);
+    doc.text("TOP SECRET", 148.5, 115, { align: "center", angle: 20 });
+
+    if (imageBase64) {
+      try {
+        doc.setDrawColor(0, 0, 0);
+        doc.rect(236, 19, 51, 36);
+        doc.addImage(imageBase64, 'JPEG', 237, 20, 49, 34);
+      } catch (err) {
+        console.log("Error loading image in PDF", err);
+      }
+    }
+
+    const formattedRows = allTagsData.map(item => [item.name, String(item.value).substring(0, 50)]);
+
+    const halfIndex = Math.ceil(formattedRows.length / 2);
+    const leftColData = formattedRows.slice(0, halfIndex);
+    const rightColData = formattedRows.slice(halfIndex);
+
+    let dynamicFontSize = 6.5;
+    let dynamicPadding = 0.8;
+    if (halfIndex > 20) {
+      dynamicFontSize = 5.8;
+      dynamicPadding = 0.6;
+    } else if (halfIndex > 30) {
+      dynamicFontSize = 5.0;
+      dynamicPadding = 0.4;
+    }
+
+    doc.autoTable({
+      startY: 57,
+      margin: { left: 10, right: 151 },
+      head: [['ATTRIBUTE IDENTIFIER', 'VALUE (LEFT COLUMN)']],
+      body: leftColData,
+      theme: 'grid',
+      styles: { font: 'courier', fontSize: dynamicFontSize, cellPadding: dynamicPadding },
+      columnStyles: {
+        0: { cellWidth: 45, fontStyle: 'bold' },
+        1: { cellWidth: 'auto' }
+      },
+      headStyles: { fillColor: [30, 30, 30], textColor: [255, 255, 255], fontSize: 6.5 },
+      didDrawCell: function(data) {
+        if (data.section === 'body' && googleMapsUrl) {
+          if (data.row.raw[0] === 'TARGET_GPS_URL' && data.column.index === 1) {
+            doc.setTextColor(0, 102, 204);
+            doc.textWithLink('[ OPEN GOOGLE MAPS 📍 ]', data.cell.x + 1, data.cell.y + 2.5, { url: googleMapsUrl });
+          }
+        }
+      }
+    });
+
+    doc.autoTable({
+      startY: 57,
+      margin: { left: 151, right: 10 },
+      head: [['ATTRIBUTE IDENTIFIER', 'VALUE (RIGHT COLUMN)']],
+      body: rightColData,
+      theme: 'grid',
+      styles: { font: 'courier', fontSize: dynamicFontSize, cellPadding: dynamicPadding },
+      columnStyles: {
+        0: { cellWidth: 45, fontStyle: 'bold' },
+        1: { cellWidth: 'auto' }
+      },
+      headStyles: { fillColor: [30, 30, 30], textColor: [255, 255, 255], fontSize: 6.5 },
+      didDrawCell: function(data) {
+        if (data.section === 'body' && googleMapsUrl) {
+          if (data.row.raw[0] === 'TARGET_GPS_URL' && data.column.index === 1) {
+            doc.setTextColor(0, 102, 204);
+            doc.textWithLink('[ OPEN GOOGLE MAPS 📍 ]', data.cell.x + 1, data.cell.y + 2.5, { url: googleMapsUrl });
+          }
+        }
+      }
+    });
+
+    doc.setFont("courier", "bold");
+    doc.setFontSize(7);
+    doc.setTextColor(200, 0, 0);
+    doc.text("TOP SECRET // CLASSIFIED EVIDENCE DOSSIER // SINGLE-PAGE LANDSCAPE SUMMARY", 148.5, 203, { align: "center" });
+
+    doc.save(`${caseNumber}_LANDSCAPE_DOSSIER.pdf`);
+  });
+</script>
+
+</body>
+</html>
