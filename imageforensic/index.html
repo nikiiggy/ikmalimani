@@ -584,7 +584,7 @@
         </div>
       </div>
 
-      <button id="exportBtn" class="btn-export">Unduh Laporan PDF Satu Halaman (Landscape)</button>
+      <button id="exportBtn" class="btn-export">Unduh Laporan Forensik (PDF)</button>
     </div>
   </div>
 
@@ -610,9 +610,16 @@
   let currentFileName = "";
   let imageBase64 = null;
   let fileHashHex = "";
+  let altitudeGlobal = null;
+  let integrityNotesGlobal = [];
 
   function bufferToHex(buffer) {
     return Array.from(new Uint8Array(buffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  function getTagValue(name) {
+    const f = allTagsData.find(x => x.name === name);
+    return f ? f.value : null;
   }
 
   document.getElementById('fileInput').addEventListener('change', async function(e) {
@@ -640,6 +647,8 @@
     integrityBoxReset.style.display = 'none';
     integrityBoxReset.classList.remove('gps-success', 'gps-warning');
     fileHashHex = "";
+    altitudeGlobal = null;
+    integrityNotesGlobal = [];
 
     try {
       // Hash SHA-256 dihitung dari byte asli file untuk bukti integritas (chain of custody).
@@ -699,6 +708,7 @@
         if (altitudeMeters !== null) {
           allTagsData.unshift({ name: 'TARGET_ALTITUDE_M', value: `${altitudeMeters.toFixed(1)} m` });
         }
+        altitudeGlobal = altitudeMeters;
         allTagsData.unshift({ name: 'TARGET_COORDINATES', value: preciseGpsPosition });
 
         gpsBox.classList.add('gps-success');
@@ -720,13 +730,9 @@
       // --- Indikasi editing: bandingkan tanggal capture vs modify, dan cek tag Software ---
       // Ini adalah HEURISTIK, bukan bukti pasti manipulasi. Banyak alasan sah kenapa tanggal
       // bisa berbeda (mis. proses ekspor ulang oleh galeri HP), jadi labelnya "indikasi".
-      const findTag = (n) => {
-        const f = allTagsData.find(x => x.name === n);
-        return f ? f.value : null;
-      };
-      const dateOriginal = findTag('DateTimeOriginal');
-      const dateModified = findTag('ModifyDate') || findTag('DateTime');
-      const softwareUsed = findTag('Software');
+      const dateOriginal = getTagValue('DateTimeOriginal');
+      const dateModified = getTagValue('ModifyDate') || getTagValue('DateTime');
+      const softwareUsed = getTagValue('Software');
 
       const integrityNotes = [];
       if (dateOriginal && dateModified && dateOriginal !== dateModified) {
@@ -735,6 +741,7 @@
       if (softwareUsed) {
         integrityNotes.push(`Tag software terdeteksi: ${softwareUsed}`);
       }
+      integrityNotesGlobal = integrityNotes;
 
       const integrityBox = document.getElementById('integrityContainer');
       integrityBox.classList.remove('gps-success', 'gps-warning');
@@ -843,110 +850,228 @@
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   }
 
-  // EXPORT PDF LANDSCAPE 1 HALAMAN LENGKAP 2 KOLOM
+  // ============================================================
+  // EXPORT PDF — LAPORAN FORENSIK
+  // Desain baru fokus pada keterbacaan: font dibiarkan pada ukuran
+  // nyaman dibaca (~8.3pt) dan laporan boleh mengalir ke beberapa
+  // halaman otomatis, alih-alih dipaksa muat 1 halaman dengan font
+  // sampai 5pt seperti versi sebelumnya. Header/footer diulang di
+  // setiap halaman agar konteks kasus tidak hilang saat digulir.
+  // ============================================================
   document.getElementById('exportBtn').addEventListener('click', function() {
+    if (!allTagsData.length) return;
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF('l', 'mm', 'a4');
 
-    const caseNumber = `CIA-EVI-${Math.floor(100000 + Math.random() * 900000)}`;
-    const timestamp = new Date().toISOString().replace('T', ' ').substring(0, 19) + ' UTC';
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const marginX = 12;
+    const headerH = 22;
+    const footerH = 12;
 
-    doc.setFont("courier", "bold");
-    doc.setFontSize(14);
-    doc.setTextColor(200, 0, 0);
-    doc.text("TOP SECRET // RESTRICTED / NOFORN", 148.5, 11, { align: "center" });
+    const NAVY = [10, 18, 34];
+    const CYAN = [53, 231, 255];
+    const BLUE = [55, 100, 200];
+    const INK = [35, 42, 55];
+    const MUTED = [110, 122, 140];
+    const LIGHT = [240, 245, 250];
+    const GREEN = [20, 145, 105];
+    const AMBER = [185, 125, 10];
+    const RED = [205, 50, 75];
 
-    doc.setFontSize(8);
-    doc.setTextColor(80, 80, 80);
-    doc.text("CENTRAL INTELLIGENCE AGENCY — FULL LANDSCAPE DUAL-COLUMN EVIDENCE DOSSIER", 148.5, 15, { align: "center" });
-    doc.line(10, 17, 287, 17);
+    const caseNumber = `FMU-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const generatedAt = new Date().toLocaleString('id-ID', { dateStyle: 'long', timeStyle: 'medium' });
 
-    doc.setFontSize(7.5);
-    doc.setTextColor(0, 0, 0);
-    doc.text(`CASE FILE ID : ${caseNumber}`, 10, 22);
-    doc.text(`ANALYSED AT  : ${timestamp}`, 10, 26);
-    doc.text(`FILE NAME    : ${currentFileName.substring(0, 35)}`, 10, 30);
+    function drawHeaderFooter(pageNumber) {
+      // header bar
+      doc.setFillColor(...NAVY);
+      doc.rect(0, 0, pageW, headerH, 'F');
+      doc.setDrawColor(...CYAN);
+      doc.setLineWidth(0.6);
+      doc.line(0, headerH, pageW, headerH);
 
-    doc.setFontSize(45);
-    doc.setTextColor(235, 210, 210);
-    doc.text("TOP SECRET", 148.5, 115, { align: "center", angle: 20 });
+      doc.setDrawColor(...CYAN);
+      doc.setLineWidth(0.5);
+      doc.circle(marginX + 3, headerH / 2, 3.6, 'S');
+      doc.setFontSize(6);
+      doc.setTextColor(...CYAN);
+      doc.text('F', marginX + 3, headerH / 2 + 1.3, { align: 'center' });
 
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.setTextColor(255, 255, 255);
+      doc.text('UNIT FORENSIK METADATA', marginX + 10, 10);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.5);
+      doc.setTextColor(...CYAN);
+      doc.text('LAPORAN ANALISIS METADATA & JEJAK LOKASI BUKTI DIGITAL', marginX + 10, 15.5);
+
+      doc.setFontSize(7);
+      doc.setTextColor(200, 212, 228);
+      doc.text(`ID KASUS: ${caseNumber}`, pageW - marginX, 9, { align: 'right' });
+      doc.text(`HALAMAN ${pageNumber}`, pageW - marginX, 14.5, { align: 'right' });
+
+      // footer
+      doc.setDrawColor(...MUTED);
+      doc.setLineWidth(0.2);
+      doc.line(marginX, pageH - footerH, pageW - marginX, pageH - footerH);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(6.5);
+      doc.setTextColor(...MUTED);
+      doc.text(`Dibuat otomatis pada ${generatedAt}`, marginX, pageH - footerH + 5);
+      doc.text('Dokumen rahasia — hanya untuk keperluan investigasi resmi.', pageW - marginX, pageH - footerH + 5, { align: 'right' });
+    }
+
+    function drawSummaryBox(x, y, w, h, title, lines, accent) {
+      doc.setFillColor(250, 251, 253);
+      doc.setDrawColor(...accent);
+      doc.setLineWidth(0.3);
+      doc.roundedRect(x, y, w, h, 1.5, 1.5, 'FD');
+      doc.setFillColor(...accent);
+      doc.rect(x, y, 1.3, h, 'F');
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.6);
+      doc.setTextColor(...accent);
+      doc.text(title, x + 5, y + 6);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7.2);
+      doc.setTextColor(...INK);
+      let ly = y + 11;
+      lines.forEach(line => {
+        const wrapped = doc.splitTextToSize(line, w - 9);
+        wrapped.forEach(wl => {
+          if (ly < y + h - 1) doc.text(wl, x + 5, ly);
+          ly += 4;
+        });
+      });
+    }
+
+    // ---------- halaman 1: ringkasan kasus ----------
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9.5);
+    doc.setTextColor(...NAVY);
+    doc.text('INFORMASI KASUS', marginX, 30);
+    doc.setDrawColor(...CYAN);
+    doc.setLineWidth(0.3);
+    doc.line(marginX, 32, marginX + 70, 32);
+
+    const infoRows = [
+      ['ID KASUS', caseNumber],
+      ['NAMA FILE', currentFileName || '-'],
+      ['UKURAN / TIPE', `${getTagValue('FILE_SIZE') || '-'}  ·  ${getTagValue('MIME_TYPE') || '-'}`],
+      ['WAKTU ANALISIS', generatedAt],
+    ];
+    let iy = 38;
+    infoRows.forEach(([label, val]) => {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7.3);
+      doc.setTextColor(...MUTED);
+      doc.text(label, marginX, iy);
+      doc.setFont('courier', 'normal');
+      doc.setFontSize(7.8);
+      doc.setTextColor(...INK);
+      doc.text(String(val).substring(0, 62), marginX + 34, iy);
+      iy += 6;
+    });
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7.3);
+    doc.setTextColor(...MUTED);
+    doc.text('HASH SHA-256', marginX, iy + 1);
+    doc.setFont('courier', 'normal');
+    doc.setFontSize(7);
+    doc.setTextColor(...INK);
+    const hashLines = fileHashHex ? doc.splitTextToSize(fileHashHex, 130) : ['-'];
+    doc.text(hashLines, marginX, iy + 6);
+
+    // foto barang bukti
+    const photoX = 217, photoY = 28, photoW = 68, photoH = 50;
+    doc.setDrawColor(...BLUE);
+    doc.setLineWidth(0.4);
+    doc.roundedRect(photoX, photoY, photoW, photoH, 2, 2, 'S');
     if (imageBase64) {
       try {
-        doc.setDrawColor(0, 0, 0);
-        doc.rect(236, 19, 51, 36);
-        doc.addImage(imageBase64, 'JPEG', 237, 20, 49, 34);
+        const imgFormat = imageBase64.includes('image/png') ? 'PNG' : 'JPEG';
+        doc.addImage(imageBase64, imgFormat, photoX + 2, photoY + 2, photoW - 4, photoH - 4, undefined, 'FAST');
       } catch (err) {
-        console.log("Error loading image in PDF", err);
+        console.log('Gagal memuat gambar di PDF', err);
       }
+    } else {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      doc.setTextColor(...MUTED);
+      doc.text('TIDAK ADA PRATINJAU', photoX + photoW / 2, photoY + photoH / 2, { align: 'center' });
     }
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(6.5);
+    doc.setTextColor(...MUTED);
+    doc.text('BARANG BUKTI', photoX, photoY + photoH + 4);
 
-    const formattedRows = allTagsData.map(item => [item.name, String(item.value).substring(0, 50)]);
+    // kotak ringkasan GPS & integritas
+    const boxY = 90, boxH = 24, boxGap = 6;
+    const boxW = (pageW - marginX * 2 - boxGap) / 2;
 
-    const halfIndex = Math.ceil(formattedRows.length / 2);
-    const leftColData = formattedRows.slice(0, halfIndex);
-    const rightColData = formattedRows.slice(halfIndex);
-
-    let dynamicFontSize = 6.5;
-    let dynamicPadding = 0.8;
-    if (halfIndex > 20) {
-      dynamicFontSize = 5.8;
-      dynamicPadding = 0.6;
-    } else if (halfIndex > 30) {
-      dynamicFontSize = 5.0;
-      dynamicPadding = 0.4;
+    let gpsLines;
+    if (preciseGpsPosition) {
+      gpsLines = [`Koordinat: ${preciseGpsPosition}`];
+      if (altitudeGlobal !== null) gpsLines.push(`Ketinggian: ${altitudeGlobal.toFixed(1)} m`);
+      gpsLines.push(`Peta: ${googleMapsUrl}`);
+    } else {
+      gpsLines = ['Tidak ditemukan data lokasi pada metadata berkas ini.'];
     }
+    drawSummaryBox(
+      marginX, boxY, boxW, boxH,
+      preciseGpsPosition ? 'LOKASI TERKUNCI' : 'TIDAK ADA DATA GPS',
+      gpsLines,
+      preciseGpsPosition ? GREEN : RED
+    );
+
+    const integLines = integrityNotesGlobal.length > 0
+      ? integrityNotesGlobal
+      : ['Tanggal metadata konsisten, tidak ada jejak software editing pada tag EXIF.'];
+    drawSummaryBox(
+      marginX + boxW + boxGap, boxY, boxW, boxH,
+      integrityNotesGlobal.length > 0 ? 'INDIKASI PERUBAHAN' : 'TIDAK ADA INDIKASI PERUBAHAN',
+      integLines,
+      integrityNotesGlobal.length > 0 ? AMBER : GREEN
+    );
+
+    // ---------- tabel metadata lengkap (mengalir otomatis ke halaman berikutnya) ----------
+    const formattedRows = allTagsData.map(item => [item.name, String(item.value)]);
 
     doc.autoTable({
-      startY: 57,
-      margin: { left: 10, right: 151 },
-      head: [['ATTRIBUTE IDENTIFIER', 'VALUE (LEFT COLUMN)']],
-      body: leftColData,
-      theme: 'grid',
-      styles: { font: 'courier', fontSize: dynamicFontSize, cellPadding: dynamicPadding },
+      startY: boxY + boxH + 8,
+      margin: { top: headerH + 6, left: marginX, right: marginX, bottom: footerH + 4 },
+      head: [['ATRIBUT METADATA', 'NILAI']],
+      body: formattedRows,
+      theme: 'striped',
+      styles: { font: 'helvetica', fontSize: 8.3, cellPadding: 2.6, overflow: 'linebreak', textColor: INK, lineColor: [225, 232, 240], lineWidth: 0.1 },
+      headStyles: { fillColor: NAVY, textColor: [255, 255, 255], fontSize: 8, fontStyle: 'bold' },
+      alternateRowStyles: { fillColor: LIGHT },
       columnStyles: {
-        0: { cellWidth: 45, fontStyle: 'bold' },
+        0: { cellWidth: 62, fontStyle: 'bold', textColor: BLUE, font: 'courier', fontSize: 7.6 },
         1: { cellWidth: 'auto' }
       },
-      headStyles: { fillColor: [30, 30, 30], textColor: [255, 255, 255], fontSize: 6.5 },
       didDrawCell: function(data) {
-        if (data.section === 'body' && googleMapsUrl) {
-          if (data.row.raw[0] === 'TARGET_GPS_URL' && data.column.index === 1) {
-            doc.setTextColor(0, 102, 204);
-            doc.textWithLink('[ OPEN GOOGLE MAPS 📍 ]', data.cell.x + 1, data.cell.y + 2.5, { url: googleMapsUrl });
-          }
+        if (data.section === 'body' && googleMapsUrl && data.row.raw[0] === 'TARGET_GPS_URL' && data.column.index === 1) {
+          const rowBg = (data.row.index % 2 === 0) ? [255, 255, 255] : LIGHT;
+          doc.setFillColor(...rowBg);
+          doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'F');
+          doc.setFont('helvetica', 'bold');
+          doc.setFontSize(8);
+          doc.setTextColor(20, 110, 190);
+          doc.textWithLink('Buka Google Maps ↗', data.cell.x + 2, data.cell.y + data.cell.height / 2 + 1.3, { url: googleMapsUrl });
         }
+      },
+      didDrawPage: function(data) {
+        drawHeaderFooter(data.pageNumber);
       }
     });
 
-    doc.autoTable({
-      startY: 57,
-      margin: { left: 151, right: 10 },
-      head: [['ATTRIBUTE IDENTIFIER', 'VALUE (RIGHT COLUMN)']],
-      body: rightColData,
-      theme: 'grid',
-      styles: { font: 'courier', fontSize: dynamicFontSize, cellPadding: dynamicPadding },
-      columnStyles: {
-        0: { cellWidth: 45, fontStyle: 'bold' },
-        1: { cellWidth: 'auto' }
-      },
-      headStyles: { fillColor: [30, 30, 30], textColor: [255, 255, 255], fontSize: 6.5 },
-      didDrawCell: function(data) {
-        if (data.section === 'body' && googleMapsUrl) {
-          if (data.row.raw[0] === 'TARGET_GPS_URL' && data.column.index === 1) {
-            doc.setTextColor(0, 102, 204);
-            doc.textWithLink('[ OPEN GOOGLE MAPS 📍 ]', data.cell.x + 1, data.cell.y + 2.5, { url: googleMapsUrl });
-          }
-        }
-      }
-    });
-
-    doc.setFont("courier", "bold");
-    doc.setFontSize(7);
-    doc.setTextColor(200, 0, 0);
-    doc.text("TOP SECRET // CLASSIFIED EVIDENCE DOSSIER // SINGLE-PAGE LANDSCAPE SUMMARY", 148.5, 203, { align: "center" });
-
-    doc.save(`${caseNumber}_LANDSCAPE_DOSSIER.pdf`);
+    doc.save(`${caseNumber}_LAPORAN_FORENSIK.pdf`);
   });
 </script>
 
