@@ -2,15 +2,17 @@ let currentImageUrl = "";
 let currentGroupName = "";
 let currentUsername = "";
 
-// Menggunakan CORS Proxy agar request frontend browser tidak diblokir
-const CORS_PROXY = "https://corsproxy.io/?";
+// Menggunakan RoProxy (Proxy khusus Roblox API yang mendukung GET & POST)
+const ROPROXY_BASE = "https://users.roproxy.com";
+const ROPROXY_GROUPS = "https://groups.roproxy.com";
+const ROPROXY_THUMBNAILS = "https://thumbnails.roproxy.com";
 
 async function resolveUserId(query) {
     const cleanQuery = query.trim();
 
     try {
-        // Percobaan 1: Cari via Username (Official Public API - Tidak Butuh Cookie)
-        const userRes = await fetch(CORS_PROXY + encodeURIComponent("https://users.roblox.com/v1/usernames/users"), {
+        // Percobaan 1: Cari via Username (POST ke RoProxy)
+        const userRes = await fetch(`${ROPROXY_BASE}/v1/namespaces/usernames/users`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ usernames: [cleanQuery], excludeBannedUsers: false })
@@ -25,15 +27,15 @@ async function resolveUserId(query) {
 
         // Percobaan 2: Jika input berupa angka langsung (User ID)
         if (/^\d+$/.test(cleanQuery)) {
-            const checkRes = await fetch(CORS_PROXY + encodeURIComponent(`https://users.roblox.com/v1/users/${cleanQuery}`));
+            const checkRes = await fetch(`${ROPROXY_BASE}/v1/users/${cleanQuery}`);
             if (checkRes.ok) {
                 const checkData = await checkRes.json();
                 return { id: parseInt(cleanQuery), name: checkData.name || cleanQuery };
             }
         }
 
-        // Percobaan 3: Fallback via User Search (Display Name)
-        const searchRes = await fetch(CORS_PROXY + encodeURIComponent(`https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(cleanQuery)}&limit=10`));
+        // Percobaan 3: Search via Display Name
+        const searchRes = await fetch(`${ROPROXY_BASE}/v1/users/search?keyword=${encodeURIComponent(cleanQuery)}&limit=10`);
         if (searchRes.ok) {
             const searchData = await searchRes.json();
             if (searchData.data && searchData.data.length > 0) {
@@ -77,7 +79,7 @@ async function fetchCommunityLogo() {
 
     try {
         // Ambil data Primary Group milik user
-        const groupRes = await fetch(CORS_PROXY + encodeURIComponent(`https://groups.roblox.com/v1/users/${user.id}/groups/primary/role`));
+        const groupRes = await fetch(`${ROPROXY_GROUPS}/v1/users/${user.id}/groups/primary/role`);
         if (!groupRes.ok) {
             status.style.color = "#f43f5e";
             status.innerText = "Status: Gagal mengambil data Primary Group!";
@@ -97,7 +99,7 @@ async function fetchCommunityLogo() {
         currentGroupName = groupData.group.name;
 
         // Ambil URL Thumbnail Logo Group
-        const thumbRes = await fetch(CORS_PROXY + encodeURIComponent(`https://thumbnails.roblox.com/v1/groups/icons?groupIds=${groupId}&size=420x420&format=Png`));
+        const thumbRes = await fetch(`${ROPROXY_THUMBNAILS}/v1/groups/icons?groupIds=${groupId}&size=420x420&format=Png`);
         const thumbData = await thumbRes.json();
 
         if (!thumbData.data || !thumbData.data[0].imageUrl) {
@@ -110,7 +112,7 @@ async function fetchCommunityLogo() {
         currentImageUrl = thumbData.data[0].imageUrl;
 
         // Render ke Preview GUI
-        previewImg.src = CORS_PROXY + encodeURIComponent(currentImageUrl);
+        previewImg.src = currentImageUrl;
         previewImg.style.display = "block";
         previewText.style.display = "none";
 
@@ -131,7 +133,7 @@ async function downloadImage() {
     if (!currentImageUrl) return;
 
     try {
-        const response = await fetch(CORS_PROXY + encodeURIComponent(currentImageUrl));
+        const response = await fetch(currentImageUrl);
         const blob = await response.blob();
         
         const cleanGroupName = currentGroupName.replace(/[^a-zA-Z0-9_-]/g, "_");
