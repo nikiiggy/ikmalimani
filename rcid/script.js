@@ -2,35 +2,42 @@ let currentImageUrl = "";
 let currentGroupName = "";
 let currentUsername = "";
 
-// CORS Proxy untuk bypass proteksi CORS browser saat fetch API Roblox dari frontend
+// Menggunakan CORS Proxy agar request frontend browser tidak diblokir
 const CORS_PROXY = "https://corsproxy.io/?";
 
 async function resolveUserId(query) {
+    const cleanQuery = query.trim();
+
     try {
-        // 1. Cari via Username
-        const userRes = await fetch(CORS_PROXY + encodeURIComponent("https://users.roblox.com/v1/namespaces/usernames/users"), {
+        // Percobaan 1: Cari via Username (Official Public API - Tidak Butuh Cookie)
+        const userRes = await fetch(CORS_PROXY + encodeURIComponent("https://users.roblox.com/v1/usernames/users"), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ usernames: [query], excludeBannedUsers: false })
+            body: JSON.stringify({ usernames: [cleanQuery], excludeBannedUsers: false })
         });
-        const userData = await userRes.json();
-        if (userData.data && userData.data.length > 0) {
-            return { id: userData.data[0].id, name: userData.data[0].name };
+        
+        if (userRes.ok) {
+            const userData = await userRes.json();
+            if (userData.data && userData.data.length > 0) {
+                return { id: userData.data[0].id, name: userData.data[0].name };
+            }
         }
 
-        // 2. Cari via Display Name / Search API
-        const searchRes = await fetch(CORS_PROXY + encodeURIComponent(`https://users.roblox.com/v1/users/search?keyword=${query}&limit=10`));
-        const searchData = await searchRes.json();
-        if (searchData.data && searchData.data.length > 0) {
-            return { id: searchData.data[0].id, name: searchData.data[0].name };
-        }
-
-        // 3. Jika input adalah angka User ID
-        if (/^\d+$/.test(query)) {
-            const checkRes = await fetch(CORS_PROXY + encodeURIComponent(`https://users.roblox.com/v1/users/${query}`));
+        // Percobaan 2: Jika input berupa angka langsung (User ID)
+        if (/^\d+$/.test(cleanQuery)) {
+            const checkRes = await fetch(CORS_PROXY + encodeURIComponent(`https://users.roblox.com/v1/users/${cleanQuery}`));
             if (checkRes.ok) {
                 const checkData = await checkRes.json();
-                return { id: parseInt(query), name: checkData.name || query };
+                return { id: parseInt(cleanQuery), name: checkData.name || cleanQuery };
+            }
+        }
+
+        // Percobaan 3: Fallback via User Search (Display Name)
+        const searchRes = await fetch(CORS_PROXY + encodeURIComponent(`https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(cleanQuery)}&limit=10`));
+        if (searchRes.ok) {
+            const searchData = await searchRes.json();
+            if (searchData.data && searchData.data.length > 0) {
+                return { id: searchData.data[0].id, name: searchData.data[0].name };
             }
         }
     } catch (e) {
@@ -40,26 +47,26 @@ async function resolveUserId(query) {
 }
 
 async function fetchCommunityLogo() {
-    const input = document.getElementById("username").value.trim();
+    const input = document.getElementById("username").value;
     const status = document.getElementById("status");
     const searchBtn = document.getElementById("searchBtn");
     const downloadBtn = document.getElementById("downloadBtn");
     const previewImg = document.getElementById("previewImg");
     const previewText = document.getElementById("previewText");
 
-    if (!input) {
+    if (!input.trim()) {
         alert("Silakan masukkan Username / Display Name terlebih dahulu!");
         return;
     }
 
     searchBtn.disabled = true;
     downloadBtn.disabled = true;
-    status.style.color = "#94a3b8";
+    status.style.color = "#fbbf24";
     status.innerText = "Status: Mencari data pengguna...";
 
     const user = await resolveUserId(input);
     if (!user) {
-        status.style.color = "#ef4444";
+        status.style.color = "#f43f5e";
         status.innerText = `Status: Pengguna '${input}' tidak ditemukan!`;
         searchBtn.disabled = false;
         return;
@@ -69,19 +76,19 @@ async function fetchCommunityLogo() {
     status.innerText = `User ditemukan: ${user.name}. Memeriksa Primary Group...`;
 
     try {
-        // Ambil data Primary Group
+        // Ambil data Primary Group milik user
         const groupRes = await fetch(CORS_PROXY + encodeURIComponent(`https://groups.roblox.com/v1/users/${user.id}/groups/primary/role`));
         if (!groupRes.ok) {
-            status.style.color = "#ef4444";
-            status.innerText = "Status: Pengguna tidak punya Primary Group / Community!";
+            status.style.color = "#f43f5e";
+            status.innerText = "Status: Gagal mengambil data Primary Group!";
             searchBtn.disabled = false;
             return;
         }
 
         const groupData = await groupRes.json();
         if (!groupData || !groupData.group) {
-            status.style.color = "#ef4444";
-            status.innerText = "Status: Pengguna tidak memasang Primary Group di profilnya!";
+            status.style.color = "#f43f5e";
+            status.innerText = "Status: Pengguna ini tidak memasang Primary Group di profilnya!";
             searchBtn.disabled = false;
             return;
         }
@@ -89,12 +96,12 @@ async function fetchCommunityLogo() {
         const groupId = groupData.group.id;
         currentGroupName = groupData.group.name;
 
-        // Ambil Thumbnail Logo Group
+        // Ambil URL Thumbnail Logo Group
         const thumbRes = await fetch(CORS_PROXY + encodeURIComponent(`https://thumbnails.roblox.com/v1/groups/icons?groupIds=${groupId}&size=420x420&format=Png`));
         const thumbData = await thumbRes.json();
 
         if (!thumbData.data || !thumbData.data[0].imageUrl) {
-            status.style.color = "#ef4444";
+            status.style.color = "#f43f5e";
             status.innerText = "Status: Gagal mengambil logo grup!";
             searchBtn.disabled = false;
             return;
@@ -102,7 +109,7 @@ async function fetchCommunityLogo() {
 
         currentImageUrl = thumbData.data[0].imageUrl;
 
-        // Render ke Preview
+        // Render ke Preview GUI
         previewImg.src = CORS_PROXY + encodeURIComponent(currentImageUrl);
         previewImg.style.display = "block";
         previewText.style.display = "none";
@@ -112,7 +119,7 @@ async function fetchCommunityLogo() {
         downloadBtn.disabled = false;
 
     } catch (err) {
-        status.style.color = "#ef4444";
+        status.style.color = "#f43f5e";
         status.innerText = "Status: Terjadi kesalahan jaringan!";
         console.error(err);
     } finally {
@@ -137,11 +144,11 @@ async function downloadImage() {
         link.click();
         document.body.removeChild(link);
     } catch (e) {
-        alert("Gagal mengunduh gambar secara otomatis. Kamu bisa klik kanan gambar preview dan pilih Save Image As.");
+        alert("Gagal mengunduh gambar secara otomatis. Silakan klik kanan gambar preview dan pilih 'Save Image As'.");
     }
 }
 
-// Enter key support
+// Support pencarian via tombol Enter
 document.getElementById("username").addEventListener("keypress", function(e) {
     if (e.key === "Enter") fetchCommunityLogo();
 });
