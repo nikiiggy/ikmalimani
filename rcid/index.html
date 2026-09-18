@@ -28,16 +28,17 @@
             <img id="previewImg" src="" alt="Preview Logo" style="display: none;">
         </div>
 
+       <!-- Tombol Simpan -->
         <button id="downloadBtn" class="btn btn-download" onclick="downloadImage()" disabled>💾 SIMPAN LOGO (PNG)</button>
+    </div> <!-- Penutup .card -->
+
+    <!-- Modal Lightbox (Letakkan di luar .card) -->
+    <div id="imageModal" class="modal">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="imgFull">
+        <div id="modalCaption" class="modal-caption"></div>
     </div>
-    
-<!-- Tambahkan Modal Lightbox di bagian bawah body -->
-<div id="imageModal" class="modal" onclick="closeModal()">
-    <span class="close-btn">&times;</span>
-    <img class="modal-content" id="imgFull">
-    <div id="modalCaption" class="modal-caption"></div>
-    
-</div>
+
     <script src="script.js"></script>
 </body>
 </html>
