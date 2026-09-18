@@ -60,18 +60,50 @@ async function downloadImage() {
     if (!currentImageUrl) return;
 
     try {
-        const response = await fetch(currentImageUrl);
-        const blob = await response.blob();
-        
-        const cleanGroupName = currentGroupName.replace(/[^a-zA-Z0-9_-]/g, "_");
-        const fileName = `${currentUsername}_${cleanGroupName}.png`;
+        const status = document.getElementById("status");
+        status.innerText = "Status: Memproses resolusi tinggi (2000x2000px)...";
 
-        const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
-        link.download = fileName;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        // 1. Load gambar ke objek Image HTML
+        const img = new Image();
+        img.crossOrigin = "anonymous"; // Bypass CORS canvas jika disupport
+        img.src = currentImageUrl;
+
+        img.onload = function () {
+            // 2. Buat Canvas dengan ukuran 2000x2000 pixel
+            const canvas = document.createElement("canvas");
+            canvas.width = 2000;
+            canvas.height = 2000;
+
+            const ctx = canvas.getContext("2d");
+
+            // Menggunakan smoothing kualitas tinggi agar tidak pecah/blur
+            ctx.imageSmoothingEnabled = true;
+            ctx.imageSmoothingQuality = "high";
+
+            // 3. Gambar ulang logo ke ukuran 2000x2000px
+            ctx.drawImage(img, 0, 0, 2000, 2000);
+
+            // 4. Export Canvas ke file PNG resolusi tinggi
+            canvas.toBlob(function (blob) {
+                const cleanGroupName = currentGroupName.replace(/[^a-zA-Z0-9_-]/g, "_");
+                const fileName = `${currentUsername}_${cleanGroupName}_2000x2000.png`;
+
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                status.innerText = `Grup: ${currentGroupName} (Berhasil diunduh HD!)`;
+            }, "image/png");
+        };
+
+        img.onerror = function () {
+            // Fallback download standar jika gambar terhalang CORS canvas
+            window.open(currentImageUrl, '_blank');
+        };
+
     } catch (e) {
         window.open(currentImageUrl, '_blank');
     }
