@@ -2,49 +2,44 @@ let currentImageUrl = "";
 let currentGroupName = "";
 let currentUsername = "";
 
-// Menggunakan RoProxy (Proxy khusus Roblox API yang mendukung GET & POST)
-const ROPROXY_BASE = "https://users.roproxy.com";
-const ROPROXY_GROUPS = "https://groups.roproxy.com";
-const ROPROXY_THUMBNAILS = "https://thumbnails.roproxy.com";
+// Menggunakan Proxy GET yang stabil untuk browser
+const PROXY = "https://api.allorigins.win/get?url=";
+
+async function fetchJSON(url) {
+    try {
+        const response = await fetch(PROXY + encodeURIComponent(url));
+        if (!response.ok) return null;
+        const data = await response.json();
+        return JSON.parse(data.contents);
+    } catch (e) {
+        console.error("Fetch error:", e);
+        return null;
+    }
+}
 
 async function resolveUserId(query) {
     const cleanQuery = query.trim();
 
-    try {
-        // Percobaan 1: Cari via Username (POST ke RoProxy)
-        const userRes = await fetch(`${ROPROXY_BASE}/v1/namespaces/usernames/users`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ usernames: [cleanQuery], excludeBannedUsers: false })
-        });
-        
-        if (userRes.ok) {
-            const userData = await userRes.json();
-            if (userData.data && userData.data.length > 0) {
-                return { id: userData.data[0].id, name: userData.data[0].name };
-            }
+    // 1. Jika pengguna langsung memasukkan angka User ID
+    if (/^\d+$/.test(cleanQuery)) {
+        const checkData = await fetchJSON(`https://users.roblox.com/v1/users/${cleanQuery}`);
+        if (checkData && checkData.id) {
+            return { id: checkData.id, name: checkData.name };
         }
-
-        // Percobaan 2: Jika input berupa angka langsung (User ID)
-        if (/^\d+$/.test(cleanQuery)) {
-            const checkRes = await fetch(`${ROPROXY_BASE}/v1/users/${cleanQuery}`);
-            if (checkRes.ok) {
-                const checkData = await checkRes.json();
-                return { id: parseInt(cleanQuery), name: checkData.name || cleanQuery };
-            }
-        }
-
-        // Percobaan 3: Search via Display Name
-        const searchRes = await fetch(`${ROPROXY_BASE}/v1/users/search?keyword=${encodeURIComponent(cleanQuery)}&limit=10`);
-        if (searchRes.ok) {
-            const searchData = await searchRes.json();
-            if (searchData.data && searchData.data.length > 0) {
-                return { id: searchData.data[0].id, name: searchData.data[0].name };
-            }
-        }
-    } catch (e) {
-        console.error("Error resolving User ID:", e);
     }
+
+    // 2. Cari User ID berdasarkan Username / Display Name via API Search Publik
+    const searchData = await fetchJSON(`https://users.roblox.com/v1/users/search?keyword=${encodeURIComponent(cleanQuery)}&limit=10`);
+    if (searchData && searchData.data && searchData.data.length > 0) {
+        // Cari match persis dengan username terlebih dahulu
+        const exactMatch = searchData.data.find(u => u.name.toLowerCase() === cleanQuery.toLowerCase());
+        if (exactMatch) {
+            return { id: exactMatch.id, name: exactMatch.name };
+        }
+        // Jika tidak ada match persis, ambil hasil pencarian teratas (Display Name)
+        return { id: searchData.data[0].id, name: searchData.data[0].name };
+    }
+
     return null;
 }
 
@@ -77,80 +72,65 @@ async function fetchCommunityLogo() {
     currentUsername = user.name;
     status.innerText = `User ditemukan: ${user.name}. Memeriksa Primary Group...`;
 
-    try {
-        // Ambil data Primary Group milik user
-        const groupRes = await fetch(`${ROPROXY_GROUPS}/v1/users/${user.id}/groups/primary/role`);
-        if (!groupRes.ok) {
-            status.style.color = "#f43f5e";
-            status.innerText = "Status: Gagal mengambil data Primary Group!";
-            searchBtn.disabled = false;
-            return;
-        }
-
-        const groupData = await groupRes.json();
-        if (!groupData || !groupData.group) {
-            status.style.color = "#f43f5e";
-            status.innerText = "Status: Pengguna ini tidak memasang Primary Group di profilnya!";
-            searchBtn.disabled = false;
-            return;
-        }
-
-        const groupId = groupData.group.id;
-        currentGroupName = groupData.group.name;
-
-        // Ambil URL Thumbnail Logo Group
-        const thumbRes = await fetch(`${ROPROXY_THUMBNAILS}/v1/groups/icons?groupIds=${groupId}&size=420x420&format=Png`);
-        const thumbData = await thumbRes.json();
-
-        if (!thumbData.data || !thumbData.data[0].imageUrl) {
-            status.style.color = "#f43f5e";
-            status.innerText = "Status: Gagal mengambil logo grup!";
-            searchBtn.disabled = false;
-            return;
-        }
-
-        currentImageUrl = thumbData.data[0].imageUrl;
-
-        // Render ke Preview GUI
-        previewImg.src = currentImageUrl;
-        previewImg.style.display = "block";
-        previewText.style.display = "none";
-
-        status.style.color = "#22c55e";
-        status.innerText = `Grup: ${currentGroupName}`;
-        downloadBtn.disabled = false;
-
-    } catch (err) {
+    // 3. Ambil data Primary Group pengguna
+    const groupData = await fetchJSON(`https://groups.roblox.com/v1/users/${user.id}/groups/primary/role`);
+    
+    if (!groupData || !groupData.group) {
         status.style.color = "#f43f5e";
-        status.innerText = "Status: Terjadi kesalahan jaringan!";
-        console.error(err);
-    } finally {
+        status.innerText = "Status: Pengguna ini tidak memasang Primary Group di profilnya!";
         searchBtn.disabled = false;
+        return;
     }
+
+    const groupId = groupData.group.id;
+    currentGroupName = groupData.group.name;
+
+    // 4. Ambil URL Thumbnail Logo Group
+    const thumbData = await fetchJSON(`https://thumbnails.roblox.com/v1/groups/icons?groupIds=${groupId}&size=420x420&format=Png`);
+
+    if (!thumbData || !thumbData.data || !thumbData.data[0].imageUrl) {
+        status.style.color = "#f43f5e";
+        status.innerText = "Status: Gagal mengambil logo grup!";
+        searchBtn.disabled = false;
+        return;
+    }
+
+    currentImageUrl = thumbData.data[0].imageUrl;
+
+    // 5. Render ke Tampilan Preview
+    previewImg.src = currentImageUrl;
+    previewImg.style.display = "block";
+    previewText.style.display = "none";
+
+    status.style.color = "#22c55e";
+    status.innerText = `Grup: ${currentGroupName}`;
+    downloadBtn.disabled = false;
+    searchBtn.disabled = false;
 }
 
 async function downloadImage() {
     if (!currentImageUrl) return;
 
     try {
-        const response = await fetch(currentImageUrl);
-        const blob = await response.blob();
+        const response = await fetch(PROXY + encodeURIComponent(currentImageUrl));
+        const data = await response.json();
         
+        // Convert base64 / blob ke link download
         const cleanGroupName = currentGroupName.replace(/[^a-zA-Z0-9_-]/g, "_");
         const fileName = `${currentUsername}_${cleanGroupName}.png`;
 
         const link = document.createElement("a");
-        link.href = URL.createObjectURL(blob);
+        link.href = data.contents;
         link.download = fileName;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
     } catch (e) {
-        alert("Gagal mengunduh gambar secara otomatis. Silakan klik kanan gambar preview dan pilih 'Save Image As'.");
+        window.open(currentImageUrl, '_blank');
     }
 }
 
-// Support pencarian via tombol Enter
+// Support tombol Enter
 document.getElementById("username").addEventListener("keypress", function(e) {
     if (e.key === "Enter") fetchCommunityLogo();
 });
