@@ -457,7 +457,7 @@
             
             <p class="hero-sub">Bantu Bisnis Kamu Makin Gampang Ditemukan &amp; Operasional Lebih Efisien</p>
             
-            <!-- Container Foto Utama (Diperkecil ukurannya dengan CDN Wsrv) -->
+            <!-- Container Foto Utama -->
             <div class="profile-img-container">
                 <img id="mainProfileImg" src="https://wsrv.nl/?url=https://i.ibb.co.com/1G8mpdw6/Untitled-3-01.jpg&w=600&output=webp&q=80" alt="Ikmal Imani">
             </div>
@@ -500,22 +500,20 @@
                 <div class="modal-subtitle" id="modalSubtitle">Sub Judul Item</div>
                 <p class="modal-desc" id="modalDesc">Deskripsi detail...</p>
 
-                <!-- Tombol Download Utama -->
+                <!-- Tombol Action Kustom dari Spreadsheet Kolom H -->
                 <a href="#" id="modalBtn" class="modal-download-btn" target="_blank">
-                    <i class="fa-solid fa-download"></i> Download
+                    <i class="fa-solid fa-arrow-right-long" id="modalBtnIcon"></i> <span id="modalBtnText">Download</span>
                 </a>
             </div>
         </div>
     </div>
 
-    <!-- ================= JAVASCRIPT FETCH & KOMPRESI IMAGE ================= -->
+    <!-- ================= JAVASCRIPT FETCH & CUSTOM BUTTON TEXT ================= -->
     <script>
         const sheetCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ-enavxOP-JDGc-D-yRUkrqMumpydoOJW4PtVmen4ZJtE9l8r-BX0wH0i3lWQi-G3wcU_sTixatKRE/pub?gid=0&single=true&output=csv';
 
-        // Fungsi Otomatis Kompres Foto dari Link ImgBB ke ukuran & format WebP yang ringan
         function getOptimizedImg(url, width = 300) {
             if (!url) return 'https://via.placeholder.com/200x200/C5A059/FFFFFF?text=Image';
-            // Lewati CDN jika link berupa SVG data URI / Base64
             if (url.startsWith('data:image')) return url;
             return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=${width}&output=webp&q=80`;
         }
@@ -536,7 +534,8 @@
                     const row = rows[i];
                     if (row.length < 7 || !row[0]) continue;
 
-                    const [judul, subjudul, deskripsi, foto, star, badge, link] = row;
+                    // Mengambil data kolom A sampai H
+                    const [judul, subjudul, deskripsi, foto, star, badge, link, tombolText] = row;
 
                     const btn = document.createElement('div');
                     btn.className = 'pdf-item-btn';
@@ -546,12 +545,13 @@
                     const safeDeskripsi = deskripsi.replace(/'/g, "\\'").replace(/\n/g, ' ');
                     const rawFoto = foto;
                     const safeLink = link;
+                    // Teks tombol custom dari Kolom H (default 'Download' jika kosong)
+                    const customTombol = (tombolText && tombolText.trim() !== '') ? tombolText.replace(/'/g, "\\'") : 'Download';
 
-                    // Menggunakan versi kompresi WebP untuk thumbnail (width=200) dan Modal Preview (width=600)
                     const thumbImgUrl = getOptimizedImg(rawFoto, 200);
                     const modalImgUrl = getOptimizedImg(rawFoto, 600);
 
-                    btn.setAttribute('onclick', `openModal('${modalImgUrl}', '${safeJudul}', '${safeSubjudul}', '${safeDeskripsi}', '${safeLink}')`);
+                    btn.setAttribute('onclick', `openModal('${modalImgUrl}', '${safeJudul}', '${safeSubjudul}', '${safeDeskripsi}', '${safeLink}', '${customTombol}')`);
 
                     let badgeHtml = '';
                     if (star && star.toUpperCase() === 'FREE') {
@@ -578,18 +578,20 @@
                 }
             } catch (error) {
                 console.error('Gagal memuat data Google Sheets:', error);
-                document.getElementById('pdfListContainer').innerHTML = '<p style="text-align:center; font-size:13px; color:#E53935;">Gagal memuat data dari Spreadsheet.</p>';
+                document.getElementById('pdfListContainer').innerHTML = '<p style="text-align:center; font-size:13px; color:#E53935;">Gagal memuat data.</p>';
             }
         }
 
         window.addEventListener('DOMContentLoaded', loadBiolinkData);
 
-        function openModal(imgUrl, title, subtitle, desc, btnLink) {
+        // Fungsi Open Modal dengan dukungan Teks Tombol Kustom
+        function openModal(imgUrl, title, subtitle, desc, btnLink, btnText) {
             document.getElementById('modalImg').src = imgUrl;
             document.getElementById('modalTitle').innerText = title;
             document.getElementById('modalSubtitle').innerText = subtitle;
             document.getElementById('modalDesc').innerText = desc;
             document.getElementById('modalBtn').href = btnLink;
+            document.getElementById('modalBtnText').innerText = btnText || 'Download';
 
             document.getElementById('modalOverlay').classList.add('active');
         }
