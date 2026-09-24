@@ -14,9 +14,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Font Awesome & JS PDF -->
+    <!-- Font Awesome & CDN jsPDF yang Stabil -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
         /* Variables & Color Palette */
@@ -136,8 +136,9 @@
             align-items: center;
         }
 
-        /* Upload Area */
-        .drop-zone {
+        /* Upload Label Zone (Native HTML Trigger) */
+        .drop-zone-label {
+            display: block;
             border: 2px dashed var(--accent-gold);
             border-radius: 16px;
             padding: 25px 15px;
@@ -147,7 +148,7 @@
             transition: var(--transition);
         }
 
-        .drop-zone:hover {
+        .drop-zone-label:hover {
             background-color: #F5EFE6;
         }
 
@@ -191,7 +192,6 @@
 
         .btn-gold:hover {
             background-color: var(--accent-gold-hover);
-            transform: translateY(-1px);
         }
 
         .btn-outline-danger {
@@ -425,14 +425,14 @@
                 
                 <input type="file" id="fileInput" accept="image/jpeg,image/jpg,image/png" multiple style="display: none !important;">
                 
-                <div id="dropArea" class="drop-zone">
+                <label for="fileInput" id="dropArea" class="drop-zone-label">
                     <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
                     <div class="drop-title">Pilih atau Tarik Foto</div>
                     <div class="drop-sub">Bisa pilih beberapa foto sekaligus</div>
-                    <button type="button" class="btn-gold" id="chooseFilesButton">
+                    <span class="btn-gold">
                         <i class="fa-solid fa-folder-open"></i> Upload Foto
-                    </button>
-                </div>
+                    </span>
+                </label>
 
                 <div class="privacy-box">
                     <i class="fa-solid fa-shield-halved"></i>
@@ -512,12 +512,12 @@
                 </button>
             </div>
 
-            <!-- Processing Alert (Default Hidden) -->
+            <!-- Processing Alert -->
             <div class="alert-box alert-info d-none" id="processingAlert">
                 <i class="fa-solid fa-spinner fa-spin"></i> Sedang menyusun PDF...
             </div>
 
-            <!-- Result PDF Section (Default Hidden) -->
+            <!-- Result PDF Section -->
             <div class="card-box d-none" id="resultSection" style="text-align: center;">
                 <i class="fa-solid fa-circle-check" style="font-size: 40px; color: var(--accent-gold); margin-bottom: 10px;"></i>
                 <h3 style="font-size: 1.2rem; margin-bottom: 4px;">PDF Berhasil Dibuat!</h3>
@@ -537,7 +537,6 @@
 
     <!-- JavaScript Engine -->
     <script>
-        const { jsPDF } = window.jspdf;
         const SIZE = { '2x3':[20,30], '3x4':[30,40], '4x6':[40,60] };
         const INNER_BORDER = 1;
         
@@ -546,35 +545,24 @@
         
         const dropArea = $('dropArea'), 
               fileInput = $('fileInput'),
-              chooseBtn = $('chooseFilesButton'),
               photoSection = $('photoSection'), 
               settingsSection = $('settingsSection'), 
               previewSection = $('previewSection'), 
               resultSection = $('resultSection');
 
-        // Buka File Dialog saat Tombol ATAU Area Drop diklik
-        chooseBtn.onclick = (e) => {
-            e.stopPropagation();
-            fileInput.click();
-        };
-
-        dropArea.onclick = () => {
-            fileInput.click();
-        };
-
-        fileInput.onchange = () => { 
-            if (fileInput.files.length > 0) {
-                handleFiles(fileInput.files); 
-                fileInput.value = ''; 
+        fileInput.addEventListener('change', function() { 
+            if (this.files && this.files.length > 0) {
+                handleFiles(this.files); 
+                this.value = ''; 
             }
-        };
+        });
         
         dropArea.ondragover = e => { e.preventDefault(); dropArea.style.borderColor = 'var(--text-dark)'; };
         dropArea.ondragleave = () => { dropArea.style.borderColor = 'var(--accent-gold)'; };
         dropArea.ondrop = e => { 
             e.preventDefault(); 
             dropArea.style.borderColor = 'var(--accent-gold)'; 
-            if (e.dataTransfer.files.length > 0) {
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
                 handleFiles(e.dataTransfer.files); 
             }
         };
@@ -834,12 +822,19 @@
 
         $('generatePdf').onclick = async () => {
             if (!photos.length) return;
+            
+            const jsPDFLib = window.jspdf ? window.jspdf.jsPDF : window.jsPDF;
+            if (!jsPDFLib) {
+                alert("Library jsPDF belum selesai dimuat, silakan muat ulang halaman.");
+                return;
+            }
+
             $('processingAlert').classList.remove('d-none');$('generatePdf').disabled = true;
             resultSection.classList.add('d-none');
 
             try {
                 const layout = buildLayout(), ori = $('orientation').value;
-                let pdf = new jsPDF({ orientation: ori, unit: 'mm', format: 'a4' });
+                let pdf = new jsPDFLib({ orientation: ori, unit: 'mm', format: 'a4' });
                 const cache = {};
                 for (let pi = 0; pi < layout.pages.length; pi++) {
                     if (pi > 0) pdf.addPage('a4', ori);
@@ -869,7 +864,7 @@
 
         $('downloadPdf').onclick = () => {
             if (!generatedPdfBlob) return;
-            const u = URL.createObjectURL ? URL.createObjectURL(generatedPdfBlob) : window.URL.createObjectURL(generatedPdfBlob);
+            const u = URL.createObjectURL(generatedPdfBlob);
             const a = document.createElement('a');
             a.href = u;
             a.download = 'Pas-Foto-A4-Siap-Cetak.pdf';
