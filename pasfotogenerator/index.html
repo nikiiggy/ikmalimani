@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pas Foto Maker — Ikmal Imani</title>
+    
+    <!-- Meta SEO & Icons -->
+    <meta name="description" content="Susun & atur pas foto ukuran 2x3, 3x4, atau 4x6 otomatis ke kertas A4 siap cetak.">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23C5A059'/><text x='50%' y='65%' font-family='Georgia, serif' font-size='50' font-weight='bold' fill='%23FFFFFF' text-anchor='middle'>II</text></svg>">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome & JS PDF -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
+
+    <style>
+        /* Variables & Color Palette */
+        :root {
+            --bg-cream: #FAF7F2;
+            --card-cream: #FFFFFF;
+            --text-dark: #33302E;
+            --text-muted: #66605C;
+            --accent-gold: #C5A059;
+            --accent-gold-hover: #b08d4b;
+            --accent-sage: #8A9A86;
+            --border-color: #E8E2D9;
+            --wa-green: #25D366;
+            --danger-red: #E53935;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            background-color: #EAE6DF;
+            color: var(--text-dark);
+            line-height: 1.5;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Centered Mobile Container Layout (Max 480px) */
+        .mobile-wrapper {
+            width: 100%;
+            max-width: 480px;
+            background-color: var(--bg-cream);
+            min-height: 100vh;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 30px 20px 15px;
+            text-align: center;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background-color: var(--card-cream);
+            color: var(--accent-sage);
+            padding: 4px 14px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        .hero h1.hero-name {
+            font-size: 36px;
+            font-weight: 700;
+            color: var(--text-dark);
+            line-height: 1.1;
+            margin-bottom: 6px;
+        }
+
+        .hero p.hero-sub {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+            max-width: 320px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Component Cards */
+        .page-section {
+            padding: 10px 20px 25px;
+        }
+
+        .card-box {
+            background-color: var(--card-cream);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+        }
+
+        .card-box.d-none {
+            display: none !important;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Upload Area */
+        .drop-zone {
+            border: 2px dashed var(--accent-gold);
+            border-radius: 16px;
+            padding: 25px 15px;
+            text-align: center;
+            background-color: #FAF8F5;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .drop-zone:hover {
+            background-color: #F5EFE6;
+        }
+
+        .drop-icon {
+            font-size: 32px;
+            color: var(--accent-gold);
+            margin-bottom: 8px;
+        }
+
+        .drop-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .drop-sub {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+            margin-bottom: 12px;
+        }
+
+        /* Buttons */
+        .btn-gold {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            background-color: var(--accent-gold);
+            color: #FFFFFF !important;
+            padding: 12px 20px;
+            font-size: 14px;
+            font-weight: 600;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(197, 160, 89, 0.25);
+            transition: var(--transition);
+        }
+
+        .btn-gold:hover {
+            background-color: var(--accent-gold-hover);
+            transform: translateY(-1px);
+        }
+
+        .btn-gold:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-outline-danger {
+            background: transparent;
+            color: var(--danger-red);
+            border: 1px solid var(--danger-red);
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-outline-danger:hover {
+            background-color: var(--danger-red);
+            color: #FFF;
+        }
+
+        .btn-small-reset {
+            background: var(--bg-cream);
+            color: var(--text-dark);
+            border: 1px solid var(--border-color);
+            padding: 5px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        /* Privacy Banner */
+        .privacy-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background-color: var(--bg-cream);
+            border-radius: 12px;
+            padding: 12px;
+            margin-top: 15px;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+        }
+
+        .privacy-box i {
+            font-size: 18px;
+            color: var(--accent-sage);
+        }
+
+        /* Photo Editor Item List */
+        .photo-item {
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 14px;
+            background-color: var(--card-cream);
+            margin-bottom: 12px;
+        }
+
+        .photo-editor {
+            background: #EAE6DF;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            margin: 0 auto 10px auto;
+            touch-action: none;
+            border: 1px dashed var(--accent-gold);
+        }
+
+        .photo-editor img {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            max-width: none;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .form-control, .form-select {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-cream);
+            color: var(--text-dark);
+            font-family: inherit;
+            font-size: 0.85rem;
+            outline: none;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--accent-gold);
+        }
+
+        .qty-control {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .qty-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-cream);
+            color: var(--text-dark);
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .qty-input {
+            width: 50px;
+            text-align: center;
+            padding: 5px;
+        }
+
+        /* Range Slider */
+        input[type=range] {
+            width: 100%;
+            accent-color: var(--accent-gold);
+        }
+
+        /* Form Grid for Settings */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        /* Preview Area */
+        .paper-wrap {
+            overflow: auto;
+            background: #EAE6DF;
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .paper {
+            position: relative;
+            background: #fff;
+            margin: auto;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transform-origin: top center;
+        }
+
+        .paper-slot {
+            position: absolute;
+            overflow: hidden;
+            border: 1px solid #adb5bd;
+            box-sizing: border-box;
+            background: #f8f9fa;
+        }
+
+        .paper-slot img {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            max-width: none;
+            user-select: none;
+        }
+
+        .page-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 4px;
+        }
+
+        /* Alert Status */
+        .alert-box {
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .alert-info {
+            background-color: #FAF7F2;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        .alert-success {
+            background-color: #E8F5E9;
+            color: #2E7D32;
+            border: 1px solid #C8E6C9;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: auto;
+            background-color: var(--text-dark);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        footer span {
+            color: var(--accent-gold);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-wrapper">
+        <!-- Hero Section -->
+        <section class="hero">
+            <span class="hero-badge">Graphic Designer &amp; Digital Tools</span>
+            <h1 class="hero-name">Pas Foto Maker</h1>
+            <p class="hero-sub">Susun & atur posisi pas foto ke lembar A4 otomatis, siap cetak dengan presisi.</p>
+        </section>
+
+        <!-- Main Content Section -->
+        <section class="page-section">
+            
+            <!-- 1. Upload Card -->
+            <div class="card-box">
+                <h2 class="section-title">1. Tambah Foto</h2>
+                <div id="dropArea" class="drop-zone" role="button">
+                    <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
+                    <div class="drop-title">Pilih atau Tarik Foto</div>
+                    <div class="drop-sub">Bisa pilih beberapa foto sekaligus</div>
+                    <button type="button" class="btn-gold" id="chooseFilesButton">
+                        <i class="fa-solid fa-folder-open"></i> Upload Foto
+                    </button>
+                    <input type="file" id="fileInput" accept="image/jpeg,image/jpg,image/png" multiple hidden>
+                </div>
+
+                <div class="privacy-box">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <div>
+                        <strong>Aman & Privat:</strong> Seluruh proses pemotongan foto dikerjakan langsung di browsermu tanpa diunggah ke server.
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Photo Adjustments Card -->
+            <div class="card-box d-none" id="photoSection">
+                <div class="section-title">
+                    <span>2. Atur Pas Foto</span>
+                    <button class="btn-outline-danger" id="clearPhotos"><i class="fa-solid fa-trash"></i> Hapus Semua</button>
+                </div>
+                <div id="photoCount" style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 12px;"></div>
+                <div id="photoList"></div>
+            </div>
+
+            <!-- 3. Paper Settings Card -->
+            <div class="card-box d-none" id="settingsSection">
+                <h2 class="section-title">3. Pengaturan Kertas</h2>
+                <div class="settings-grid">
+                    <div class="form-group full-width">
+                        <label>Ukuran Kertas</label>
+                        <select class="form-select" id="pageSize">
+                            <option value="a4" selected>A4 — 210 × 297 mm</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Orientasi</label>
+                        <select class="form-select" id="orientation">
+                            <option value="portrait">Portrait</option>
+                            <option value="landscape">Landscape</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Margin A4 (mm)</label>
+                        <input type="number" min="0" max="30" value="5" class="form-control" id="margin">
+                    </div>
+                    <div class="form-group">
+                        <label>Jarak Foto (mm)</label>
+                        <input type="number" min="0" max="10" step="0.5" value="0" class="form-control" id="gap">
+                    </div>
+                    <div class="form-group">
+                        <label>Garis Potong</label>
+                        <select class="form-select" id="cutLine">
+                            <option value="yes" selected>Tampilkan</option>
+                            <option value="no">Tanpa Garis</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Ketebalan Garis Potong</label>
+                        <select class="form-select" id="lineWidth">
+                            <option value="0.1">Tipis — 0,1 mm</option>
+                            <option value="0.2" selected>Normal — 0,2 mm</option>
+                            <option value="0.3">Tebal — 0,3 mm</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="alert-box alert-info" style="margin-top: 10px; margin-bottom: 0;">
+                    <i class="fa-solid fa-circle-info"></i> Gunakan opsi <strong>Actual Size / 100%</strong> saat mencetak file PDF.
+                </div>
+            </div>
+
+            <!-- 4. Preview & Export Card -->
+            <div class="card-box d-none" id="previewSection">
+                <div class="section-title">
+                    <span>4. Preview Cetak</span>
+                    <button class="btn-small-reset" id="refreshPreview"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+                </div>
+                <div id="layoutInfo" style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 12px;"></div>
+                <div id="pagesPreview"></div>
+
+                <button type="button" class="btn-gold" id="generatePdf" style="margin-top: 15px;">
+                    <i class="fa-solid fa-file-pdf"></i> Buat PDF Siap Print
+                </button>
+            </div>
+
+            <!-- Processing Alert -->
+            <div class="alert-box alert-info d-none" id="processingAlert">
+                <i class="fa-solid fa-spinner fa-spin"></i> Sedang menyusun PDF...
+            </div>
+
+            <!-- Result PDF Section -->
+            <div class="card-box d-none" id="resultSection" style="text-align: center;">
+                <i class="fa-solid fa-circle-check" style="font-size: 40px; color: var(--accent-gold); margin-bottom: 10px;"></i>
+                <h3 style="font-size: 1.2rem; margin-bottom: 4px;">PDF Berhasil Dibuat!</h3>
+                <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px;" id="resultInfo"></p>
+                <button class="btn-gold" id="downloadPdf">
+                    <i class="fa-solid fa-download"></i> Download File PDF
+                </button>
+            </div>
+
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>© 2026 <span>ikmalimanii</span>. All Rights Reserved.</p>
+        </footer>
+    </div>
+
+    <!-- JavaScript Engine -->
+    <script>
+        const { jsPDF } = window.jspdf;
+        const SIZE = { '2x3':[20,30], '3x4':[30,40], '4x6':[40,60] };
+        const INNER_BORDER = 1; // 1mm border putih per sisi
+        
+        let photos = [], generatedPdfBlob = null;
+        const $ = id => document.getElementById(id);
+        
+        const dropArea = $('dropArea'), 
+              fileInput = $('fileInput'), 
+              photoSection = $('photoSection'), 
+              settingsSection = $('settingsSection'), 
+              previewSection = $('previewSection'), 
+              resultSection = $('resultSection');
+
+        $('chooseFilesButton').onclick = e => { e.stopPropagation(); fileInput.click(); };
+        dropArea.onclick = () => fileInput.click();
+        fileInput.onchange = () => { handleFiles(fileInput.files); fileInput.value = ''; };
+        
+        dropArea.ondragover = e => { e.preventDefault(); dropArea.style.borderColor = 'var(--text-dark)'; };
+        dropArea.ondragleave = () => { dropArea.style.borderColor = 'var(--accent-gold)'; };
+        dropArea.ondrop = e => { 
+            e.preventDefault(); 
+            dropArea.style.borderColor = 'var(--accent-gold)'; 
+            handleFiles(e.dataTransfer.files); 
+        };
+
+        function handleFiles(files) {
+            [...files].filter(f => ['image/jpeg','image/jpg','image/png'].includes(f.type)).forEach(file => {
+                const r = new FileReader();
+                r.onload = e => {
+                    const im = new Image();
+                    im.onload = () => {
+                        photos.push({
+                            id: crypto.randomUUID(),
+                            name: file.name,
+                            dataUrl: e.target.result,
+                            naturalWidth: im.naturalWidth,
+                            naturalHeight: im.naturalHeight,
+                            size: '3x4',
+                            qty: 4,
+                            zoom: 1,
+                            x: 0,
+                            y: 0
+                        });
+                        renderPhotos();
+                        updateAll();
+                    };
+                    im.src = e.target.result;
+                };
+                r.readAsDataURL(file);
+            });
+        }
+
+        function escapeHtml(t) {
+            const d = document.createElement('div');
+            d.textContent = t;
+            return d.innerHTML;
+        }
+
+        function renderPhotos() {
+            $('photoList').innerHTML = '';
+            $('photoCount').textContent = photos.length + ' Foto diunggah';
+            
+            [photoSection, settingsSection, previewSection].forEach(el => el.classList.toggle('d-none', !photos.length));
+            if (!photos.length) { resultSection.classList.add('d-none'); return; }
+
+            photos.forEach((p, i) => {
+                const [w, h] = SIZE[p.size];
+                const row = document.createElement('div');
+                row.className = 'photo-item';
+                row.innerHTML = `
+                    <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-dark); margin-bottom: 8px;" class="text-truncate">${escapeHtml(p.name)}</div>
+                    <div class="photo-editor" data-editor="${i}" style="width:${Math.min(w * 3, 130)}px; height:${Math.min(h * 3, 170)}px">
+                        <img src="${p.dataUrl}" alt="Crop Preview">
+                    </div>
+                    <div style="font-size: 0.72rem; color: var(--text-muted); text-align: center; margin-bottom: 10px;">
+                        <i class="fa-solid fa-arrows-up-down-left-right"></i> Geser foto di atas untuk atur posisi
+                    </div>
+                    <div class="settings-grid">
+                        <div class="form-group">
+                            <label>Ukuran</label>
+                            <select class="form-select photo-size" data-i="${i}">
+                                <option value="2x3" ${p.size==='2x3'?'selected':''}>2 × 3 cm</option>
+                                <option value="3x4" ${p.size==='3x4'?'selected':''}>3 × 4 cm</option>
+                                <option value="4x6" ${p.size==='4x6'?'selected':''}>4 × 6 cm</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Jumlah Cetak</label>
+                            <div class="qty-control">
+                                <button class="qty-btn qty-minus" data-i="${i}">-</button>
+                                <input type="number" min="1" max="999" class="form-control qty-input photo-qty" data-i="${i}" value="${p.qty}">
+                                <button class="qty-btn qty-plus" data-i="${i}">+</button>
+                            </div>
+                        </div>
+                        <div class="form-group full-width">
+                            <label style="display:flex; justify-content:space-between;">
+                                <span>Zoom Foto</span>
+                                <span style="color:var(--text-muted);">${Math.round(p.zoom * 100)}%</span>
+                            </label>
+                            <input type="range" min="1" max="3" step="0.01" value="${p.zoom}" class="photo-zoom" data-i="${i}">
+                        </div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
+                        <button class="btn-small-reset reset-pos" data-i="${i}"><i class="fa-solid fa-rotate-left"></i> Reset Posisi</button>
+                        <button class="btn-outline-danger remove-photo" data-i="${i}"><i class="fa-solid fa-trash"></i> Hapus</button>
+                    </div>
+                `;
+                $('photoList').appendChild(row);
+                updateEditor(i);
+            });
+            bindControls();
+        }
+
+        function coverScale(p, boxW, boxH) {
+            return Math.max(boxW / p.naturalWidth, boxH / p.naturalHeight) * p.zoom;
+        }
+
+        function updateEditor(i) {
+            const p = photos[i], ed = document.querySelector(`[data-editor="${i}"]`);
+            if (!ed) return;
+            const img = ed.querySelector('img'), s = coverScale(p, ed.clientWidth, ed.clientHeight);
+            img.style.width = (p.naturalWidth * s) + 'px';
+            img.style.height = (p.naturalHeight * s) + 'px';
+            img.style.transform = `translate(calc(-50% + ${p.x}px), calc(-50% + ${p.y}px))`;
+        }
+
+        function bindControls() {
+            document.querySelectorAll('.photo-size').forEach(el => el.onchange = () => {
+                photos[+el.dataset.i].size = el.value;
+                photos[+el.dataset.i].x = 0;
+                photos[+el.dataset.i].y = 0;
+                renderPhotos();
+                updateAll();
+            });
+            document.querySelectorAll('.photo-qty').forEach(el => el.onchange = () => {
+                photos[+el.dataset.i].qty = Math.max(1, +el.value || 1);
+                updateAll();
+            });
+            document.querySelectorAll('.qty-minus').forEach(el => el.onclick = () => {
+                let p = photos[+el.dataset.i];
+                p.qty = Math.max(1, p.qty - 1);
+                renderPhotos();
+                updateAll();
+            });
+            document.querySelectorAll('.qty-plus').forEach(el => el.onclick = () => {
+                photos[+el.dataset.i].qty++;
+                renderPhotos();
+                updateAll();
+            });
+            document.querySelectorAll('.photo-zoom').forEach(el => el.oninput = () => {
+                photos[+el.dataset.i].zoom = +el.value;
+                updateEditor(+el.dataset.i);
+                updatePreview();
+            });
+            document.querySelectorAll('.reset-pos').forEach(el => el.onclick = () => {
+                let p = photos[+el.dataset.i];
+                p.zoom = 1; p.x = p.y = 0;
+                renderPhotos();
+                updateAll();
+            });
+            document.querySelectorAll('.remove-photo').forEach(el => el.onclick = () => {
+                photos.splice(+el.dataset.i, 1);
+                renderPhotos();
+                updateAll();
+            });
+            document.querySelectorAll('.photo-editor').forEach(ed => {
+                let dragging = false, sx = 0, sy = 0, ox = 0, oy = 0, i = +ed.dataset.editor;
+                ed.onpointerdown = e => {
+                    dragging = true; sx = e.clientX; sy = e.clientY;
+                    ox = photos[i].x; oy = photos[i].y;
+                    ed.setPointerCapture(e.pointerId);
+                };
+                ed.onpointermove = e => {
+                    if (!dragging) return;
+                    photos[i].x = ox + e.clientX - sx;
+                    photos[i].y = oy + e.clientY - sy;
+                    updateEditor(i);
+                    updatePreview();
+                };
+                ed.onpointerup = () => dragging = false;
+            });
+        }
+
+        $('clearPhotos').onclick = () => { photos = []; renderPhotos(); };
+        ['orientation','margin','gap','cutLine','lineWidth'].forEach(id => $(id).oninput = updateAll);$('refreshPreview').onclick = updateAll;
+
+        function getPage() {
+            return $('orientation').value === 'portrait' ? [210, 297] : [297, 210];
+        }
+
+        function buildLayout() {
+            const [pw, ph] = getPage(), margin = Math.max(0, +$('margin').value \vert{}\vert{} 0), gap = Math.max(0, +$('gap').value || 0), aw = pw - margin * 2, ah = ph - margin * 2;
+            const items = [];
+            photos.forEach((p, pi) => {
+                for (let q = 0; q < p.qty; q++) items.push({ photoIndex: pi, w: SIZE[p.size][0], h: SIZE[p.size][1] });
+            });
+            const pages = []; let page = [], x = margin, y = margin, rowH = 0;
+            items.forEach(it => {
+                if (x + it.w > margin + aw + .001) { x = margin; y += rowH + gap; rowH = 0; }
+                if (y + it.h > margin + ah + .001) { pages.push(page); page = []; x = margin; y = margin; rowH = 0; }
+                page.push({ ...it, x, y }); x += it.w + gap; rowH = Math.max(rowH, it.h);
+            });
+            if (page.length) pages.push(page);
+            return { pages, pw, ph, margin, gap, total: items.length };
+        }
+
+        function updateAll() {
+            generatedPdfBlob = null;
+            resultSection.classList.add('d-none');
+            updatePreview();
+        }
+
+        function updatePreview() {
+            if (!photos.length) return;
+            const layout = buildLayout();
+            $('layoutInfo').textContent = `${layout.total} foto • ${layout.pages.length} lembar A4 • margin ${layout.margin} mm • gap ${layout.gap} mm`;
+            const wrap = $('pagesPreview'); wrap.innerHTML = '';
+            
+            layout.pages.forEach((page, idx) => {
+                const outer = document.createElement('div');
+                outer.className = 'paper-wrap';
+                const containerWidth = wrap.clientWidth ? (wrap.clientWidth - 20) : 380;
+                const scale = containerWidth / layout.pw;
+                
+                const paper = document.createElement('div');
+                paper.className = 'paper';
+                paper.style.width = (layout.pw * scale) + 'px';
+                paper.style.height = (layout.ph * scale) + 'px';
+
+                page.forEach(it => {
+                    const p = photos[it.photoIndex], slot = document.createElement('div');
+                    slot.className = 'paper-slot';
+                    slot.style.left = it.x * scale + 'px';
+                    slot.style.top = it.y * scale + 'px';
+                    slot.style.width = it.w * scale + 'px';
+                    slot.style.height = it.h * scale + 'px';
+                    slot.style.border = $('cutLine').value === 'yes' ? '1px solid #adb5bd' : '0';
+                    
+                    const img = document.createElement('img');
+                    img.src = p.dataUrl;
+                    const innerW = (it.w - INNER_BORDER * 2) * scale, innerH = (it.h - INNER_BORDER * 2) * scale;
+                    const s = coverScale(p, innerW, innerH);
+                    img.style.width = p.naturalWidth * s + 'px';
+                    img.style.height = p.naturalHeight * s + 'px';
+                    img.style.left = (INNER_BORDER * scale + innerW / 2) + 'px';
+                    img.style.top = (INNER_BORDER * scale + innerH / 2) + 'px';
+                    
+                    const editor = document.querySelector(`[data-editor="${it.photoIndex}"]`);
+                    const factor = editor ? innerW / editor.clientWidth : 1;
+                    img.style.transform = `translate(calc(-50% + ${p.x * factor}px), calc(-50% + ${p.y * factor}px))`;
+                    
+                    slot.appendChild(img);
+                    paper.appendChild(slot);
+                });
+                outer.appendChild(paper);
+                
+                const lab = document.createElement('div');
+                lab.className = 'page-label';
+                lab.textContent = `Halaman ${idx + 1} dari ${layout.pages.length}`;
+                outer.appendChild(lab);
+                wrap.appendChild(outer);
+            });
+        }
+
+        async function cropDataUrl(p, wMm, hMm) {
+            const dpi = 300, pxPerMm = dpi / 25.4, cw = Math.round(wMm * pxPerMm), ch = Math.round(hMm * pxPerMm);
+            const c = document.createElement('canvas'); c.width = cw; c.height = ch;
+            const ctx = c.getContext('2d'); const img = new Image(); img.src = p.dataUrl;
+            await img.decode();
+            const base = Math.max(cw / p.naturalWidth, ch / p.naturalHeight) * p.zoom;
+            const dw = p.naturalWidth * base, dh = p.naturalHeight * base;
+            const editor = document.querySelector(`[data-editor="${photos.indexOf(p)}"]`);
+            const mmPerEditorPx = editor ? wMm / editor.clientWidth : 1;
+            const dx = p.x * mmPerEditorPx * pxPerMm, dy = p.y * mmPerEditorPx * pxPerMm;
+            ctx.drawImage(img, (cw - dw) / 2 + dx, (ch - dh) / 2 + dy, dw, dh);
+            return c.toDataURL('image/jpeg', .95);
+        }
+
+        $('generatePdf').onclick = async () => {
+            if (!photos.length) return;
+            $('processingAlert').classList.remove('d-none');$('generatePdf').disabled = true;
+            resultSection.classList.add('d-none');
+
+            try {
+                const layout = buildLayout(), ori = $('orientation').value;
+                let pdf = new jsPDF({ orientation: ori, unit: 'mm', format: 'a4' });
+                const cache = {};
+                for (let pi = 0; pi < layout.pages.length; pi++) {
+                    if (pi > 0) pdf.addPage('a4', ori);
+                    for (const it of layout.pages[pi]) {
+                        const p = photos[it.photoIndex], innerW = it.w - INNER_BORDER * 2, innerH = it.h - INNER_BORDER * 2;
+                        const key = it.photoIndex + '-' + innerW + '-' + innerH;
+                        if (!cache[key]) cache[key] = await cropDataUrl(p, innerW, innerH);
+                        pdf.addImage(cache[key], 'JPEG', it.x + INNER_BORDER, it.y + INNER_BORDER, innerW, innerH, undefined, 'FAST');
+                        if ($('cutLine').value === 'yes') {
+                            pdf.setDrawColor(200);
+                            pdf.setLineWidth(+$('lineWidth').value);
+                            pdf.rect(it.x, it.y, it.w, it.h);
+                        }
+                    }
+                }
+                generatedPdfBlob = pdf.output('blob');
+                $('resultInfo').textContent = `${layout.total} foto • ${layout.pages.length} halaman A4 • ${ori==='portrait'?'Portrait':'Landscape'}`;
+                resultSection.classList.remove('d-none');
+                resultSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } catch (e) {
+                console.error(e);
+                alert('Gagal membuat file PDF. Silakan coba lagi.');
+            } finally {
+                $('processingAlert').classList.add('d-none');$('generatePdf').disabled = false;
+            }
+        };
+
+        $('downloadPdf').onclick = () => {
+            if (!generatedPdfBlob) return;
+            const u = URL.createObjectURL ? URL.createObjectURL(generatedPdfBlob) : window.URL.createObjectURL(generatedPdfBlob);
+            const a = document.createElement('a');
+            a.href = u;
+            a.download = 'Pas-Foto-A4-Siap-Cetak.pdf';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(u), 1000);
+        };
+
+        window.addEventListener('resize', () => { if (photos.length) updatePreview(); });
+    </script>
+</body>
+</html>
