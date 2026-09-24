@@ -554,82 +554,72 @@
         }
 
         async function loadBiolinkData() {
-    try {
-        const response = await fetch(sheetCsvUrl);
-        const dataText = await response.text();
-        
-        // Memecah baris CSV dengan lebih aman
-        const lines = dataText.split(/\r\n|\n/);
-        const container = document.getElementById('pdfListContainer');
-        container.innerHTML = '';
+            try {
+                const response = await fetch(sheetCsvUrl);
+                const dataText = await response.text();
+                
+                const rows = dataText.split('\n').map(row => {
+                    return row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(field => field.replace(/^"\vert{}"$/g, '').trim());
+                });
 
-        let itemCounter = 1;
+                const container = document.getElementById('pdfListContainer');
+                container.innerHTML = '';
 
-        for (let i = 1; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if (!line) continue; // Lewati baris kosong
+                let itemCounter = 1;
 
-            // Parser CSV fleksibel
-            const row = line.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(field => field.replace(/^"\vert{}"$/g, '').trim());
+                for (let i = 1; i < rows.length; i++) {
+                    const row = rows[i];
+                    if (row.length < 7 || !row[0]) continue;
 
-            // Cukup pastikan judul (kolom A) ada isinya
-            const judul = row[0];
-            if (!judul) continue;
+                    const [judul, subjudul, deskripsi, foto, star, badge, link, tombolText] = row;
 
-            const subjudul = row[1] || '';
-            const deskripsi = row[2] || '';
-            const foto = row[3] || '';
-            const star = row[4] || '';
-            const badge = row[5] || '';
-            const link = row[6] || '#';
-            const tombolText = row[7] || '';
+                    const btn = document.createElement('div');
+                    btn.className = 'pdf-item-btn';
+                    
+                    const safeJudul = judul.replace(/'/g, "\\'");
+                    const safeSubjudul = subjudul.replace(/'/g, "\\'");
+                    const safeDeskripsi = deskripsi.replace(/'/g, "\\'").replace(/\n/g, ' ');
+                    const rawFoto = foto;
+                    const safeLink = link;
+                    const customTombol = (tombolText && tombolText.trim() !== '') ? tombolText.replace(/'/g, "\\'") : 'Download';
 
-            const btn = document.createElement('div');
-            btn.className = 'pdf-item-btn';
-            
-            const safeJudul = judul.replace(/'/g, "\\'");
-            const safeSubjudul = subjudul.replace(/'/g, "\\'");
-            const safeDeskripsi = deskripsi.replace(/'/g, "\\'").replace(/\r?\n|\r/g, ' ');
-            const rawFoto = foto;
-            const safeLink = link;
-            const customTombol = (tombolText && tombolText.trim() !== '') ? tombolText.replace(/'/g, "\\'") : 'Download';
+                    const thumbImgUrl = getOptimizedImg(rawFoto, 200);
+                    const modalImgUrl = getOptimizedImg(rawFoto, 600);
 
-            const thumbImgUrl = getOptimizedImg(rawFoto, 200);
-            const modalImgUrl = getOptimizedImg(rawFoto, 600);
+                    btn.setAttribute('onclick', `openModal('${modalImgUrl}', '${safeJudul}', '${safeSubjudul}', '${safeDeskripsi}', '${safeLink}', '${customTombol}')`);
 
-            btn.setAttribute('onclick', `openModal('${modalImgUrl}', '${safeJudul}', '${safeSubjudul}', '${safeDeskripsi}', '${safeLink}', '${customTombol}')`);
+                    let badgeHtml = '';
+                    
+                    // Fleksibel: Menampilkan badge bintang merah untuk teks apa saja (HOT, FREE, NEW, dll)
+                    if (star && star.trim() !== '') {
+                        badgeHtml += `<span class="star-badge-free"><i class="fa-solid fa-star"></i> ${star.trim()}</span>`;
+                    }
+                    if (badge && badge.trim() !== '') {
+                        badgeHtml += `<span class="pdf-badge">${badge.trim()}</span>`;
+                    }
 
-            let badgeHtml = '';
-            
-            if (star && star.trim() !== '') {
-                badgeHtml += `<span class="star-badge-free"><i class="fa-solid fa-star"></i> ${star.trim()}</span>`;
+                    btn.innerHTML = `
+                        <div class="pdf-thumb-1x1">
+                            <div class="item-number-badge">#${itemCounter}</div>
+                            <img src="${thumbImgUrl}" alt="${judul}" loading="lazy" onerror="this.src='https://via.placeholder.com/200x200/C5A059/FFFFFF?text=Image'">
+                        </div>
+                        <div class="pdf-text-box">
+                            <div class="pdf-title-text">${judul}</div>
+                            <div class="pdf-sub-text">${subjudul}</div>
+                        </div>
+                        <div class="badge-group">
+                            ${badgeHtml}
+                        </div>
+                    `;
+
+                    container.appendChild(btn);
+                    itemCounter++;
+                }
+            } catch (error) {
+                console.error('Gagal memuat data Google Sheets:', error);
+                document.getElementById('pdfListContainer').innerHTML = '<p style="text-align:center; font-size:13px; color:#E53935;">Gagal memuat data.</p>';
             }
-            if (badge && badge.trim() !== '') {
-                badgeHtml += `<span class="pdf-badge">${badge.trim()}</span>`;
-            }
-
-            btn.innerHTML = `
-                <div class="pdf-thumb-1x1">
-                    <div class="item-number-badge">#${itemCounter}</div>
-                    <img src="${thumbImgUrl}" alt="${judul}" loading="lazy" onerror="this.src='https://via.placeholder.com/200x200/C5A059/FFFFFF?text=Image'">
-                </div>
-                <div class="pdf-text-box">
-                    <div class="pdf-title-text">${judul}</div>
-                    <div class="pdf-sub-text">${subjudul}</div>
-                </div>
-                <div class="badge-group">
-                    ${badgeHtml}
-                </div>
-            `;
-
-            container.appendChild(btn);
-            itemCounter++;
         }
-    } catch (error) {
-        console.error('Gagal memuat data Google Sheets:', error);
-        document.getElementById('pdfListContainer').innerHTML = '<p style="text-align:center; font-size:13px; color:#E53935;">Gagal memuat data dari Spreadsheet.</p>';
-    }
-}
 
         window.addEventListener('DOMContentLoaded', loadBiolinkData);
 
