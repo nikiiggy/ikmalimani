@@ -17,7 +17,7 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- jsPDF CDN yang Stabil untuk GitHub Pages -->
+    <!-- jsPDF CDN -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
@@ -55,12 +55,10 @@
             justify-content: center;
         }
 
-        /* Class khusus menyembunyikan elemen */
         .d-none {
             display: none !important;
         }
 
-        /* Centered Mobile Wrapper */
         .mobile-wrapper {
             width: 100%;
             max-width: 480px;
@@ -138,7 +136,7 @@
             align-items: center;
         }
 
-        /* Area Drop / Upload File Native Label */
+        /* Area Drop / Upload File Label */
         .drop-zone-label {
             display: block;
             border: 2px dashed var(--accent-gold);
@@ -173,7 +171,7 @@
             margin-bottom: 12px;
         }
 
-        /* Custom Gold Buttons */
+        /* Buttons */
         .btn-gold {
             display: inline-flex;
             align-items: center;
@@ -440,7 +438,7 @@
                 </div>
             </div>
 
-            <!-- 2. Section Edit Foto (Otomatis muncul bila ada foto) -->
+            <!-- 2. Section Edit Foto -->
             <div class="card-box d-none" id="photoSection">
                 <div class="section-title">
                     <span>2. Atur Pas Foto</span>
@@ -450,7 +448,7 @@
                 <div id="photoList"></div>
             </div>
 
-            <!-- 3. Section Pengaturan Kertas (Otomatis muncul) -->
+            <!-- 3. Section Pengaturan Kertas -->
             <div class="card-box d-none" id="settingsSection">
                 <h2 class="section-title">3. Pengaturan Kertas</h2>
                 <div class="settings-grid">
@@ -496,7 +494,7 @@
                 </div>
             </div>
 
-            <!-- 4. Section Preview A4 (Otomatis muncul) -->
+            <!-- 4. Section Preview A4 -->
             <div class="card-box d-none" id="previewSection">
                 <div class="section-title">
                     <span>4. Preview Cetak</span>
@@ -510,12 +508,12 @@
                 </button>
             </div>
 
-            <!-- Loading Alert (Sembunyi secara default) -->
+            <!-- Loading Alert -->
             <div class="alert-box alert-info d-none" id="processingAlert">
                 <i class="fa-solid fa-spinner fa-spin"></i> Sedang menyusun PDF...
             </div>
 
-            <!-- Result Box (Sembunyi secara default) -->
+            <!-- Result Box -->
             <div class="card-box d-none" id="resultSection" style="text-align: center;">
                 <i class="fa-solid fa-circle-check" style="font-size: 40px; color: var(--accent-gold); margin-bottom: 10px;"></i>
                 <h3 style="font-size: 1.2rem; margin-bottom: 4px;">PDF Berhasil Dibuat!</h3>
@@ -539,9 +537,8 @@
         const INNER_BORDER = 1;
         
         let photos = [], generatedPdfBlob = null;
-        const $ = id => document.getElementById(id);
+        const $ = function(id) { return document.getElementById(id); };
 
-        // Generator ID Unik Sederhana yang Aman Tanpa Dependensi Browser
         function createUniqueId() {
             return 'photo_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         }
@@ -560,9 +557,9 @@
             }
         });
         
-        dropArea.ondragover = e => { e.preventDefault(); dropArea.style.borderColor = 'var(--text-dark)'; };
-        dropArea.ondragleave = () => { dropArea.style.borderColor = 'var(--accent-gold)'; };
-        dropArea.ondrop = e => { 
+        dropArea.ondragover = function(e) { e.preventDefault(); dropArea.style.borderColor = 'var(--text-dark)'; };
+        dropArea.ondragleave = function() { dropArea.style.borderColor = 'var(--accent-gold)'; };
+        dropArea.ondrop = function(e) { 
             e.preventDefault(); 
             dropArea.style.borderColor = 'var(--accent-gold)'; 
             if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
@@ -571,13 +568,15 @@
         };
 
         function handleFiles(files) {
-            const validFiles = [...files].filter(f => ['image/jpeg','image/jpg','image/png'].includes(f.type));
+            const validFiles = Array.from(files).filter(function(f) {
+                return ['image/jpeg','image/jpg','image/png'].indexOf(f.type.toLowerCase()) !== -1;
+            });
             
-            validFiles.forEach(file => {
+            validFiles.forEach(function(file) {
                 const r = new FileReader();
-                r.onload = e => {
+                r.onload = function(e) {
                     const im = new Image();
-                    im.onload = () => {
+                    im.onload = function() {
                         photos.push({
                             id: createUniqueId(),
                             name: file.name,
@@ -606,55 +605,73 @@
         }
 
         function renderPhotos() {
-            $('photoList').innerHTML = '';
+            const list = $('photoList');
+            list.innerHTML = '';
             $('photoCount').textContent = photos.length + ' Foto diunggah';
             
-            [photoSection, settingsSection, previewSection].forEach(el => el.classList.toggle('d-none', !photos.length));
-            if (!photos.length) { resultSection.classList.add('d-none'); return; }
+            [photoSection, settingsSection, previewSection].forEach(function(el) {
+                if (photos.length > 0) {
+                    el.classList.remove('d-none');
+                } else {
+                    el.classList.add('d-none');
+                }
+            });
 
-            photos.forEach((p, i) => {
-                const [w, h] = SIZE[p.size];
+            if (!photos.length) { 
+                resultSection.classList.add('d-none'); 
+                return; 
+            }
+
+            photos.forEach(function(p, i) {
+                const dim = SIZE[p.size];
+                const w = dim[0];
+                const h = dim[1];
                 const row = document.createElement('div');
                 row.className = 'photo-item';
-                row.innerHTML = `
-                    <div style="font-size: 0.8rem; font-weight: 600; color: var(--text-dark); margin-bottom: 8px;" class="text-truncate">${escapeHtml(p.name)}</div>
-                    <div class="photo-editor" data-editor="${i}" style="width:${Math.min(w * 3, 130)}px; height:${Math.min(h * 3, 170)}px">
-                        <img src="${p.dataUrl}" alt="Crop Preview">
-                    </div>
-                    <div style="font-size: 0.72rem; color: var(--text-muted); text-align: center; margin-bottom: 10px;">
-                        <i class="fa-solid fa-arrows-up-down-left-right"></i> Geser foto di atas untuk atur posisi
-                    </div>
-                    <div class="settings-grid">
-                        <div class="form-group">
-                            <label>Ukuran</label>
-                            <select class="form-select photo-size" data-i="${i}">
-                                <option value="2x3" ${p.size==='2x3'?'selected':''}>2 × 3 cm</option>
-                                <option value="3x4" ${p.size==='3x4'?'selected':''}>3 × 4 cm</option>
-                                <option value="4x6" ${p.size==='4x6'?'selected':''}>4 × 6 cm</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Jumlah Cetak</label>
-                            <div class="qty-control">
-                                <button class="qty-btn qty-minus" data-i="${i}">-</button>
-                                <input type="number" min="1" max="999" class="form-control qty-input photo-qty" data-i="${i}" value="${p.qty}">
-                                <button class="qty-btn qty-plus" data-i="${i}">+</button>
-                            </div>
-                        </div>
-                        <div class="form-group full-width">
-                            <label style="display:flex; justify-content:space-between;">
-                                <span>Zoom Foto</span>
-                                <span style="color:var(--text-muted);">${Math.round(p.zoom * 100)}%</span>
-                            </label>
-                            <input type="range" min="1" max="3" step="0.01" value="${p.zoom}" class="photo-zoom" data-i="${i}">
-                        </div>
-                    </div>
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">
-                        <button class="btn-small-reset reset-pos" data-i="${i}"><i class="fa-solid fa-rotate-left"></i> Reset Posisi</button>
-                        <button class="btn-outline-danger remove-photo" data-i="${i}"><i class="fa-solid fa-trash"></i> Hapus</button>
-                    </div>
-                `;
-                $('photoList').appendChild(row);
+                
+                const boxW = Math.min(w * 3, 130);
+                const boxH = Math.min(h * 3, 170);
+                const zoomVal = Math.round(p.zoom * 100);
+
+                row.innerHTML = 
+                    '<div style="font-size: 0.8rem; font-weight: 600; color: var(--text-dark); margin-bottom: 8px;" class="text-truncate">' + escapeHtml(p.name) + '</div>' +
+                    '<div class="photo-editor" data-editor="' + i + '" style="width:' + boxW + 'px; height:' + boxH + 'px">' +
+                        '<img src="' + p.dataUrl + '" alt="Crop Preview">' +
+                    '</div>' +
+                    '<div style="font-size: 0.72rem; color: var(--text-muted); text-align: center; margin-bottom: 10px;">' +
+                        '<i class="fa-solid fa-arrows-up-down-left-right"></i> Geser foto di atas untuk atur posisi' +
+                    '</div>' +
+                    '<div class="settings-grid">' +
+                        '<div class="form-group">' +
+                            '<label>Ukuran</label>' +
+                            '<select class="form-select photo-size" data-i="' + i + '">' +
+                                '<option value="2x3" ' + (p.size==='2x3'?'selected':'') + '>2 × 3 cm</option>' +
+                                '<option value="3x4" ' + (p.size==='3x4'?'selected':'') + '>3 × 4 cm</option>' +
+                                '<option value="4x6" ' + (p.size==='4x6'?'selected':'') + '>4 × 6 cm</option>' +
+                            '</select>' +
+                        '</div>' +
+                        '<div class="form-group">' +
+                            '<label>Jumlah Cetak</label>' +
+                            '<div class="qty-control">' +
+                                '<button class="qty-btn qty-minus" data-i="' + i + '">-</button>' +
+                                '<input type="number" min="1" max="999" class="form-control qty-input photo-qty" data-i="' + i + '" value="' + p.qty + '">' +
+                                '<button class="qty-btn qty-plus" data-i="' + i + '">+</button>' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="form-group full-width">' +
+                            '<label style="display:flex; justify-content:space-between;">' +
+                                '<span>Zoom Foto</span>' +
+                                '<span style="color:var(--text-muted);">' + zoomVal + '%</span>' +
+                            '</label>' +
+                            '<input type="range" min="1" max="3" step="0.01" value="' + p.zoom + '" class="photo-zoom" data-i="' + i + '">' +
+                        '</div>' +
+                    '</div>' +
+                    '<div style="display:flex; justify-content:space-between; align-items:center; margin-top:5px;">' +
+                        '<button class="btn-small-reset reset-pos" data-i="' + i + '"><i class="fa-solid fa-rotate-left"></i> Reset Posisi</button>' +
+                        '<button class="btn-outline-danger remove-photo" data-i="' + i + '"><i class="fa-solid fa-trash"></i> Hapus</button>' +
+                    '</div>';
+
+                list.appendChild(row);
                 updateEditor(i);
             });
             bindControls();
@@ -665,92 +682,165 @@
         }
 
         function updateEditor(i) {
-            const p = photos[i], ed = document.querySelector(`[data-editor="${i}"]`);
+            const p = photos[i];
+            const ed = document.querySelector('[data-editor="' + i + '"]');
             if (!ed) return;
-            const img = ed.querySelector('img'), s = coverScale(p, ed.clientWidth, ed.clientHeight);
+            const img = ed.querySelector('img');
+            const s = coverScale(p, ed.clientWidth, ed.clientHeight);
             img.style.width = (p.naturalWidth * s) + 'px';
             img.style.height = (p.naturalHeight * s) + 'px';
-            img.style.transform = `translate(calc(-50% + ${p.x}px), calc(-50% + ${p.y}px))`;
+            img.style.transform = 'translate(calc(-50% + ' + p.x + 'px), calc(-50% + ' + p.y + 'px))';
         }
 
         function bindControls() {
-            document.querySelectorAll('.photo-size').forEach(el => el.onchange = () => {
-                photos[+el.dataset.i].size = el.value;
-                photos[+el.dataset.i].x = 0;
-                photos[+el.dataset.i].y = 0;
-                renderPhotos();
-                updateAll();
-            });
-            document.querySelectorAll('.photo-qty').forEach(el => el.onchange = () => {
-                photos[+el.dataset.i].qty = Math.max(1, +el.value || 1);
-                updateAll();
-            });
-            document.querySelectorAll('.qty-minus').forEach(el => el.onclick = () => {
-                let p = photos[+el.dataset.i];
-                p.qty = Math.max(1, p.qty - 1);
-                renderPhotos();
-                updateAll();
-            });
-            document.querySelectorAll('.qty-plus').forEach(el => el.onclick = () => {
-                photos[+el.dataset.i].qty++;
-                renderPhotos();
-                updateAll();
-            });
-            document.querySelectorAll('.photo-zoom').forEach(el => el.oninput = () => {
-                photos[+el.dataset.i].zoom = +el.value;
-                updateEditor(+el.dataset.i);
-                updatePreview();
-            });
-            document.querySelectorAll('.reset-pos').forEach(el => el.onclick = () => {
-                let p = photos[+el.dataset.i];
-                p.zoom = 1; p.x = p.y = 0;
-                renderPhotos();
-                updateAll();
-            });
-            document.querySelectorAll('.remove-photo').forEach(el => el.onclick = () => {
-                photos.splice(+el.dataset.i, 1);
-                renderPhotos();
-                updateAll();
-            });
-            document.querySelectorAll('.photo-editor').forEach(ed => {
-                let dragging = false, sx = 0, sy = 0, ox = 0, oy = 0, i = +ed.dataset.editor;
-                ed.onpointerdown = e => {
-                    dragging = true; sx = e.clientX; sy = e.clientY;
-                    ox = photos[i].x; oy = photos[i].y;
-                    ed.setPointerCapture(e.pointerId);
+            document.querySelectorAll('.photo-size').forEach(function(el) {
+                el.onchange = function() {
+                    const idx = +this.dataset.i;
+                    photos[idx].size = this.value;
+                    photos[idx].x = 0;
+                    photos[idx].y = 0;
+                    renderPhotos();
+                    updateAll();
                 };
-                ed.onpointermove = e => {
-                    if (!dragging) return;
-                    photos[i].x = ox + e.clientX - sx;
-                    photos[i].y = oy + e.clientY - sy;
-                    updateEditor(i);
+            });
+
+            document.querySelectorAll('.photo-qty').forEach(function(el) {
+                el.onchange = function() {
+                    const idx = +this.dataset.i;
+                    photos[idx].qty = Math.max(1, +this.value || 1);
+                    updateAll();
+                };
+            });
+
+            document.querySelectorAll('.qty-minus').forEach(function(el) {
+                el.onclick = function() {
+                    const idx = +this.dataset.i;
+                    photos[idx].qty = Math.max(1, photos[idx].qty - 1);
+                    renderPhotos();
+                    updateAll();
+                };
+            });
+
+            document.querySelectorAll('.qty-plus').forEach(function(el) {
+                el.onclick = function() {
+                    const idx = +this.dataset.i;
+                    photos[idx].qty++;
+                    renderPhotos();
+                    updateAll();
+                };
+            });
+
+            document.querySelectorAll('.photo-zoom').forEach(function(el) {
+                el.oninput = function() {
+                    const idx = +this.dataset.i;
+                    photos[idx].zoom = +this.value;
+                    updateEditor(idx);
                     updatePreview();
                 };
-                ed.onpointerup = () => dragging = false;
+            });
+
+            document.querySelectorAll('.reset-pos').forEach(function(el) {
+                el.onclick = function() {
+                    const idx = +this.dataset.i;
+                    photos[idx].zoom = 1; 
+                    photos[idx].x = 0;
+                    photos[idx].y = 0;
+                    renderPhotos();
+                    updateAll();
+                };
+            });
+
+            document.querySelectorAll('.remove-photo').forEach(function(el) {
+                el.onclick = function() {
+                    const idx = +this.dataset.i;
+                    photos.splice(idx, 1);
+                    renderPhotos();
+                    updateAll();
+                };
+            });
+
+            document.querySelectorAll('.photo-editor').forEach(function(ed) {
+                let dragging = false, sx = 0, sy = 0, ox = 0, oy = 0;
+                const idx = +ed.dataset.editor;
+
+                ed.onpointerdown = function(e) {
+                    dragging = true; 
+                    sx = e.clientX; 
+                    sy = e.clientY;
+                    ox = photos[idx].x; 
+                    oy = photos[idx].y;
+                    ed.setPointerCapture(e.pointerId);
+                };
+
+                ed.onpointermove = function(e) {
+                    if (!dragging) return;
+                    photos[idx].x = ox + e.clientX - sx;
+                    photos[idx].y = oy + e.clientY - sy;
+                    updateEditor(idx);
+                    updatePreview();
+                };
+
+                ed.onpointerup = function() { 
+                    dragging = false; 
+                };
             });
         }
 
-        $('clearPhotos').onclick = () => { photos = []; renderPhotos(); };
-        ['orientation','margin','gap','cutLine','lineWidth'].forEach(id => $(id).oninput = updateAll);$('refreshPreview').onclick = updateAll;
+        $('clearPhotos').onclick = function() { photos = []; renderPhotos(); };
+        
+        ['orientation','margin','gap','cutLine','lineWidth'].forEach(function(id) {
+            $(id).oninput = updateAll;
+        });
+
+        $('refreshPreview').onclick = updateAll;
 
         function getPage() {
             return $('orientation').value === 'portrait' ? [210, 297] : [297, 210];
         }
 
         function buildLayout() {
-            const [pw, ph] = getPage(), margin = Math.max(0, +$('margin').value \vert{}\vert{} 0), gap = Math.max(0, +$('gap').value || 0), aw = pw - margin * 2, ah = ph - margin * 2;
+            const pageDim = getPage();
+            const pw = pageDim[0];
+            const ph = pageDim[1];
+            const margin = Math.max(0, +$('margin').value || 0);
+            const gap = Math.max(0, +$('gap').value || 0);
+            const aw = pw - margin * 2;
+            const ah = ph - margin * 2;
+
             const items = [];
-            photos.forEach((p, pi) => {
-                for (let q = 0; q < p.qty; q++) items.push({ photoIndex: pi, w: SIZE[p.size][0], h: SIZE[p.size][1] });
+            photos.forEach(function(p, pi) {
+                const dim = SIZE[p.size];
+                for (let q = 0; q < p.qty; q++) {
+                    items.push({ photoIndex: pi, w: dim[0], h: dim[1] });
+                }
             });
-            const pages = []; let page = [], x = margin, y = margin, rowH = 0;
-            items.forEach(it => {
-                if (x + it.w > margin + aw + .001) { x = margin; y += rowH + gap; rowH = 0; }
-                if (y + it.h > margin + ah + .001) { pages.push(page); page = []; x = margin; y = margin; rowH = 0; }
-                page.push({ ...it, x, y }); x += it.w + gap; rowH = Math.max(rowH, it.h);
+
+            const pages = []; 
+            let page = [];
+            let x = margin;
+            let y = margin;
+            let rowH = 0;
+
+            items.forEach(function(it) {
+                if (x + it.w > margin + aw + 0.001) { 
+                    x = margin; 
+                    y += rowH + gap; 
+                    rowH = 0; 
+                }
+                if (y + it.h > margin + ah + 0.001) { 
+                    pages.push(page); 
+                    page = []; 
+                    x = margin; 
+                    y = margin; 
+                    rowH = 0; 
+                }
+                page.push({ photoIndex: it.photoIndex, w: it.w, h: it.h, x: x, y: y }); 
+                x += it.w + gap; 
+                rowH = Math.max(rowH, it.h);
             });
+
             if (page.length) pages.push(page);
-            return { pages, pw, ph, margin, gap, total: items.length };
+            return { pages: pages, pw: pw, ph: ph, margin: margin, gap: gap, total: items.length };
         }
 
         function updateAll() {
@@ -762,10 +852,11 @@
         function updatePreview() {
             if (!photos.length) return;
             const layout = buildLayout();
-            $('layoutInfo').textContent = `${layout.total} foto • ${layout.pages.length} lembar A4 • margin ${layout.margin} mm • gap ${layout.gap} mm`;
-            const wrap = $('pagesPreview'); wrap.innerHTML = '';
+            $('layoutInfo').textContent = layout.total + ' foto • ' + layout.pages.length + ' lembar A4 • margin ' + layout.margin + ' mm • gap ' + layout.gap + ' mm';
+            const wrap = $('pagesPreview'); 
+            wrap.innerHTML = '';
             
-            layout.pages.forEach((page, idx) => {
+            layout.pages.forEach(function(page, idx) {
                 const outer = document.createElement('div');
                 outer.className = 'paper-wrap';
                 const containerWidth = wrap.clientWidth ? (wrap.clientWidth - 20) : 380;
@@ -776,27 +867,30 @@
                 paper.style.width = (layout.pw * scale) + 'px';
                 paper.style.height = (layout.ph * scale) + 'px';
 
-                page.forEach(it => {
-                    const p = photos[it.photoIndex], slot = document.createElement('div');
+                page.forEach(function(it) {
+                    const p = photos[it.photoIndex];
+                    const slot = document.createElement('div');
                     slot.className = 'paper-slot';
-                    slot.style.left = it.x * scale + 'px';
-                    slot.style.top = it.y * scale + 'px';
-                    slot.style.width = it.w * scale + 'px';
-                    slot.style.height = it.h * scale + 'px';
-                    slot.style.border = $('cutLine').value === 'yes' ? '1px solid #adb5bd' : '0';
+                    slot.style.left = (it.x * scale) + 'px';
+                    slot.style.top = (it.y * scale) + 'px';
+                    slot.style.width = (it.w * scale) + 'px';
+                    slot.style.height = (it.h * scale) + 'px';
+                    slot.style.border = ($('cutLine').value === 'yes') ? '1px solid #adb5bd' : '0';
                     
                     const img = document.createElement('img');
                     img.src = p.dataUrl;
-                    const innerW = (it.w - INNER_BORDER * 2) * scale, innerH = (it.h - INNER_BORDER * 2) * scale;
+                    const innerW = (it.w - INNER_BORDER * 2) * scale;
+                    const innerH = (it.h - INNER_BORDER * 2) * scale;
                     const s = coverScale(p, innerW, innerH);
-                    img.style.width = p.naturalWidth * s + 'px';
-                    img.style.height = p.naturalHeight * s + 'px';
+                    
+                    img.style.width = (p.naturalWidth * s) + 'px';
+                    img.style.height = (p.naturalHeight * s) + 'px';
                     img.style.left = (INNER_BORDER * scale + innerW / 2) + 'px';
                     img.style.top = (INNER_BORDER * scale + innerH / 2) + 'px';
                     
-                    const editor = document.querySelector(`[data-editor="${it.photoIndex}"]`);
-                    const factor = editor ? innerW / editor.clientWidth : 1;
-                    img.style.transform = `translate(calc(-50% + ${p.x * factor}px), calc(-50% + ${p.y * factor}px))`;
+                    const editor = document.querySelector('[data-editor="' + it.photoIndex + '"]');
+                    const factor = editor ? (innerW / editor.clientWidth) : 1;
+                    img.style.transform = 'translate(calc(-50% + ' + (p.x * factor) + 'px), calc(-50% + ' + (p.y * factor) + 'px))';
                     
                     slot.appendChild(img);
                     paper.appendChild(slot);
@@ -805,49 +899,73 @@
                 
                 const lab = document.createElement('div');
                 lab.className = 'page-label';
-                lab.textContent = `Halaman ${idx + 1} dari ${layout.pages.length}`;
+                lab.textContent = 'Halaman ' + (idx + 1) + ' dari ' + layout.pages.length;
                 outer.appendChild(lab);
                 wrap.appendChild(outer);
             });
         }
 
-        async function cropDataUrl(p, wMm, hMm) {
-            const dpi = 300, pxPerMm = dpi / 25.4, cw = Math.round(wMm * pxPerMm), ch = Math.round(hMm * pxPerMm);
-            const c = document.createElement('canvas'); c.width = cw; c.height = ch;
-            const ctx = c.getContext('2d'); const img = new Image(); img.src = p.dataUrl;
-            await img.decode();
-            const base = Math.max(cw / p.naturalWidth, ch / p.naturalHeight) * p.zoom;
-            const dw = p.naturalWidth * base, dh = p.naturalHeight * base;
-            const editor = document.querySelector(`[data-editor="${photos.indexOf(p)}"]`);
-            const mmPerEditorPx = editor ? wMm / editor.clientWidth : 1;
-            const dx = p.x * mmPerEditorPx * pxPerMm, dy = p.y * mmPerEditorPx * pxPerMm;
-            ctx.drawImage(img, (cw - dw) / 2 + dx, (ch - dh) / 2 + dy, dw, dh);
-            return c.toDataURL('image/jpeg', .95);
+        function cropDataUrl(p, wMm, hMm) {
+            return new Promise(function(resolve) {
+                const dpi = 300;
+                const pxPerMm = dpi / 25.4;
+                const cw = Math.round(wMm * pxPerMm);
+                const ch = Math.round(hMm * pxPerMm);
+                const c = document.createElement('canvas'); 
+                c.width = cw; 
+                c.height = ch;
+                const ctx = c.getContext('2d'); 
+                const img = new Image(); 
+                img.src = p.dataUrl;
+                
+                img.onload = function() {
+                    const base = Math.max(cw / p.naturalWidth, ch / p.naturalHeight) * p.zoom;
+                    const dw = p.naturalWidth * base;
+                    const dh = p.naturalHeight * base;
+                    const editor = document.querySelector('[data-editor="' + photos.indexOf(p) + '"]');
+                    const mmPerEditorPx = editor ? (wMm / editor.clientWidth) : 1;
+                    const dx = p.x * mmPerEditorPx * pxPerMm;
+                    const dy = p.y * mmPerEditorPx * pxPerMm;
+                    ctx.drawImage(img, (cw - dw) / 2 + dx, (ch - dh) / 2 + dy, dw, dh);
+                    resolve(c.toDataURL('image/jpeg', 0.95));
+                };
+            });
         }
 
-        $('generatePdf').onclick = async () => {
+        $('generatePdf').onclick = async function() {
             if (!photos.length) return;
             
-            const jsPDFLib = window.jspdf ? window.jspdf.jsPDF : window.jsPDF;
+            const jsPDFLib = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : window.jsPDF;
             if (!jsPDFLib) {
-                alert("Library jsPDF belum selesai dimuat. Silakan periksa koneksi internet kamu.");
+                alert("Library jsPDF belum terkonfirmasi dimuat. Silakan periksa jaringan internet.");
                 return;
             }
 
-            $('processingAlert').classList.remove('d-none');$('generatePdf').disabled = true;
+            $('processingAlert').classList.remove('d-none');
+            $('generatePdf').disabled = true;
             resultSection.classList.add('d-none');
 
             try {
-                const layout = buildLayout(), ori = $('orientation').value;
-                let pdf = new jsPDFLib({ orientation: ori, unit: 'mm', format: 'a4' });
+                const layout = buildLayout();
+                const ori = $('orientation').value;
+                const pdf = new jsPDFLib({ orientation: ori, unit: 'mm', format: 'a4' });
                 const cache = {};
+
                 for (let pi = 0; pi < layout.pages.length; pi++) {
                     if (pi > 0) pdf.addPage('a4', ori);
-                    for (const it of layout.pages[pi]) {
-                        const p = photos[it.photoIndex], innerW = it.w - INNER_BORDER * 2, innerH = it.h - INNER_BORDER * 2;
+                    for (let k = 0; k < layout.pages[pi].length; k++) {
+                        const it = layout.pages[pi][k];
+                        const p = photos[it.photoIndex];
+                        const innerW = it.w - INNER_BORDER * 2;
+                        const innerH = it.h - INNER_BORDER * 2;
                         const key = it.photoIndex + '-' + innerW + '-' + innerH;
-                        if (!cache[key]) cache[key] = await cropDataUrl(p, innerW, innerH);
+                        
+                        if (!cache[key]) {
+                            cache[key] = await cropDataUrl(p, innerW, innerH);
+                        }
+                        
                         pdf.addImage(cache[key], 'JPEG', it.x + INNER_BORDER, it.y + INNER_BORDER, innerW, innerH, undefined, 'FAST');
+                        
                         if ($('cutLine').value === 'yes') {
                             pdf.setDrawColor(200);
                             pdf.setLineWidth(+$('lineWidth').value);
@@ -855,19 +973,21 @@
                         }
                     }
                 }
+                
                 generatedPdfBlob = pdf.output('blob');
-                $('resultInfo').textContent = `${layout.total} foto • ${layout.pages.length} halaman A4 • ${ori==='portrait'?'Portrait':'Landscape'}`;
+                $('resultInfo').textContent = layout.total + ' foto • ' + layout.pages.length + ' halaman A4 • ' + (ori==='portrait'?'Portrait':'Landscape');
                 resultSection.classList.remove('d-none');
                 resultSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
             } catch (e) {
                 console.error(e);
                 alert('Gagal membuat file PDF. Silakan coba lagi.');
             } finally {
-                $('processingAlert').classList.add('d-none');$('generatePdf').disabled = false;
+                $('processingAlert').classList.add('d-none');
+                $('generatePdf').disabled = false;
             }
         };
 
-        $('downloadPdf').onclick = () => {
+        $('downloadPdf').onclick = function() {
             if (!generatedPdfBlob) return;
             const u = URL.createObjectURL(generatedPdfBlob);
             const a = document.createElement('a');
@@ -876,10 +996,12 @@
             document.body.appendChild(a);
             a.click();
             a.remove();
-            setTimeout(() => URL.revokeObjectURL(u), 1000);
+            setTimeout(function() { URL.revokeObjectURL(u); }, 1000);
         };
 
-        window.addEventListener('resize', () => { if (photos.length) updatePreview(); });
+        window.addEventListener('resize', function() { 
+            if (photos.length) updatePreview(); 
+        });
     </script>
 </body>
 </html>
