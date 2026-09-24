@@ -54,6 +54,11 @@
             justify-content: center;
         }
 
+        /* Utilitas Sembunyi Element */
+        .d-none {
+            display: none !important;
+        }
+
         .mobile-wrapper {
             width: 100%;
             max-width: 480px;
@@ -119,10 +124,6 @@
             border: 1px solid var(--border-color);
             box-shadow: var(--shadow);
             margin-bottom: 20px;
-        }
-
-        .card-box.d-none {
-            display: none !important;
         }
 
         .section-title {
@@ -421,6 +422,9 @@
             <!-- 1. Upload Card -->
             <div class="card-box">
                 <h2 class="section-title">1. Tambah Foto</h2>
+                
+                <input type="file" id="fileInput" accept="image/jpeg,image/jpg,image/png" multiple style="display: none !important;">
+                
                 <div id="dropArea" class="drop-zone">
                     <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
                     <div class="drop-title">Pilih atau Tarik Foto</div>
@@ -428,7 +432,6 @@
                     <button type="button" class="btn-gold" id="chooseFilesButton">
                         <i class="fa-solid fa-folder-open"></i> Upload Foto
                     </button>
-                    <input type="file" id="fileInput" accept="image/jpeg,image/jpg,image/png" multiple hidden>
                 </div>
 
                 <div class="privacy-box">
@@ -509,12 +512,12 @@
                 </button>
             </div>
 
-            <!-- Processing Alert -->
+            <!-- Processing Alert (Default Hidden) -->
             <div class="alert-box alert-info d-none" id="processingAlert">
                 <i class="fa-solid fa-spinner fa-spin"></i> Sedang menyusun PDF...
             </div>
 
-            <!-- Result PDF Section -->
+            <!-- Result PDF Section (Default Hidden) -->
             <div class="card-box d-none" id="resultSection" style="text-align: center;">
                 <i class="fa-solid fa-circle-check" style="font-size: 40px; color: var(--accent-gold); margin-bottom: 10px;"></i>
                 <h3 style="font-size: 1.2rem; margin-bottom: 4px;">PDF Berhasil Dibuat!</h3>
@@ -542,17 +545,21 @@
         const $ = id => document.getElementById(id);
         
         const dropArea = $('dropArea'), 
-              fileInput = $('fileInput'), 
+              fileInput = $('fileInput'),
+              chooseBtn = $('chooseFilesButton'),
               photoSection = $('photoSection'), 
               settingsSection = $('settingsSection'), 
               previewSection = $('previewSection'), 
               resultSection = $('resultSection');
 
-        // PERBAIKAN EVENT CLICK UPLOAD
-        dropArea.onclick = (e) => {
-            if (e.target !== fileInput) {
-                fileInput.click();
-            }
+        // Buka File Dialog saat Tombol ATAU Area Drop diklik
+        chooseBtn.onclick = (e) => {
+            e.stopPropagation();
+            fileInput.click();
+        };
+
+        dropArea.onclick = () => {
+            fileInput.click();
         };
 
         fileInput.onchange = () => { 
