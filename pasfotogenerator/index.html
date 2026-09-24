@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pas Foto Maker — Ikmal Imani</title>
     
-    <!-- Meta SEO & Icons -->
+    <!-- Meta SEO & Favicon -->
     <meta name="description" content="Susun & atur pas foto ukuran 2x3, 3x4, atau 4x6 otomatis ke kertas A4 siap cetak.">
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23C5A059'/><text x='50%' y='65%' font-family='Georgia, serif' font-size='50' font-weight='bold' fill='%23FFFFFF' text-anchor='middle'>II</text></svg>">
     
@@ -14,12 +14,14 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Font Awesome & CDN jsPDF yang Stabil -->
+    <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- jsPDF CDN yang Stabil untuk GitHub Pages -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
     <style>
-        /* Variables & Color Palette */
+        /* Variables & Color Palette Identik */
         :root {
             --bg-cream: #FAF7F2;
             --card-cream: #FFFFFF;
@@ -29,7 +31,6 @@
             --accent-gold-hover: #b08d4b;
             --accent-sage: #8A9A86;
             --border-color: #E8E2D9;
-            --wa-green: #25D366;
             --danger-red: #E53935;
             --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
             --transition: all 0.3s ease;
@@ -54,11 +55,12 @@
             justify-content: center;
         }
 
-        /* Utilitas Sembunyi Element */
+        /* Class khusus menyembunyikan elemen */
         .d-none {
             display: none !important;
         }
 
+        /* Centered Mobile Wrapper */
         .mobile-wrapper {
             width: 100%;
             max-width: 480px;
@@ -112,7 +114,7 @@
             margin-right: auto;
         }
 
-        /* Component Cards */
+        /* Section Cards */
         .page-section {
             padding: 10px 20px 25px;
         }
@@ -136,7 +138,7 @@
             align-items: center;
         }
 
-        /* Upload Label Zone (Native HTML Trigger) */
+        /* Area Drop / Upload File Native Label */
         .drop-zone-label {
             display: block;
             border: 2px dashed var(--accent-gold);
@@ -171,7 +173,7 @@
             margin-bottom: 12px;
         }
 
-        /* Buttons */
+        /* Custom Gold Buttons */
         .btn-gold {
             display: inline-flex;
             align-items: center;
@@ -223,7 +225,7 @@
             margin-top: 8px;
         }
 
-        /* Privacy Banner */
+        /* Banner Informasi */
         .privacy-box {
             display: flex;
             align-items: center;
@@ -242,7 +244,7 @@
             color: var(--accent-sage);
         }
 
-        /* Photo Editor Item List */
+        /* Item Editor Foto */
         .photo-item {
             border: 1px solid var(--border-color);
             border-radius: 16px;
@@ -294,10 +296,6 @@
             outline: none;
         }
 
-        .form-control:focus, .form-select:focus {
-            border-color: var(--accent-gold);
-        }
-
         .qty-control {
             display: flex;
             align-items: center;
@@ -336,7 +334,7 @@
             grid-column: span 2;
         }
 
-        /* Preview Area */
+        /* Area Preview Kertas A4 */
         .paper-wrap {
             overflow: auto;
             background: #EAE6DF;
@@ -416,14 +414,14 @@
             <p class="hero-sub">Susun & atur posisi pas foto ke lembar A4 otomatis, siap cetak dengan presisi.</p>
         </section>
 
-        <!-- Main Content Section -->
+        <!-- Main Section -->
         <section class="page-section">
             
-            <!-- 1. Upload Card -->
+            <!-- 1. Tambah Foto Card -->
             <div class="card-box">
                 <h2 class="section-title">1. Tambah Foto</h2>
                 
-                <input type="file" id="fileInput" accept="image/jpeg,image/jpg,image/png" multiple style="display: none !important;">
+                <input type="file" id="fileInput" accept="image/jpeg,image/jpg,image/png" multiple class="d-none">
                 
                 <label for="fileInput" id="dropArea" class="drop-zone-label">
                     <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
@@ -437,12 +435,12 @@
                 <div class="privacy-box">
                     <i class="fa-solid fa-shield-halved"></i>
                     <div>
-                        <strong>Aman & Privat:</strong> Seluruh proses pemotongan foto dikerjakan langsung di browsermu tanpa diunggah ke server.
+                        <strong>Aman & Privat:</strong> Seluruh proses dikerjakan langsung di browsermu tanpa diunggah ke server.
                     </div>
                 </div>
             </div>
 
-            <!-- 2. Photo Adjustments Card -->
+            <!-- 2. Section Edit Foto (Otomatis muncul bila ada foto) -->
             <div class="card-box d-none" id="photoSection">
                 <div class="section-title">
                     <span>2. Atur Pas Foto</span>
@@ -452,7 +450,7 @@
                 <div id="photoList"></div>
             </div>
 
-            <!-- 3. Paper Settings Card -->
+            <!-- 3. Section Pengaturan Kertas (Otomatis muncul) -->
             <div class="card-box d-none" id="settingsSection">
                 <h2 class="section-title">3. Pengaturan Kertas</h2>
                 <div class="settings-grid">
@@ -498,7 +496,7 @@
                 </div>
             </div>
 
-            <!-- 4. Preview & Export Card -->
+            <!-- 4. Section Preview A4 (Otomatis muncul) -->
             <div class="card-box d-none" id="previewSection">
                 <div class="section-title">
                     <span>4. Preview Cetak</span>
@@ -512,12 +510,12 @@
                 </button>
             </div>
 
-            <!-- Processing Alert -->
+            <!-- Loading Alert (Sembunyi secara default) -->
             <div class="alert-box alert-info d-none" id="processingAlert">
                 <i class="fa-solid fa-spinner fa-spin"></i> Sedang menyusun PDF...
             </div>
 
-            <!-- Result PDF Section -->
+            <!-- Result Box (Sembunyi secara default) -->
             <div class="card-box d-none" id="resultSection" style="text-align: center;">
                 <i class="fa-solid fa-circle-check" style="font-size: 40px; color: var(--accent-gold); margin-bottom: 10px;"></i>
                 <h3 style="font-size: 1.2rem; margin-bottom: 4px;">PDF Berhasil Dibuat!</h3>
@@ -542,6 +540,11 @@
         
         let photos = [], generatedPdfBlob = null;
         const $ = id => document.getElementById(id);
+
+        // Generator ID Unik Sederhana yang Aman Tanpa Dependensi Browser
+        function createUniqueId() {
+            return 'photo_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
         
         const dropArea = $('dropArea'), 
               fileInput = $('fileInput'),
@@ -568,13 +571,15 @@
         };
 
         function handleFiles(files) {
-            [...files].filter(f => ['image/jpeg','image/jpg','image/png'].includes(f.type)).forEach(file => {
+            const validFiles = [...files].filter(f => ['image/jpeg','image/jpg','image/png'].includes(f.type));
+            
+            validFiles.forEach(file => {
                 const r = new FileReader();
                 r.onload = e => {
                     const im = new Image();
                     im.onload = () => {
                         photos.push({
-                            id: crypto.randomUUID(),
+                            id: createUniqueId(),
                             name: file.name,
                             dataUrl: e.target.result,
                             naturalWidth: im.naturalWidth,
@@ -825,7 +830,7 @@
             
             const jsPDFLib = window.jspdf ? window.jspdf.jsPDF : window.jsPDF;
             if (!jsPDFLib) {
-                alert("Library jsPDF belum selesai dimuat, silakan muat ulang halaman.");
+                alert("Library jsPDF belum selesai dimuat. Silakan periksa koneksi internet kamu.");
                 return;
             }
 
