@@ -1,647 +1,322 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Balon Perkalian by Ikmal Imani 🎈</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Google: Fredoka (Font ramah anak & ceria) -->
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Fredoka', cursive, sans-serif;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: manipulation;
-            background: linear-gradient(180deg, #60a5fa 0%, #93c5fd 60%, #bfdbfe 100%);
-            overflow: hidden;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Balon Perkalian — by Ikmal Imani 🎈</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --sky-a:#fde8d3; --sky-b:#f7c9de; --sky-c:#d9b8fb;
+    --grass-a:#8fd19e; --grass-b:#5fb977;
+    --ink:#3a2e57; --cream:#fffcf6;
+    --coral:#ff6f61; --gold:#ffb703; --teal:#00b4a6; --violet:#8a5cf6; --pink:#ff7fae; --blue:#4ea8de;
+    --card-shadow: 0 14px 0 rgba(58,46,87,.12), 0 20px 30px rgba(58,46,87,.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{
+    margin:0; font-family:'Nunito',sans-serif; overflow:hidden; user-select:none; -webkit-user-select:none; touch-action:manipulation;
+    background: linear-gradient(180deg,var(--sky-a) 0%, var(--sky-b) 55%, var(--sky-c) 100%);
+    padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  .sun{position:absolute; width:clamp(90px,16vw,180px); height:clamp(90px,16vw,180px); border-radius:50%; top:6%; right:8%;
+       background:radial-gradient(circle at 35% 35%, #fff6cf, #ffd166 60%, #ffb703 100%); box-shadow:0 0 60px rgba(255,183,3,.5); pointer-events:none;}
+  .ground{position:absolute; bottom:0; left:0; width:100%; height:14%; background:linear-gradient(180deg,var(--grass-a),var(--grass-b)); pointer-events:none;
+          border-top-left-radius:50% 30px; border-top-right-radius:50% 30px;}
+  .bunting{position:absolute; top:0; left:0; width:100%; height:22px; display:flex; justify-content:space-evenly; pointer-events:none; z-index:1;}
+  .flag{width:16px; height:20px; clip-path:polygon(0 0,100% 0,50% 100%);}
+  @media (prefers-reduced-motion:no-preference){
+    .balloon-wrapper{ animation: floatSlow 4.2s ease-in-out infinite alternate; }
+    .balloon-wrapper:nth-child(2n){ animation-delay:-1.2s; }
+    .balloon-wrapper:nth-child(3n){ animation-delay:-2.4s; }
+  }
+  @keyframes floatSlow{0%{transform:translateY(0) rotate(-2.5deg);}100%{transform:translateY(-10px) rotate(2.5deg);}}
+  @keyframes shake{0%,100%{transform:translateX(0);}20%,60%{transform:translateX(-8px);}40%,80%{transform:translateX(8px);}}
+  .shake{animation:shake .4s ease-in-out;}
+  @keyframes pop-in{0%{transform:scale(.6); opacity:0;}70%{transform:scale(1.06);}100%{transform:scale(1); opacity:1;}}
 
-        /* Styling Balon & Tali (Ukuran Responsive) */
-        .balloon-wrapper {
-            position: absolute;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: transform 0.2s ease-out;
-            animation: floatSlow 4s ease-in-out infinite alternate;
-        }
+  .stage{position:relative; z-index:2; height:100%; display:flex; flex-direction:column; max-width:900px; margin:0 auto; padding:10px 12px;}
 
-        .balloon-wrapper:nth-child(2) { animation-delay: -1s; }
-        .balloon-wrapper:nth-child(3) { animation-delay: -2s; }
-        .balloon-wrapper:nth-child(4) { animation-delay: -3s; }
+  header{display:flex; align-items:center; justify-content:space-between; gap:8px; background:rgba(255,252,246,.85); backdrop-filter:blur(6px);
+         border-radius:20px; padding:8px 14px; border:2px solid #fff; box-shadow:var(--card-shadow);}
+  .stat{display:flex; align-items:center; gap:6px; font-weight:800; color:var(--ink);}
+  .stat .emoji{font-size:1.3rem;}
+  .stat .num{font-family:'Baloo 2',cursive; font-size:1.3rem; color:var(--coral);}
+  #bestNum{color:var(--violet);}
+  .pill{background:#eef1ff; color:var(--ink); font-weight:800; padding:5px 14px; border-radius:999px; font-size:.85rem; border:2px solid #dfe3ff;}
+  .icon-btn{background:#fff; border:2px solid #ffd7d0; color:#c0392b; width:36px; height:36px; border-radius:50%; font-size:1.05rem; cursor:pointer;}
+  .icon-btn:focus-visible, .mode-btn:focus-visible, button:focus-visible, .balloon-wrapper:focus-visible{outline:3px solid #4ea8de; outline-offset:2px;}
 
-        @keyframes floatSlow {
-            0% { transform: translateY(0px) rotate(-3deg); }
-            100% { transform: translateY(-12px) rotate(3deg); }
-        }
+  main{flex:1; display:flex; flex-direction:column; align-items:center; justify-content:space-evenly; min-height:0;}
 
-        /* Responsive Balon menyesuaikan orientasi layar */
-        .balloon {
-            width: clamp(65px, 11vw, 110px);
-            height: clamp(80px, 13vw, 130px);
-            border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: clamp(1.5rem, 3.5vw, 3rem);
-            font-weight: 700;
-            color: white;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            box-shadow: inset -6px -6px 12px rgba(0, 0, 0, 0.18), inset 6px 6px 12px rgba(255, 255, 255, 0.45);
-            position: relative;
-        }
+  #questionCard{background:var(--cream); border:3px solid #fff; border-radius:28px; box-shadow:var(--card-shadow); padding:14px 26px; text-align:center; animation:pop-in .35s ease-out;}
+  #questionCard p{margin:0 0 2px; font-weight:800; letter-spacing:.3px; color:#b7a9d6; font-size:.75rem;}
+  #questionText{font-family:'Baloo 2',cursive; font-weight:800; color:var(--violet); font-size:clamp(2rem,7vw,3.4rem); line-height:1;}
 
-        @media (max-height: 500px) {
-            /* Penyesuaian khusus untuk HP Landscape */
-            .balloon {
-                width: 60px !important;
-                height: 72px !important;
-                font-size: 1.3rem !important;
-            }
-            .balloon-string {
-                height: 18px !important;
-            }
-        }
+  #balloonArea{width:100%; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:clamp(10px,3vw,26px); max-width:520px; padding:6px 10px;}
+  @media (min-width:640px){ #balloonArea{grid-template-columns:repeat(4,minmax(0,1fr));} }
+  .balloon-wrapper{display:flex; flex-direction:column; align-items:center; cursor:pointer;}
+  .balloon{width:100%; aspect-ratio:.85; max-width:110px; border-radius:50% 50% 50% 50% / 42% 42% 58% 58%; display:flex; align-items:center; justify-content:center;
+           font-family:'Baloo 2',cursive; font-weight:700; color:#fff; text-shadow:1px 2px 3px rgba(0,0,0,.25); font-size:clamp(1.1rem,4vw,1.8rem);
+           box-shadow:inset -6px -6px 10px rgba(0,0,0,.16), inset 6px 6px 10px rgba(255,255,255,.4); position:relative; margin:0 auto;}
+  .balloon::before{content:'';position:absolute; top:14%; left:18%; width:18%; height:22%; background:rgba(255,255,255,.5); border-radius:50%; transform:rotate(-25deg);}
+  .balloon-knot{width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-top:10px solid currentColor; margin-top:-1px;}
+  .balloon-string{width:2px; height:clamp(14px,2.5vw,26px); background:rgba(255,255,255,.7);}
 
-        .balloon::before {
-            content: '';
-            position: absolute;
-            top: 12%;
-            left: 15%;
-            width: 20%;
-            height: 25%;
-            background: rgba(255, 255, 255, 0.5);
-            border-radius: 50%;
-            transform: rotate(-30deg);
-        }
+  #feedback{height:34px; display:flex; align-items:center; justify-content:center;}
+  #feedbackText{font-weight:800; padding:5px 18px; border-radius:999px; box-shadow:0 4px 10px rgba(0,0,0,.15); font-size:.95rem;}
 
-        .balloon-knot {
-            width: 0;
-            height: 0;
-            border-left: clamp(6px, 1vw, 10px) solid transparent;
-            border-right: clamp(6px, 1vw, 10px) solid transparent;
-            border-bottom: clamp(8px, 1.2vw, 14px) solid currentColor;
-            margin-top: -2px;
-        }
+  #popCanvas{position:fixed; inset:0; pointer-events:none; z-index:30;}
 
-        .balloon-string {
-            width: 3px;
-            height: clamp(20px, 3vw, 35px);
-            background-color: rgba(255, 255, 255, 0.75);
-        }
+  #startScreen{position:absolute; inset:8px; background:var(--cream); z-index:40; border-radius:32px; border:3px solid #fff; box-shadow:var(--card-shadow);
+               display:flex; flex-direction:column; align-items:center; text-align:center; padding:16px; overflow-y:auto;}
+  #startScreen h1{font-family:'Baloo 2',cursive; font-size:clamp(1.4rem,5vw,2.3rem); color:var(--violet); margin:2px 0 0;}
+  #startScreen .tagline{color:#a094c2; font-weight:800; font-size:.8rem; margin:2px 0 8px;}
+  .modes{display:grid; grid-template-columns:repeat(3,1fr); gap:6px; width:100%; max-width:420px; margin:auto 0;}
+  .mode-btn{font-family:'Nunito',sans-serif; font-weight:800; padding:10px 4px; font-size:.85rem; border-radius:14px; border:2px solid #e6def7; background:#fff; color:var(--violet); cursor:pointer;}
+  .mode-btn.active{background:var(--violet); color:#fff; border-color:#6d3ff0;}
+  .mode-all{grid-column:1/-1; background:linear-gradient(90deg,var(--coral),var(--pink)); color:#fff; border:none;}
+  .mode-all.active{outline:3px solid var(--gold);}
+  .primary-btn{width:100%; max-width:420px; padding:14px; font-family:'Baloo 2',cursive; font-weight:700; font-size:1.3rem; color:#fff; border:none; border-radius:20px; cursor:pointer;
+               background:linear-gradient(180deg,#59d896,#2fb873); box-shadow:0 6px 0 #1f8c58; margin-top:10px;}
+  .primary-btn:active{transform:translateY(4px); box-shadow:0 2px 0 #1f8c58;}
+  .secondary-btn{width:100%; max-width:420px; padding:11px; font-weight:800; font-size:.9rem; color:#8a5a00; background:#ffd166; border:none; border-radius:16px; cursor:pointer; margin-top:8px;}
 
-        /* Animasi Bergetar (Salah Jawab) */
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            20%, 60% { transform: translateX(-10px); }
-            40%, 80% { transform: translateX(10px); }
-        }
-        .shake {
-            animation: shake 0.4s ease-in-out;
-        }
+  #tableModal{display:none; position:fixed; inset:0; z-index:50; background:rgba(58,46,87,.55); align-items:center; justify-content:center; padding:12px;}
+  #tableModal.show{display:flex;}
+  #tableModalContent{background:#fff; border-radius:24px; padding:16px; width:100%; max-width:640px; max-height:90vh; display:flex; flex-direction:column; border:3px solid #ffd166;}
+  #tableModalContent table{width:100%; border-collapse:collapse; text-align:center;}
+  #tableModalContent th,#tableModalContent td{border:1px solid #ffe8b3; padding:6px 3px; font-size:.78rem; font-weight:800; color:#5b4630;}
+  #tableModalContent th{background:#ffb703; color:#5c3d00;}
+  td.hl{background:#ffe08a; color:#7a4a00;}
+  .print-header{display:none;}
 
-        /* Canvas Partikel Meletus */
-        #popCanvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 30;
-        }
-
-        /* Awan Latar Belakang */
-        .cloud {
-            position: absolute;
-            background: rgba(255, 255, 255, 0.65);
-            border-radius: 50px;
-            opacity: 0.8;
-            pointer-events: none;
-        }
-
-        /* ==================== STYLES CETAK / PRINT (A4 LANDSCAPE) ==================== */
-        @media print {
-            @page {
-                size: A4 landscape;
-                margin: 2cm !important;
-            }
-            body {
-                background: #ffffff !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-                overflow: visible !important;
-            }
-            #popCanvas, .cloud, #startScreen, #topBar, #gameBoard, #feedback, .modal-no-print {
-                display: none !important;
-            }
-            #tableModal {
-                position: absolute !important;
-                inset: 0 !important;
-                background: #ffffff !important;
-                padding: 0 !important;
-                display: flex !important;
-                justify-content: center !important;
-                align-items: center !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-            #tableModalContent {
-                border: 4px solid #fbbf24 !important;
-                box-shadow: none !important;
-                max-width: 100% !important;
-                width: 100% !important;
-                padding: 8px !important;
-                background: #ffffff !important;
-                border-radius: 16px !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-            .print-header {
-                display: block !important;
-                text-align: center;
-                margin-bottom: 12px;
-            }
-            table {
-                width: 100% !important;
-                border-collapse: collapse !important;
-            }
-            th, td {
-                border: 2px solid #fde68a !important;
-                padding: 10px 4px !important;
-                font-size: 15pt !important;
-                font-weight: 800 !important;
-            }
-            th {
-                background-color: #fbbf24 !important;
-                color: #78350f !important;
-                font-size: 16pt !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-            td.highlight {
-                background-color: #fef08a !important;
-                color: #854d0e !important;
-                font-size: 16pt !important;
-                font-weight: 900 !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-            tr:nth-child(even) td:not(.highlight) {
-                background-color: #fefce8 !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-            tr:nth-child(odd) td:not(.highlight) {
-                background-color: #ffffff !important;
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-        }
-        .print-header {
-            display: none;
-        }
-    </style>
+  @media print{
+    @page{size:A4 landscape; margin:2cm;}
+    body{background:#fff !important;}
+    #popCanvas,.sun,.ground,.bunting,#startScreen,header,main,#feedback,.modal-no-print{display:none !important;}
+    #tableModal{position:absolute; inset:0; background:#fff; display:flex; align-items:center; justify-content:center;}
+    #tableModalContent{border:4px solid #ffb703; box-shadow:none; width:100%;}
+    .print-header{display:block; text-align:center; margin-bottom:10px;}
+    th,td{font-size:15pt !important; padding:10px 4px !important;}
+    th{font-size:16pt !important;}
+    td.hl{font-size:16pt !important;}
+  }
+</style>
 </head>
-<body class="h-screen w-screen flex flex-col items-center justify-between relative overflow-hidden">
+<body>
+  <div class="bunting" id="bunting"></div>
+  <div class="sun"></div>
+  <div class="ground"></div>
+  <canvas id="popCanvas"></canvas>
 
-    <!-- Awan-Awan Dekoratif -->
-    <div class="cloud w-32 md:w-56 h-12 md:h-20 top-8 -left-8 animate-[bounce_8s_infinite]"></div>
-    <div class="cloud w-40 md:w-64 h-14 md:h-24 top-20 -right-10 animate-[bounce_10s_infinite]"></div>
-    <div class="cloud w-28 md:w-44 h-10 md:h-16 top-1/2 -left-6 opacity-50"></div>
+  <div class="stage">
+    <header id="topBar" style="display:none;">
+      <div class="stat"><span class="emoji">⭐</span><span id="scoreNum" class="num">0</span></div>
+      <div class="stat"><span class="emoji">🔥</span><span id="streakNum" class="num">0</span></div>
+      <div class="pill" id="modeTag">1–10 Campur</div>
+      <div class="stat"><span class="emoji">🏆</span><span id="bestNum" class="num">0</span></div>
+      <button class="icon-btn" id="muteBtn" onclick="toggleMute()">🔊</button>
+      <button class="icon-btn" onclick="resetToStart()">🚪</button>
+    </header>
 
-    <!-- Canvas Partikel Meletus -->
-    <canvas id="popCanvas"></canvas>
+    <main id="gameBoard" style="display:none;">
+      <div id="questionCard">
+        <p>Berapa hasilnya?</p>
+        <div id="questionText">4 × 7</div>
+      </div>
+      <div id="balloonArea"></div>
+    </main>
 
-    <!-- CONTAINER UTAMA -->
-    <div class="w-full max-w-5xl h-full flex flex-col justify-between relative z-10 p-2 md:p-6">
+    <div id="feedback"><span id="feedbackText" style="display:none;"></span></div>
 
-        <!-- HEADER / TOP BAR -->
-        <header id="topBar" class="hidden flex justify-between items-center bg-white/80 backdrop-blur-md rounded-2xl md:rounded-3xl p-2 md:p-4 shadow-lg border-2 border-white/60">
-            <div class="flex items-center space-x-2 md:space-x-4">
-                <span class="text-2xl md:text-5xl">⭐</span>
-                <div>
-                    <div class="text-[10px] md:text-sm text-gray-500 font-semibold leading-none">SKOR</div>
-                    <div id="scoreDisplay" class="text-xl md:text-4xl font-bold text-yellow-500 leading-none">0</div>
-                </div>
-            </div>
-
-            <div id="modeTag" class="bg-blue-100 text-blue-700 font-bold px-3 py-1 md:px-6 md:py-2 rounded-full text-xs md:text-xl border border-blue-300">
-                1-10 Campur
-            </div>
-
-            <button onclick="resetToStart()" class="bg-red-100 hover:bg-red-200 text-red-600 font-bold text-xs md:text-base px-3 py-1.5 md:px-4 md:py-2 rounded-full border border-red-200 transition">
-                Keluar 🚪
-            </button>
-        </header>
-
-        <!-- AREA PERMAINAN MAIN -->
-        <main id="gameBoard" class="hidden flex-1 relative w-full flex flex-col items-center justify-center my-auto">
-            
-            <!-- KOTAK SOAL -->
-            <div id="questionBox" class="relative z-20 w-10/12 max-w-xs md:max-w-md text-center transform transition-transform">
-                <div class="bg-gradient-to-r from-yellow-300 via-orange-300 to-yellow-400 p-1.5 md:p-3 rounded-2xl md:rounded-[2.5rem] shadow-2xl border-2 md:border-8 border-white">
-                    <div class="bg-white rounded-xl md:rounded-[2rem] py-3 md:py-8 px-4 shadow-inner">
-                        <p class="text-[10px] md:text-base font-bold text-gray-400 uppercase tracking-widest mb-0.5 md:mb-2">Berapa Hasilnya?</p>
-                        <div id="questionText" class="text-3xl sm:text-5xl md:text-7xl font-black text-blue-600 tracking-wider">
-                            4 × 7 = ?
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- AREA BALON -->
-            <div id="balloonArea" class="absolute inset-0 z-10 pointer-events-none"></div>
-
-        </main>
-
-        <!-- FEEDBACK BANNER -->
-        <div id="feedback" class="h-6 md:h-10 flex justify-center items-center relative z-20">
-            <span id="feedbackText" class="hidden text-sm md:text-2xl font-bold px-4 py-1 rounded-full shadow-md transition-all duration-200"></span>
-        </div>
-
-        <!-- SCREEN START / UTAMA -->
-        <div id="startScreen" class="absolute inset-0 bg-white/95 backdrop-blur-md z-40 rounded-3xl md:rounded-[3rem] m-2 md:m-6 p-4 md:p-8 flex flex-col justify-between items-center text-center shadow-2xl border-4 md:border-8 border-blue-200 overflow-y-auto">
-            <div class="mt-1">
-                <div class="text-4xl md:text-7xl mb-1 animate-bounce">🎈</div>
-                <h1 class="text-xl md:text-4xl font-extrabold text-blue-600 drop-shadow-sm">Balon Perkalian</h1>
-                <p class="text-[10px] md:text-lg font-bold text-gray-400 mt-0.5">by Ikmal Imani</p>
-            </div>
-
-            <!-- Pilih Mode Perkalian -->
-            <div class="w-full max-w-xl my-auto py-1 md:py-2">
-                <label class="block text-xs md:text-base font-bold text-gray-700 mb-1.5 md:mb-2">Pilih Angka Perkalian:</label>
-                <div class="grid grid-cols-3 gap-1 md:gap-2.5">
-                    <button onclick="selectMode('all')" id="btn-mode-all" class="mode-btn bg-blue-500 text-white font-bold py-1.5 md:py-3 text-xs md:text-base rounded-xl md:rounded-2xl shadow border-2 border-blue-600 col-span-3">
-                        🌟 1 - 10 Campur 🌟
-                    </button>
-                    <script>
-                        for(let i=1; i<=10; i++){
-                            document.write(`
-                                <button onclick="selectMode(${i})" id="btn-mode-${i}" class="mode-btn bg-white text-blue-600 font-bold py-1.5 md:py-3 text-xs md:text-base rounded-xl md:rounded-2xl shadow border-2 border-blue-200 hover:bg-blue-50">
-                                    Perkalian ${i}
-                                </button>
-                            `);
-                        }
-                    </script>
-                </div>
-            </div>
-
-            <!-- ACTION BUTTONS -->
-            <div class="w-full max-w-xl space-y-1.5 md:space-y-2">
-                <button onclick="startGame()" class="w-full py-2.5 md:py-4 bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white font-extrabold text-lg md:text-2xl rounded-xl md:rounded-3xl shadow-lg transform active:scale-95 transition-all border-b-4 md:border-b-6 border-green-700">
-                    MULAI MAIN 🚀
-                </button>
-                <button onclick="openTableModal()" class="w-full py-2 md:py-3 bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold text-xs md:text-lg rounded-xl md:rounded-2xl shadow border-b-4 border-amber-600 transition-all flex items-center justify-center space-x-2">
-                    <span>📖 Kunci Jawaban (Tabel Perkalian)</span>
-                </button>
-            </div>
-        </div>
-
+    <div id="startScreen">
+      <div style="font-size:clamp(2.2rem,9vw,3.5rem);">🎈</div>
+      <h1>Balon Perkalian</h1>
+      <p class="tagline">by Ikmal Imani</p>
+      <div class="modes">
+        <button class="mode-btn mode-all active" onclick="selectMode('all')" id="btn-mode-all">🌟 1–10 Campur</button>
+        <div id="modeGrid" style="display:contents;"></div>
+      </div>
+      <button class="primary-btn" onclick="startGame()">Mulai Main 🚀</button>
+      <button class="secondary-btn" onclick="openTableModal()">📖 Kunci Jawaban (Tabel Perkalian)</button>
     </div>
+  </div>
 
-    <!-- MODAL KUNCI JAWABAN (TABEL PERKALIAN 1-10) -->
-    <div id="tableModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 md:p-6">
-        <div id="tableModalContent" class="bg-white rounded-3xl p-4 md:p-6 w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl border-4 border-amber-300">
-            
-            <!-- HEADER CERIA UNTUK PRINT -->
-            <div class="print-header">
-                <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-                    <span style="font-size: 26pt;">🎈</span>
-                    <h1 style="font-size: 24pt; font-weight: 900; color: #2563eb; margin: 0;">Balon Perkalian</h1>
-                    <span style="font-size: 26pt;">🎈</span>
-                </div>
-                <p style="font-size: 14pt; font-weight: 800; color: #d97706; margin-top: 2px; margin-bottom: 12px;">
-                    Kunci Jawaban Tabel Perkalian 1 - 10 • by Ikmal Imani
-                </p>
-            </div>
-
-            <!-- Header Modal Tampilan Web -->
-            <div class="modal-no-print flex justify-between items-center mb-3">
-                <div class="flex items-center space-x-2">
-                    <span class="text-2xl md:text-3xl">📖</span>
-                    <h2 class="text-lg md:text-2xl font-extrabold text-gray-800">Tabel Perkalian 1 - 10</h2>
-                </div>
-                <button onclick="closeTableModal()" class="bg-red-100 text-red-600 hover:bg-red-200 font-bold rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center transition">
-                    ✕
-                </button>
-            </div>
-
-            <!-- Isi Tabel Perkalian -->
-            <div class="overflow-auto flex-1 rounded-2xl border-2 border-amber-300 shadow-inner">
-                <table class="w-full text-center border-collapse">
-                    <thead>
-                        <tr class="bg-amber-400 text-amber-950 font-black text-xs md:text-base sticky top-0 z-10">
-                            <th class="p-2 border border-amber-300 bg-amber-500 text-white">×</th>
-                            <script>
-                                for(let col=1; col<=10; col++){
-                                    document.write(`<th class="p-2 border border-amber-300">${col}</th>`);
-                                }
-                            </script>
-                        </tr>
-                    </thead>
-                    <tbody class="text-xs md:text-sm font-bold text-gray-700">
-                        <script>
-                            for(let row=1; row<=10; row++){
-                                document.write(`<tr class="${row % 2 === 0 ? 'bg-amber-50/50' : 'bg-white'}">`);
-                                document.write(`<td class="p-2 border border-amber-200 bg-amber-200 font-extrabold text-amber-900 highlight">${row}</td>`);
-                                for(let col=1; col<=10; col++){
-                                    document.write(`<td class="p-2 border border-amber-100 hover:bg-amber-100 transition">${row * col}</td>`);
-                                }
-                                document.write(`</tr>`);
-                            }
-                        </script>
-                    </tbody>
-                </table>
-            </div>
-
-            <!-- Footer Modal Buttons -->
-            <div class="modal-no-print mt-3 flex space-x-2">
-                <button onclick="window.print()" class="flex-1 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-extrabold rounded-xl shadow transition flex items-center justify-center space-x-2">
-                    <span>🖨️ Cetak / Save PDF A4 (Besar)</span>
-                </button>
-                <button onclick="closeTableModal()" class="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-xl transition">
-                    Tutup
-                </button>
-            </div>
-
-        </div>
+  <div id="tableModal">
+    <div id="tableModalContent">
+      <div class="print-header">
+        <div style="font-size:22pt;font-weight:900;color:#6d3ff0;">🎈 Balon Perkalian 🎈</div>
+        <p style="font-size:13pt;font-weight:800;color:#c76b00;">Kunci Jawaban Tabel Perkalian 1–10 • by Ikmal Imani</p>
+      </div>
+      <div class="modal-no-print" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+        <strong style="color:#3a2e57;font-size:1.1rem;">📖 Tabel Perkalian 1–10</strong>
+        <button class="icon-btn" onclick="closeTableModal()">✕</button>
+      </div>
+      <div style="overflow:auto;flex:1;" id="tableWrap"></div>
+      <div class="modal-no-print" style="display:flex;gap:8px;margin-top:10px;">
+        <button class="primary-btn" style="background:linear-gradient(180deg,#5b8def,#2f66d8); box-shadow:0 6px 0 #1e469c;" onclick="window.print()">🖨️ Cetak / Simpan PDF</button>
+        <button class="secondary-btn" style="margin-top:0;" onclick="closeTableModal()">Tutup</button>
+      </div>
     </div>
+  </div>
 
-    <script>
-        /* STATE GAME */
-        let score = 0;
-        let selectedMode = 'all';
-        let currentQuestion = { num1: 0, num2: 0, answer: 0 };
-        let activeBalloons = [];
+<script>
+const COLORS=['#ff6f61','#4ea8de','#00b4a6','#ffb703','#8a5cf6','#ff7fae'];
+let score=0, streak=0, best=0, muted=false, selectedMode='all', currentQuestion={};
 
-        const balloonColors = [
-            { bg: '#ef4444' },
-            { bg: '#3b82f6' },
-            { bg: '#10b981' },
-            { bg: '#f59e0b' },
-            { bg: '#8b5cf6' },
-            { bg: '#ec4899' }
-        ];
+// bunting flags
+const bunting=document.getElementById('bunting');
+for(let i=0;i<14;i++){const f=document.createElement('div');f.className='flag';f.style.background=COLORS[i%COLORS.length];bunting.appendChild(f);}
 
-        /* WEB AUDIO API */
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        let audioCtx = null;
+// mode buttons 1-10
+const modeGrid=document.getElementById('modeGrid');
+for(let i=1;i<=10;i++){
+  const b=document.createElement('button');
+  b.className='mode-btn'; b.id='btn-mode-'+i; b.textContent='Perkalian '+i;
+  b.onclick=()=>selectMode(i);
+  modeGrid.appendChild(b);
+}
 
-        function initAudio() {
-            if (!audioCtx) audioCtx = new AudioContext();
-            if (audioCtx.state === 'suspended') audioCtx.resume();
-        }
+// multiplication table
+const tableWrap=document.getElementById('tableWrap');
+let html='<table><thead><tr><th>×</th>';
+for(let c=1;c<=10;c++) html+=`<th>${c}</th>`;
+html+='</tr></thead><tbody>';
+for(let r=1;r<=10;r++){
+  html+=`<tr><td class="hl">${r}</td>`;
+  for(let c=1;c<=10;c++) html+=`<td>${r*c}</td>`;
+  html+='</tr>';
+}
+html+='</tbody></table>';
+tableWrap.innerHTML=html;
 
-        function playPopSound() {
-            if (!audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(450, audioCtx.currentTime);
-            osc.frequency.exponentialRampToValueAtTime(90, audioCtx.currentTime + 0.1);
-            gain.gain.setValueAtTime(0.8, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.1);
-        }
+try{ best=parseInt(localStorage.getItem('balonPerkalianBest')||'0'); document.getElementById('bestNum').textContent=best; }catch(e){}
 
-        function playWrongSound() {
-            if (!audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sawtooth';
-            osc.frequency.setValueAtTime(180, audioCtx.currentTime);
-            osc.frequency.linearRampToValueAtTime(110, audioCtx.currentTime + 0.2);
-            gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
-            osc.connect(gain);
-            gain.connect(audioCtx.destination);
-            osc.start();
-            osc.stop(audioCtx.currentTime + 0.2);
-        }
+let audioCtx=null;
+function initAudio(){ const AC=window.AudioContext||window.webkitAudioContext; if(!audioCtx) audioCtx=new AC(); if(audioCtx.state==='suspended') audioCtx.resume(); }
+function beep(freq,type,dur,vol,glideTo){
+  if(!audioCtx||muted) return;
+  const osc=audioCtx.createOscillator(), gain=audioCtx.createGain();
+  osc.type=type; osc.frequency.setValueAtTime(freq,audioCtx.currentTime);
+  if(glideTo) osc.frequency.exponentialRampToValueAtTime(glideTo,audioCtx.currentTime+dur);
+  gain.gain.setValueAtTime(vol,audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(.01,audioCtx.currentTime+dur);
+  osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime+dur);
+}
+const playPop=()=>beep(450,'sine',.1,.8,90);
+const playWrong=()=>beep(180,'sawtooth',.2,.4,110);
+function toggleMute(){ muted=!muted; document.getElementById('muteBtn').textContent=muted?'🔇':'🔊'; }
 
-        /* EFEK PARTIKEL CANVAS */
-        const canvas = document.getElementById('popCanvas');
-        const ctx = canvas.getContext('2d');
-        let particles = [];
+const canvas=document.getElementById('popCanvas'), ctx=canvas.getContext('2d');
+let particles=[];
+function resizeCanvas(){canvas.width=innerWidth;canvas.height=innerHeight;}
+addEventListener('resize',resizeCanvas); resizeCanvas();
+function burst(x,y,color,count){
+  for(let i=0;i<count;i++) particles.push({x,y,vx:(Math.random()-.5)*12,vy:(Math.random()-.5)*12,r:Math.random()*6+4,color,a:1});
+}
+(function loop(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i]; p.x+=p.vx; p.y+=p.vy; p.a*=.92; p.r*=.95;
+    ctx.save(); ctx.globalAlpha=p.a; ctx.fillStyle=p.color; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,7); ctx.fill(); ctx.restore();
+    if(p.a<.05) particles.splice(i,1);
+  }
+  requestAnimationFrame(loop);
+})();
 
-        function resizeCanvas() {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
-        }
-        window.addEventListener('resize', resizeCanvas);
-        resizeCanvas();
+function openTableModal(){ document.getElementById('tableModal').classList.add('show'); }
+function closeTableModal(){ document.getElementById('tableModal').classList.remove('show'); }
 
-        function createPopParticles(x, y, color) {
-            for (let i = 0; i < 20; i++) {
-                particles.push({
-                    x: x, y: y,
-                    vx: (Math.random() - 0.5) * 12,
-                    vy: (Math.random() - 0.5) * 12,
-                    radius: Math.random() * 6 + 4,
-                    color: color,
-                    alpha: 1,
-                    life: 0.92
-                });
-            }
-        }
+function selectMode(mode){
+  selectedMode=mode;
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('btn-mode-'+mode).classList.add('active');
+}
 
-        function animateParticles() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            for (let i = particles.length - 1; i >= 0; i--) {
-                let p = particles[i];
-                p.x += p.vx;
-                p.y += p.vy;
-                p.alpha *= p.life;
-                p.radius *= 0.95;
+function showFeedback(text,ok){
+  const fb=document.getElementById('feedbackText');
+  fb.textContent=text;
+  fb.style.background=ok?'#2fb873':'#e64c3c'; fb.style.color='#fff';
+  fb.style.display='inline-block';
+  clearTimeout(fb._t); fb._t=setTimeout(()=>fb.style.display='none',850);
+}
 
-                ctx.save();
-                ctx.globalAlpha = p.alpha;
-                ctx.fillStyle = p.color;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.restore();
+function startGame(){
+  initAudio();
+  document.documentElement.requestFullscreen?.().catch(()=>{});
+  score=0; streak=0;
+  document.getElementById('scoreNum').textContent=0;
+  document.getElementById('streakNum').textContent=0;
+  document.getElementById('startScreen').style.display='none';
+  document.getElementById('topBar').style.display='flex';
+  document.getElementById('gameBoard').style.display='flex';
+  document.getElementById('modeTag').textContent=selectedMode==='all'?'1–10 Campur':'Perkalian '+selectedMode;
+  nextQuestion();
+}
 
-                if (p.alpha < 0.05) particles.splice(i, 1);
-            }
-            requestAnimationFrame(animateParticles);
-        }
-        animateParticles();
+function resetToStart(){
+  document.exitFullscreen?.().catch(()=>{});
+  document.getElementById('startScreen').style.display='flex';
+  document.getElementById('topBar').style.display='none';
+  document.getElementById('gameBoard').style.display='none';
+}
 
-        /* FULLSCREEN FUNCTION */
-        function requestFullScreen() {
-            const elem = document.documentElement;
-            if (elem.requestFullscreen) {
-                elem.requestFullscreen().catch(() => {});
-            } else if (elem.webkitRequestFullscreen) { /* Safari */
-                elem.webkitRequestFullscreen();
-            } else if (elem.msRequestFullscreen) { /* IE11 */
-                elem.msRequestFullscreen();
-            }
-        }
+function nextQuestion(){
+  const n1=selectedMode==='all'?Math.floor(Math.random()*10)+1:parseInt(selectedMode);
+  const n2=Math.floor(Math.random()*10)+1;
+  currentQuestion={n1,n2,answer:n1*n2};
+  document.getElementById('questionText').textContent=`${n1} × ${n2}`;
+  renderBalloons();
+}
 
-        /* LOGIKA MODAL TABEL */
-        function openTableModal() {
-            document.getElementById('tableModal').classList.remove('hidden');
-        }
+function renderBalloons(){
+  const area=document.getElementById('balloonArea');
+  area.innerHTML='';
+  let answers=[currentQuestion.answer], tries=0;
+  while(answers.length<4 && tries<40){
+    tries++;
+    const offset=(Math.floor(Math.random()*6)+1)*(Math.random()<.5?1:-1);
+    const wrong=currentQuestion.answer+offset;
+    if(wrong>0 && wrong<=100 && !answers.includes(wrong)) answers.push(wrong);
+  }
+  answers.sort(()=>Math.random()-.5);
 
-        function closeTableModal() {
-            document.getElementById('tableModal').classList.add('hidden');
-        }
+  answers.forEach(val=>{
+    const color=COLORS[Math.floor(Math.random()*COLORS.length)];
+    const wrap=document.createElement('div');
+    wrap.className='balloon-wrapper'; wrap.tabIndex=0; wrap.setAttribute('role','button');
+    wrap.setAttribute('aria-label','Jawaban '+val);
+    wrap.innerHTML=`<div class="balloon" style="background:${color}">${val}</div>
+      <div class="balloon-knot" style="border-top-color:${color}"></div>
+      <div class="balloon-string"></div>`;
+    const isCorrect=val===currentQuestion.answer;
+    const handle=(clientX,clientY)=>onAnswer(isCorrect,wrap,color,clientX,clientY);
+    wrap.addEventListener('pointerdown',e=>{e.preventDefault();handle(e.clientX,e.clientY);});
+    wrap.addEventListener('keydown',e=>{
+      if(e.key==='Enter'||e.key===' '){ e.preventDefault(); const r=wrap.getBoundingClientRect(); handle(r.left+r.width/2,r.top+r.height/2); }
+    });
+    area.appendChild(wrap);
+  });
+}
 
-        /* KONTROL MODE & GAMEPLAY */
-        function selectMode(mode) {
-            selectedMode = mode;
-            document.querySelectorAll('.mode-btn').forEach(btn => {
-                btn.classList.remove('bg-blue-500', 'text-white', 'border-blue-600');
-                btn.classList.add('bg-white', 'text-blue-600', 'border-blue-200');
-            });
-            const selectedBtn = document.getElementById(`btn-mode-${mode}`);
-            if (selectedBtn) {
-                selectedBtn.classList.remove('bg-white', 'text-blue-600', 'border-blue-200');
-                selectedBtn.classList.add('bg-blue-500', 'text-white', 'border-blue-600');
-            }
-        }
-
-        function showFeedback(text, isSuccess) {
-            const fb = document.getElementById('feedbackText');
-            fb.innerText = text;
-            fb.className = `text-sm md:text-2xl font-bold px-6 py-1 rounded-full shadow-md transition-all duration-200 ${
-                isSuccess ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
-            }`;
-            fb.classList.remove('hidden');
-            setTimeout(() => fb.classList.add('hidden'), 900);
-        }
-
-        function startGame() {
-            initAudio();
-            requestFullScreen(); // Mengaktifkan Fullscreen
-            score = 0;
-            document.getElementById('scoreDisplay').innerText = score;
-
-            document.getElementById('startScreen').classList.add('hidden');
-            document.getElementById('topBar').classList.remove('hidden');
-            document.getElementById('gameBoard').classList.remove('hidden');
-
-            const modeTag = document.getElementById('modeTag');
-            modeTag.innerText = selectedMode === 'all' ? '1-10 Campur' : `Perkalian ${selectedMode}`;
-
-            generateNewQuestion();
-        }
-
-        function generateNewQuestion() {
-            let n1 = selectedMode === 'all' ? Math.floor(Math.random() * 10) + 1 : parseInt(selectedMode);
-            let n2 = Math.floor(Math.random() * 10) + 1;
-
-            currentQuestion = { num1: n1, num2: n2, answer: n1 * n2 };
-            document.getElementById('questionText').innerText = `${n1} × ${n2} = ?`;
-
-            renderBalloonsAroundBox();
-        }
-
-        function renderBalloonsAroundBox() {
-            const balloonArea = document.getElementById('balloonArea');
-            balloonArea.innerHTML = '';
-            activeBalloons = [];
-
-            let answers = [currentQuestion.answer];
-            while (answers.length < 4) {
-                let offset = (Math.floor(Math.random() * 5) + 1) * (Math.random() < 0.5 ? 1 : -1);
-                let wrong = currentQuestion.answer + offset;
-                if (wrong > 0 && wrong <= 100 && !answers.includes(wrong)) {
-                    answers.push(wrong);
-                }
-            }
-            answers.sort(() => Math.random() - 0.5);
-
-            // Posisi adaptif yang aman agar balon tidak saling bertumpuk (terutama di HP Landscape)
-            const isLandscape = window.innerWidth > window.innerHeight && window.innerHeight < 500;
-            const positions = isLandscape ? [
-                { top: '10%', left: '2%' },
-                { top: '10%', right: '2%' },
-                { bottom: '10%', left: '2%' },
-                { bottom: '10%', right: '2%' }
-            ] : [
-                { top: '2%', left: '2%' },
-                { top: '2%', right: '2%' },
-                { bottom: '5%', left: '2%' },
-                { bottom: '5%', right: '2%' }
-            ];
-
-            answers.forEach((val, idx) => {
-                const colorObj = balloonColors[Math.floor(Math.random() * balloonColors.length)];
-                const pos = positions[idx];
-
-                const wrapper = document.createElement('div');
-                wrapper.className = 'balloon-wrapper pointer-events-auto';
-                
-                if (pos.top) wrapper.style.top = pos.top;
-                if (pos.bottom) wrapper.style.bottom = pos.bottom;
-                if (pos.left) wrapper.style.left = pos.left;
-                if (pos.right) wrapper.style.right = pos.right;
-
-                wrapper.innerHTML = `
-                    <div class="balloon" style="background-color: ${colorObj.bg}">
-                        ${val}
-                    </div>
-                    <div class="balloon-knot" style="border-bottom-color: ${colorObj.bg}"></div>
-                    <div class="balloon-string"></div>
-                `;
-
-                const balloonData = {
-                    element: wrapper,
-                    value: val,
-                    color: colorObj.bg,
-                    isCorrect: val === currentQuestion.answer
-                };
-
-                wrapper.addEventListener('pointerdown', (e) => {
-                    e.preventDefault();
-                    handleBalloonClick(balloonData, e.clientX, e.clientY);
-                });
-
-                balloonArea.appendChild(wrapper);
-                activeBalloons.push(balloonData);
-            });
-        }
-
-        function handleBalloonClick(balloon, clickX, clickY) {
-            if (balloon.isCorrect) {
-                playPopSound();
-                createPopParticles(clickX, clickY, balloon.color);
-                score += 10;
-                document.getElementById('scoreDisplay').innerText = score;
-                showFeedback('Hore! Benar! 🎉', true);
-                generateNewQuestion();
-            } else {
-                playWrongSound();
-                balloon.element.classList.add('shake');
-                setTimeout(() => balloon.element.classList.remove('shake'), 400);
-                showFeedback('Coba Lagi! ❌', false);
-            }
-        }
-
-        function resetToStart() {
-            if (document.exitFullscreen) {
-                document.exitFullscreen().catch(() => {});
-            }
-            document.getElementById('startScreen').classList.remove('hidden');
-            document.getElementById('topBar').classList.add('hidden');
-            document.getElementById('gameBoard').classList.add('hidden');
-        }
-
-        window.addEventListener('resize', () => {
-            if (!document.getElementById('gameBoard').classList.contains('hidden')) {
-                renderBalloonsAroundBox();
-            }
-        });
-    </script>
+function onAnswer(isCorrect,el,color,x,y){
+  if(isCorrect){
+    playPop(); burst(x,y,color,20); streak++;
+    score+=10+Math.min(streak-1,5)*2;
+    document.getElementById('scoreNum').textContent=score;
+    document.getElementById('streakNum').textContent=streak;
+    if(score>best){ best=score; document.getElementById('bestNum').textContent=best; try{localStorage.setItem('balonPerkalianBest',best);}catch(e){} }
+    showFeedback(streak>=5?'Luar biasa! 🔥':'Hore! Benar! 🎉',true);
+    if(streak>0 && streak%5===0) for(let i=0;i<3;i++) setTimeout(()=>burst(innerWidth*Math.random(),innerHeight*.3,COLORS[i%COLORS.length],25),i*120);
+    nextQuestion();
+  } else {
+    playWrong(); streak=0; document.getElementById('streakNum').textContent=0;
+    el.classList.add('shake'); setTimeout(()=>el.classList.remove('shake'),400);
+    showFeedback('Coba lagi! ❌',false);
+  }
+}
+</script>
 </body>
 </html>
