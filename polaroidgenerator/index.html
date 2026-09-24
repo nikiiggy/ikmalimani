@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polaroid Generator — Ikmal Imani</title>
+    
+    <!-- Meta SEO & Favicon -->
+    <meta name="description" content="Susun & cetak foto polaroid Instax Mini, Square, dan Wide ke kertas A4/A3 siap cetak.">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23C5A059'/><text x='50%' y='65%' font-family='Georgia, serif' font-size='50' font-weight='bold' fill='%23FFFFFF' text-anchor='middle'>II</text></svg>">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons & jsPDF CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        :root {
+            --bg-cream: #FAF7F2;
+            --card-cream: #FFFFFF;
+            --text-dark: #33302E;
+            --text-muted: #66605C;
+            --accent-gold: #C5A059;
+            --accent-gold-hover: #b08d4b;
+            --accent-sage: #8A9A86;
+            --border-color: #E8E2D9;
+            --danger-red: #E53935;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            background-color: #EAE6DF;
+            color: var(--text-dark);
+            line-height: 1.4;
+            display: flex;
+            justify-content: center;
+        }
+
+        .d-none { display: none !important; }
+
+        .mobile-wrapper {
+            width: 100%;
+            max-width: 480px;
+            background-color: var(--bg-cream);
+            min-height: 100vh;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        h1, h2, h3, h4 { font-family: 'Cormorant Garamond', serif; }
+
+        /* Hero Header */
+        .hero {
+            padding: 25px 20px 15px;
+            text-align: center;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background-color: var(--card-cream);
+            color: var(--accent-sage);
+            padding: 3px 12px;
+            border-radius: 50px;
+            font-size: 10px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .hero h1.hero-name {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-dark);
+            line-height: 1.1;
+            margin-bottom: 4px;
+        }
+
+        .hero p.hero-sub {
+            font-size: 12px;
+            color: var(--text-muted);
+            max-width: 320px;
+            margin: 0 auto;
+        }
+
+        /* Section Cards */
+        .page-section { padding: 10px 15px 20px; }
+
+        .card-box {
+            background-color: var(--card-cream);
+            border-radius: 16px;
+            padding: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            margin-bottom: 15px;
+        }
+
+        .section-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* Upload Area */
+        .drop-zone-label {
+            display: block;
+            border: 2px dashed var(--accent-gold);
+            border-radius: 14px;
+            padding: 20px 12px;
+            text-align: center;
+            background-color: #FAF8F5;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .drop-zone-label:hover { background-color: #F5EFE6; }
+
+        .drop-icon {
+            font-size: 28px;
+            color: var(--accent-gold);
+            margin-bottom: 6px;
+        }
+
+        .drop-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .drop-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+            margin-bottom: 10px;
+        }
+
+        /* Button Custom */
+        .btn-gold {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+            background-color: var(--accent-gold);
+            color: #FFFFFF !important;
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: 25px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(197, 160, 89, 0.2);
+            transition: var(--transition);
+        }
+
+        .btn-gold:hover { background-color: var(--accent-gold-hover); }
+
+        .btn-outline-danger {
+            background: transparent;
+            color: var(--danger-red);
+            border: 1px solid var(--danger-red);
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .btn-small-reset {
+            background: var(--bg-cream);
+            color: var(--text-dark);
+            border: 1px solid var(--border-color);
+            padding: 4px 10px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .privacy-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background-color: var(--bg-cream);
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 12px;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            border: 1px solid var(--border-color);
+        }
+
+        .privacy-box i { font-size: 16px; color: var(--accent-sage); }
+
+        /* Item Photo Layout Ringkas & Horizontal */
+        .photo-item {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 10px;
+            background-color: var(--card-cream);
+            margin-bottom: 10px;
+        }
+
+        .photo-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .photo-name {
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            max-width: 220px;
+        }
+
+        .photo-item-body {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .photo-editor-wrapper {
+            flex-shrink: 0;
+            background: #FFFFFF;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 4px 4px 12px 4px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .photo-editor {
+            background: #EAE6DF;
+            overflow: hidden;
+            position: relative;
+            touch-action: none;
+        }
+
+        .photo-editor img {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            max-width: none;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        .photo-controls {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 2px;
+        }
+
+        .form-control, .form-select {
+            width: 100%;
+            padding: 5px 8px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-cream);
+            color: var(--text-dark);
+            font-family: inherit;
+            font-size: 0.75rem;
+            outline: none;
+        }
+
+        .qty-control {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .qty-btn {
+            width: 26px;
+            height: 26px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-cream);
+            color: var(--text-dark);
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .qty-input {
+            width: 40px;
+            text-align: center;
+            padding: 3px;
+        }
+
+        input[type=range] {
+            width: 100%;
+            accent-color: var(--accent-gold);
+        }
+
+        .settings-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .full-width { grid-column: span 2; }
+
+        /* Preview Paper Container */
+        .paper-wrap {
+            overflow: auto;
+            background: #EAE6DF;
+            border-radius: 10px;
+            padding: 8px;
+            margin-bottom: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .paper {
+            position: relative;
+            background: #fff;
+            margin: auto;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transform-origin: top center;
+        }
+
+        .paper-slot {
+            position: absolute;
+            background: #FFFFFF;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+            box-sizing: border-box;
+        }
+
+        .paper-slot-inner {
+            position: absolute;
+            overflow: hidden;
+            background: #f8f9fa;
+        }
+
+        .paper-slot-inner img {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            max-width: none;
+            user-select: none;
+        }
+
+        .page-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-align: center;
+            margin-top: 3px;
+        }
+
+        .alert-box {
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .alert-info {
+            background-color: #FAF7F2;
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+        }
+
+        footer {
+            margin-top: auto;
+            background-color: var(--text-dark);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 16px;
+            text-align: center;
+            font-size: 11px;
+        }
+
+        footer span { color: var(--accent-gold); }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-wrapper">
+        <!-- Hero Header -->
+        <section class="hero">
+            <span class="hero-badge">Graphic Designer &amp; Digital Tools</span>
+            <h1 class="hero-name">Polaroid Generator</h1>
+            <p class="hero-sub">Susun & cetak foto polaroid Instax Mini, Square, dan Wide otomatis ke kertas A4/A3.</p>
+        </section>
+
+        <!-- Main Content Section -->
+        <section class="page-section">
+            
+            <!-- 1. Tambah Foto -->
+            <div class="card-box">
+                <h2 class="section-title">1. Tambah Foto</h2>
+                
+                <input type="file" id="fileInput" accept="image/jpeg,image/jpg,image/png" multiple class="d-none">
+                
+                <label for="fileInput" id="dropArea" class="drop-zone-label">
+                    <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
+                    <div class="drop-title">Pilih atau Tarik Foto</div>
+                    <div class="drop-sub">Bisa memilih beberapa foto sekaligus</div>
+                    <span class="btn-gold">
+                        <i class="fa-solid fa-folder-open"></i> Upload Foto
+                    </span>
+                </label>
+
+                <div class="privacy-box">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <div>
+                        <strong>Aman & Privat:</strong> Dikerjakan langsung di browsermu tanpa upload ke server.
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Ringkasan & Setting Foto -->
+            <div class="card-box d-none" id="photoSection">
+                <div class="section-title">
+                    <span>2. Atur Foto Polaroid</span>
+                    <button class="btn-outline-danger" id="clearPhotos"><i class="fa-solid fa-trash"></i> Hapus Semua</button>
+                </div>
+                <div id="photoCount" style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 10px;"></div>
+                <div id="photoList"></div>
+            </div>
+
+            <!-- 3. Pengaturan Kertas (A4 & A3) -->
+            <div class="card-box d-none" id="settingsSection">
+                <h2 class="section-title">3. Pengaturan Kertas</h2>
+                <div class="settings-grid">
+                    <div class="form-group full-width">
+                        <label>Ukuran Kertas</label>
+                        <select class="form-select" id="pageSize">
+                            <option value="a4" selected>A4 — 210 × 297 mm</option>
+                            <option value="a3">A3 — 297 × 420 mm</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Orientasi</label>
+                        <select class="form-select" id="orientation">
+                            <option value="portrait" selected>Portrait</option>
+                            <option value="landscape">Landscape</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Margin Kertas (mm)</label>
+                        <input type="number" min="0" max="30" value="5" class="form-control" id="margin">
+                    </div>
+                    <div class="form-group">
+                        <label>Jarak Foto (mm)</label>
+                        <input type="number" min="0" max="10" step="0.5" value="2" class="form-control" id="gap">
+                    </div>
+                    <div class="form-group">
+                        <label>Garis Potong/Batas</label>
+                        <select class="form-select" id="cutLine">
+                            <option value="yes" selected>Tampilkan (Tipis)</option>
+                            <option value="no">Tanpa Garis</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="alert-box alert-info" style="margin-top: 10px; margin-bottom: 0;">
+                    <i class="fa-solid fa-circle-info"></i> Gunakan skala <strong>Actual Size / 100%</strong> saat mencetak file PDF.
+                </div>
+            </div>
+
+            <!-- 4. Preview A4 / A3 -->
+            <div class="card-box d-none" id="previewSection">
+                <div class="section-title">
+                    <span>4. Preview Layout</span>
+                    <button class="btn-small-reset" id="refreshPreview"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+                </div>
+                <div id="layoutInfo" style="font-size: 0.72rem; color: var(--text-muted); margin-bottom: 10px;"></div>
+                <div id="pagesPreview"></div>
+
+                <button type="button" class="btn-gold" id="generatePdf" style="margin-top: 12px;">
+                    <i class="fa-solid fa-file-pdf"></i> Buat PDF Siap Print
+                </button>
+            </div>
+
+            <!-- Loading Alert -->
+            <div class="alert-box alert-info d-none" id="processingAlert">
+                <i class="fa-solid fa-spinner fa-spin"></i> Sedang memproses PDF...
+            </div>
+
+            <!-- Result PDF -->
+            <div class="card-box d-none" id="resultSection" style="text-align: center;">
+                <i class="fa-solid fa-circle-check" style="font-size: 36px; color: var(--accent-gold); margin-bottom: 8px;"></i>
+                <h3 style="font-size: 1.1rem; margin-bottom: 2px;">PDF Polaroid Siap!</h3>
+                <p style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 12px;" id="resultInfo"></p>
+                <button class="btn-gold" id="downloadPdf">
+                    <i class="fa-solid fa-download"></i> Download File PDF
+                </button>
+            </div>
+
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>© 2026 <span>ikmalimanii</span>. All Rights Reserved.</p>
+        </footer>
+    </div>
+
+    <!-- JavaScript Engine -->
+    <script>
+        // Spesifikasi Ukuran Polaroid Instax (mm)
+        // Outer: [Lebar Total, Tinggi Total]
+        // Photo: [Lebar Foto, Tinggi Foto]
+        // Offset: [Margin Kiri Foto, Margin Atas Foto]
+        const POLAROID_TYPES = {
+            'mini': {
+                name: 'Instax Mini (53x86 mm)',
+                outer: [53, 86],
+                photo: [46, 61],
+                offset: [3.5, 3.5]
+            },
+            'square': {
+                name: 'Instax Square (71x86 mm)',
+                outer: [71, 86],
+                photo: [61, 61],
+                offset: [5, 5]
+            },
+            'wide': {
+                name: 'Instax Wide (108x86 mm)',
+                outer: [108, 86],
+                photo: [99, 62],
+                offset: [4.5, 4.5]
+            }
+        };
+
+        const PAPER_SIZES = {
+            'a4': [210, 297],
+            'a3': [297, 420]
+        };
+
+        let photos = [], generatedPdfBlob = null;
+        const $ = function(id) { return document.getElementById(id); };
+
+        function createUniqueId() {
+            return 'polaroid_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        const dropArea = $('dropArea'), 
+              fileInput = $('fileInput'),
+              photoSection = $('photoSection'), 
+              settingsSection = $('settingsSection'), 
+              previewSection = $('previewSection'), 
+              resultSection = $('resultSection');
+
+        fileInput.addEventListener('change', function() { 
+            if (this.files && this.files.length > 0) {
+                handleFiles(this.files); 
+                this.value = ''; 
+            }
+        });
+
+        dropArea.ondragover = function(e) { e.preventDefault(); dropArea.style.borderColor = 'var(--text-dark)'; };
+        dropArea.ondragleave = function() { dropArea.style.borderColor = 'var(--accent-gold)'; };
+        dropArea.ondrop = function(e) { 
+            e.preventDefault(); 
+            dropArea.style.borderColor = 'var(--accent-gold)'; 
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                handleFiles(e.dataTransfer.files); 
+            }
+        };
+
+        function handleFiles(files) {
+            const validFiles = Array.from(files).filter(function(f) {
+                return ['image/jpeg','image/jpg','image/png'].indexOf(f.type.toLowerCase()) !== -1;
+            });
+
+            validFiles.forEach(function(file) {
+                const r = new FileReader();
+                r.onload = function(e) {
+                    const im = new Image();
+                    im.onload = function() {
+                        photos.push({
+                            id: createUniqueId(),
+                            name: file.name,
+                            dataUrl: e.target.result,
+                            naturalWidth: im.naturalWidth,
+                            naturalHeight: im.naturalHeight,
+                            type: 'mini',
+                            qty: 1, // Default jumlah cetak 1
+                            zoom: 1,
+                            x: 0,
+                            y: 0
+                        });
+                        renderPhotos();
+                        updateAll();
+                    };
+                    im.src = e.target.result;
+                };
+                r.readAsDataURL(file);
+            });
+        }
+
+        function escapeHtml(t) {
+            const d = document.createElement('div');
+            d.textContent = t;
+            return d.innerHTML;
+        }
+
+        // Render Item Foto Ringkas Secara Horizontal
+        function renderPhotos() {
+            const list = $('photoList');
+            list.innerHTML = '';
+            $('photoCount').textContent = photos.length + ' Foto diunggah';
+
+            [photoSection, settingsSection, previewSection].forEach(function(el) {
+                if (photos.length > 0) { el.classList.remove('d-none'); } 
+                else { el.classList.add('d-none'); }
+            });
+
+            if (!photos.length) { 
+                resultSection.classList.add('d-none'); 
+                return; 
+            }
+
+            photos.forEach(function(p, i) {
+                const spec = POLAROID_TYPES[p.type];
+                const row = document.createElement('div');
+                row.className = 'photo-item';
+
+                // Skala editor ringkas
+                const editorScale = 0.8;
+                const outerW = Math.round(spec.outer[0] * editorScale);
+                const outerH = Math.round(spec.outer[1] * editorScale);
+                const photoW = Math.round(spec.photo[0] * editorScale);
+                const photoH = Math.round(spec.photo[1] * editorScale);
+                const offX = Math.round(spec.offset[0] * editorScale);
+                const offY = Math.round(spec.offset[1] * editorScale);
+
+                row.innerHTML = 
+                    '<div class="photo-item-header">' +
+                        '<div class="photo-name text-truncate">' + escapeHtml(p.name) + '</div>' +
+                        '<button class="btn-outline-danger remove-photo" data-i="' + i + '"><i class="fa-solid fa-trash"></i></button>' +
+                    '</div>' +
+                    '<div class="photo-item-body">' +
+                        '<div class="photo-editor-wrapper" style="width:' + (outerW + 10) + 'px; height:' + (outerH + 18) + 'px;">' +
+                            '<div class="photo-editor" data-editor="' + i + '" style="width:' + photoW + 'px; height:' + photoH + 'px; margin-left:' + offX + 'px; margin-top:' + offY + 'px;">' +
+                                '<img src="' + p.dataUrl + '" alt="Crop Preview">' +
+                            '</div>' +
+                        '</div>' +
+                        '<div class="photo-controls">' +
+                            '<div class="form-group">' +
+                                '<label>Ukuran Polaroid</label>' +
+                                '<select class="form-select photo-type" data-i="' + i + '">' +
+                                    '<option value="mini" ' + (p.type==='mini'?'selected':'') + '>Instax Mini (53x86 mm)</option>' +
+                                    '<option value="square" ' + (p.type==='square'?'selected':'') + '>Instax Square (71x86 mm)</option>' +
+                                    '<option value="wide" ' + (p.type==='wide'?'selected':'') + '>Instax Wide (108x86 mm)</option>' +
+                                '</select>' +
+                            '</div>' +
+                            '<div style="display:flex; gap:8px;">' +
+                                '<div class="form-group" style="flex:1;">' +
+                                    '<label>Jumlah Cetak</label>' +
+                                    '<div class="qty-control">' +
+                                        '<button class="qty-btn qty-minus" data-i="' + i + '">-</button>' +
+                                        '<input type="number" min="1" max="999" class="form-control qty-input photo-qty" data-i="' + i + '" value="' + p.qty + '">' +
+                                        '<button class="qty-btn qty-plus" data-i="' + i + '">+</button>' +
+                                    '</div>' +
+                                '</div>' +
+                                '<div class="form-group" style="flex:1;">' +
+                                    '<label>Zoom (' + Math.round(p.zoom * 100) + '%)</label>' +
+                                    '<input type="range" min="1" max="3" step="0.01" value="' + p.zoom + '" class="photo-zoom" data-i="' + i + '">' +
+                                '</div>' +
+                            '</div>' +
+                            '<div style="text-align:right;">' +
+                                '<button class="btn-small-reset reset-pos" data-i="' + i + '"><i class="fa-solid fa-rotate-left"></i> Reset Posisi</button>' +
+                            '</div>' +
+                        '</div>' +
+                    '</div>';
+
+                list.appendChild(row);
+                updateEditor(i);
+            });
+            bindControls();
+        }
+
+        function coverScale(p, boxW, boxH) {
+            return Math.max(boxW / p.naturalWidth, boxH / p.naturalHeight) * p.zoom;
+        }
+
+        function updateEditor(i) {
+            const p = photos[i];
+            const ed = document.querySelector('[data-editor="' + i + '"]');
+            if (!ed) return;
+            const img = ed.querySelector('img');
+            const s = coverScale(p, ed.clientWidth, ed.clientHeight);
+            img.style.width = (p.naturalWidth * s) + 'px';
+            img.style.height = (p.naturalHeight * s) + 'px';
+            img.style.transform = 'translate(calc(-50% + ' + p.x + 'px), calc(-50% + ' + p.y + 'px))';
+        }
+
+        function bindControls() {
+            document.querySelectorAll('.photo-type').forEach(function(el) {
+                el.onchange = function() {
+                    const idx = +this.dataset.i;
+                    photos[idx].type = this.value;
+                    photos[idx].x = 0;
+                    photos[idx].y = 0;
+                    renderPhotos();
+                    updateAll();
+                };
+            });
+
+            document.querySelectorAll('.photo-qty').forEach(function(el) {
+                el.onchange = function() {
+                    const idx = +this.dataset.i;
+                    photos[idx].qty = Math.max(1, +this.value || 1);
+                    updateAll();
+                };
+            });
+
+            document.querySelectorAll('.qty-minus').forEach(function(el) {
+                el.onclick = function() {
+                    const idx = +this.dataset.i;
+                    photos[idx].qty = Math.max(1, photos[idx].qty - 1);
+                    renderPhotos();
+                    updateAll();
+                };
+            });
+
+            document.querySelectorAll('.qty-plus').forEach(function(el) {
+                el.onclick = function() {
+                    const idx = +this.dataset.i;
+                    photos[idx].qty++;
+                    renderPhotos();
+                    updateAll();
+                };
+            });
+
+            document.querySelectorAll('.photo-zoom').forEach(function(el) {
+                el.oninput = function() {
+                    const idx = +this.dataset.i;
+                    photos[idx].zoom = +this.value;
+                    updateEditor(idx);
+                    updatePreview();
+                };
+            });
+
+            document.querySelectorAll('.reset-pos').forEach(function(el) {
+                el.onclick = function() {
+                    const idx = +this.dataset.i;
+                    photos[idx].zoom = 1; 
+                    photos[idx].x = 0;
+                    photos[idx].y = 0;
+                    renderPhotos();
+                    updateAll();
+                };
+            });
+
+            document.querySelectorAll('.remove-photo').forEach(function(el) {
+                el.onclick = function() {
+                    const idx = +this.dataset.i;
+                    photos.splice(idx, 1);
+                    renderPhotos();
+                    updateAll();
+                };
+            });
+
+            document.querySelectorAll('.photo-editor').forEach(function(ed) {
+                let dragging = false, sx = 0, sy = 0, ox = 0, oy = 0;
+                const idx = +ed.dataset.editor;
+
+                ed.onpointerdown = function(e) {
+                    dragging = true; 
+                    sx = e.clientX; 
+                    sy = e.clientY;
+                    ox = photos[idx].x; 
+                    oy = photos[idx].y;
+                    ed.setPointerCapture(e.pointerId);
+                };
+
+                ed.onpointermove = function(e) {
+                    if (!dragging) return;
+                    photos[idx].x = ox + e.clientX - sx;
+                    photos[idx].y = oy + e.clientY - sy;
+                    updateEditor(idx);
+                    updatePreview();
+                };
+
+                ed.onpointerup = function() { dragging = false; };
+            });
+        }
+
+        $('clearPhotos').onclick = function() { photos = []; renderPhotos(); };
+        
+        ['pageSize','orientation','margin','gap','cutLine'].forEach(function(id) {
+            $(id).oninput = updateAll;
+        });
+
+        $('refreshPreview').onclick = updateAll;
+
+        function getPage() {
+            const pSize = PAPER_SIZES[$('pageSize').value] || PAPER_SIZES['a4'];
+            return $('orientation').value === 'portrait' ? [pSize[0], pSize[1]] : [pSize[1], pSize[0]];
+        }
+
+        function buildLayout() {
+            const pageDim = getPage();
+            const pw = pageDim[0];
+            const ph = pageDim[1];
+            const margin = Math.max(0, +$('margin').value || 0);
+            const gap = Math.max(0, +$('gap').value || 0);
+            const aw = pw - margin * 2;
+            const ah = ph - margin * 2;
+
+            const items = [];
+            photos.forEach(function(p, pi) {
+                const spec = POLAROID_TYPES[p.type];
+                for (let q = 0; q < p.qty; q++) {
+                    items.push({ 
+                        photoIndex: pi, 
+                        type: p.type,
+                        w: spec.outer[0], 
+                        h: spec.outer[1] 
+                    });
+                }
+            });
+
+            const pages = []; 
+            let page = [];
+            let x = margin;
+            let y = margin;
+            let rowH = 0;
+
+            items.forEach(function(it) {
+                if (x + it.w > margin + aw + 0.001) { 
+                    x = margin; 
+                    y += rowH + gap; 
+                    rowH = 0; 
+                }
+                if (y + it.h > margin + ah + 0.001) { 
+                    pages.push(page); 
+                    page = []; 
+                    x = margin; 
+                    y = margin; 
+                    rowH = 0; 
+                }
+                page.push({ photoIndex: it.photoIndex, type: it.type, w: it.w, h: it.h, x: x, y: y }); 
+                x += it.w + gap; 
+                rowH = Math.max(rowH, it.h);
+            });
+
+            if (page.length) pages.push(page);
+            return { pages: pages, pw: pw, ph: ph, margin: margin, gap: gap, total: items.length };
+        }
+
+        function updateAll() {
+            generatedPdfBlob = null;
+            resultSection.classList.add('d-none');
+            updatePreview();
+        }
+
+        function updatePreview() {
+            if (!photos.length) return;
+            const layout = buildLayout();
+            const paperLabelText = $('pageSize').value.toUpperCase();
+            $('layoutInfo').textContent = layout.total + ' foto • ' + layout.pages.length + ' lembar ' + paperLabelText + ' • margin ' + layout.margin + ' mm • gap ' + layout.gap + ' mm';
+            const wrap = $('pagesPreview'); 
+            wrap.innerHTML = '';
+            
+            layout.pages.forEach(function(page, idx) {
+                const outer = document.createElement('div');
+                outer.className = 'paper-wrap';
+                const containerWidth = wrap.clientWidth ? (wrap.clientWidth - 16) : 380;
+                const scale = containerWidth / layout.pw;
+                
+                const paper = document.createElement('div');
+                paper.className = 'paper';
+                paper.style.width = (layout.pw * scale) + 'px';
+                paper.style.height = (layout.ph * scale) + 'px';
+
+                page.forEach(function(it) {
+                    const p = photos[it.photoIndex];
+                    const spec = POLAROID_TYPES[p.type];
+
+                    // Outer Frame Polaroid
+                    const slot = document.createElement('div');
+                    slot.className = 'paper-slot';
+                    slot.style.left = (it.x * scale) + 'px';
+                    slot.style.top = (it.y * scale) + 'px';
+                    slot.style.width = (it.w * scale) + 'px';
+                    slot.style.height = (it.h * scale) + 'px';
+                    if ($('cutLine').value === 'yes') {
+                        slot.style.outline = '1px dashed #cccccc';
+                    }
+
+                    // Inner Photo
+                    const inner = document.createElement('div');
+                    inner.className = 'paper-slot-inner';
+                    inner.style.left = (spec.offset[0] * scale) + 'px';
+                    inner.style.top = (spec.offset[1] * scale) + 'px';
+                    inner.style.width = (spec.photo[0] * scale) + 'px';
+                    inner.style.height = (spec.photo[1] * scale) + 'px';
+
+                    const img = document.createElement('img');
+                    img.src = p.dataUrl;
+                    
+                    const innerW = spec.photo[0] * scale;
+                    const innerH = spec.photo[1] * scale;
+                    const s = coverScale(p, innerW, innerH);
+
+                    img.style.width = (p.naturalWidth * s) + 'px';
+                    img.style.height = (p.naturalHeight * s) + 'px';
+
+                    const editor = document.querySelector('[data-editor="' + it.photoIndex + '"]');
+                    const factor = editor ? (innerW / editor.clientWidth) : 1;
+                    img.style.transform = 'translate(calc(-50% + ' + (p.x * factor) + 'px), calc(-50% + ' + (p.y * factor) + 'px))';
+
+                    inner.appendChild(img);
+                    slot.appendChild(inner);
+                    paper.appendChild(slot);
+                });
+                outer.appendChild(paper);
+                
+                const lab = document.createElement('div');
+                lab.className = 'page-label';
+                lab.textContent = 'Halaman ' + (idx + 1) + ' dari ' + layout.pages.length;
+                outer.appendChild(lab);
+                wrap.appendChild(outer);
+            });
+        }
+
+        function cropDataUrl(p, wMm, hMm) {
+            return new Promise(function(resolve) {
+                const dpi = 300;
+                const pxPerMm = dpi / 25.4;
+                const cw = Math.round(wMm * pxPerMm);
+                const ch = Math.round(hMm * pxPerMm);
+                const c = document.createElement('canvas'); 
+                c.width = cw; 
+                c.height = ch;
+                const ctx = c.getContext('2d'); 
+                const img = new Image(); 
+                img.src = p.dataUrl;
+                
+                img.onload = function() {
+                    const base = Math.max(cw / p.naturalWidth, ch / p.naturalHeight) * p.zoom;
+                    const dw = p.naturalWidth * base;
+                    const dh = p.naturalHeight * base;
+                    const editor = document.querySelector('[data-editor="' + photos.indexOf(p) + '"]');
+                    const mmPerEditorPx = editor ? (wMm / editor.clientWidth) : 1;
+                    const dx = p.x * mmPerEditorPx * pxPerMm;
+                    const dy = p.y * mmPerEditorPx * pxPerMm;
+                    ctx.drawImage(img, (cw - dw) / 2 + dx, (ch - dh) / 2 + dy, dw, dh);
+                    resolve(c.toDataURL('image/jpeg', 0.95));
+                };
+            });
+        }
+
+        $('generatePdf').onclick = async function() {
+            if (!photos.length) return;
+            
+            const jsPDFLib = (window.jspdf && window.jspdf.jsPDF) ? window.jspdf.jsPDF : window.jsPDF;
+            if (!jsPDFLib) {
+                alert("Library jsPDF belum selesai dimuat. Silakan periksa koneksi internet.");
+                return;
+            }
+
+            $('processingAlert').classList.remove('d-none');
+            $('generatePdf').disabled = true;
+            resultSection.classList.add('d-none');
+
+            try {
+                const layout = buildLayout();
+                const ori = $('orientation').value;
+                const paperFormat = $('pageSize').value;
+                const pdf = new jsPDFLib({ orientation: ori, unit: 'mm', format: paperFormat });
+                const cache = {};
+
+                for (let pi = 0; pi < layout.pages.length; pi++) {
+                    if (pi > 0) pdf.addPage(paperFormat, ori);
+                    for (let k = 0; k < layout.pages[pi].length; k++) {
+                        const it = layout.pages[pi][k];
+                        const p = photos[it.photoIndex];
+                        const spec = POLAROID_TYPES[p.type];
+                        const key = it.photoIndex + '-' + p.type;
+
+                        // 1. Gambar Outer White Frame Polaroid
+                        pdf.setFillColor(255, 255, 255);
+                        pdf.rect(it.x, it.y, it.w, it.h, 'F');
+
+                        if ($('cutLine').value === 'yes') {
+                            pdf.setDrawColor(220, 220, 220);
+                            pdf.setLineWidth(0.1);
+                            pdf.rect(it.x, it.y, it.w, it.h, 'S');
+                        }
+
+                        // 2. Gambar Foto
+                        if (!cache[key]) {
+                            cache[key] = await cropDataUrl(p, spec.photo[0], spec.photo[1]);
+                        }
+
+                        const photoX = it.x + spec.offset[0];
+                        const photoY = it.y + spec.offset[1];
+                        pdf.addImage(cache[key], 'JPEG', photoX, photoY, spec.photo[0], spec.photo[1], undefined, 'FAST');
+                    }
+                }
+
+                generatedPdfBlob = pdf.output('blob');
+                $('resultInfo').textContent = layout.total + ' polaroid • ' + layout.pages.length + ' lembar ' + paperFormat.toUpperCase() + ' • ' + (ori==='portrait'?'Portrait':'Landscape');
+                resultSection.classList.remove('d-none');
+                resultSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } catch (e) {
+                console.error(e);
+                alert('Gagal membuat file PDF. Silakan coba lagi.');
+            } finally {
+                $('processingAlert').classList.add('d-none');
+                $('generatePdf').disabled = false;
+            }
+        };
+
+        $('downloadPdf').onclick = function() {
+            if (!generatedPdfBlob) return;
+            const u = URL.createObjectURL(generatedPdfBlob);
+            const a = document.createElement('a');
+            a.href = u;
+            a.download = 'Polaroid-' + $('pageSize').value.toUpperCase() + '-Siap-Cetak.pdf';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(function() { URL.revokeObjectURL(u); }, 1000);
+        };
+
+        window.addEventListener('resize', function() { 
+            if (photos.length) updatePreview(); 
+        });
+    </script>
+</body>
+</html>
