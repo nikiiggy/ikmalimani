@@ -147,7 +147,7 @@
             margin-right: auto;
         }
 
-        /* Wrapper Foto Profil dengan Gradient Overlay */
+        /* Wrapper Foto Profil Utama */
         .profile-img-container {
             position: relative;
             width: 100%;
@@ -240,7 +240,7 @@
             display: block;
         }
 
-        /* Badge Nomor di Pojok Kiri Atas Gambar */
+        /* Badge Nomor di Pojok Kiri Atas Gambar (#1, #2, dst) */
         .item-number-badge {
             position: absolute;
             top: 0;
@@ -285,7 +285,7 @@
             margin-left: auto;
         }
 
-        /* Badge Gold Bawaan (INFO / PDF) */
+        /* Badge Gold Bawaan */
         .pdf-badge {
             background-color: var(--accent-gold);
             color: #FFF;
@@ -295,7 +295,7 @@
             border-radius: 4px;
         }
 
-        /* Badge Bintang Merah Fleksibel (FREE, HOT, NEW, dll) */
+        /* Badge Bintang Merah Fleksibel (HOT, FREE, NEW, dll) */
         .star-badge-free {
             background-color: #E53935;
             color: #FFFFFF;
@@ -379,7 +379,7 @@
             background-color: rgba(0, 0, 0, 0.8);
         }
 
-        /* Container Foto Modal 1:1 Presisi */
+        /* Container Foto Modal 1:1 Presisi dengan Preloading Fade-In */
         .modal-img-wrapper {
             width: 100%;
             aspect-ratio: 1 / 1;
@@ -503,7 +503,7 @@
             </a>
         </section>
 
-        <!-- PORTFOLIO & SERVICES LIST -->
+        <!-- PORTFOLIO & SERVICES LIST (DINAMIS DARI GOOGLE SHEETS) -->
         <section class="page-section">
             <div class="pdf-list" id="pdfListContainer">
                 <p style="text-align:center; font-size:13px; color:var(--text-muted);">Memuat data...</p>
@@ -543,85 +543,107 @@
         </div>
     </div>
 
-    <!-- ================= JAVASCRIPT FETCH & PENOMORAN OTOMATIS ================= -->
+    <!-- ================= JAVASCRIPT FETCH, CACHING, & EVENT HANDLER ================= -->
     <script>
         const sheetCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ-enavxOP-JDGc-D-yRUkrqMumpydoOJW4PtVmen4ZJtE9l8r-BX0wH0i3lWQi-G3wcU_sTixatKRE/pub?gid=0&single=true&output=csv';
+        const CACHE_KEY = 'biolink_data_cache';
 
+        // Fungsi Otomatis Kompres Foto ke format WebP ringan via CDN Wsrv
         function getOptimizedImg(url, width = 300) {
             if (!url) return 'https://via.placeholder.com/200x200/C5A059/FFFFFF?text=Image';
             if (url.startsWith('data:image')) return url;
             return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=${width}&output=webp&q=80`;
         }
 
+        // Fungsi Render List Item
+        function renderBiolinkData(dataText) {
+            const rows = dataText.split('\n').map(row => {
+                return row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(field => field.replace(/^"\vert{}"$/g, '').trim());
+            });
+
+            const container = document.getElementById('pdfListContainer');
+            container.innerHTML = '';
+
+            let itemCounter = 1;
+
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (row.length < 7 || !row[0]) continue;
+
+                const [judul, subjudul, deskripsi, foto, star, badge, link, tombolText] = row;
+
+                const btn = document.createElement('div');
+                btn.className = 'pdf-item-btn';
+                
+                const safeJudul = judul.replace(/'/g, "\\'");
+                const safeSubjudul = subjudul.replace(/'/g, "\\'");
+                const safeDeskripsi = deskripsi.replace(/'/g, "\\'").replace(/\n/g, ' ');
+                const rawFoto = foto;
+                const safeLink = link;
+                const customTombol = (tombolText && tombolText.trim() !== '') ? tombolText.replace(/'/g, "\\'") : 'Download';
+
+                const thumbImgUrl = getOptimizedImg(rawFoto, 200);
+                const modalImgUrl = getOptimizedImg(rawFoto, 600);
+
+                btn.setAttribute('onclick', `openModal('${modalImgUrl}', '${safeJudul}', '${safeSubjudul}', '${safeDeskripsi}', '${safeLink}', '${customTombol}')`);
+
+                let badgeHtml = '';
+                if (star && star.trim() !== '') {
+                    badgeHtml += `<span class="star-badge-free"><i class="fa-solid fa-star"></i> ${star.trim()}</span>`;
+                }
+                if (badge && badge.trim() !== '') {
+                    badgeHtml += `<span class="pdf-badge">${badge.trim()}</span>`;
+                }
+
+                btn.innerHTML = `
+                    <div class="pdf-thumb-1x1">
+                        <div class="item-number-badge">#${itemCounter}</div>
+                        <img src="${thumbImgUrl}" alt="${judul}" loading="lazy" onerror="this.src='https://via.placeholder.com/200x200/C5A059/FFFFFF?text=Image'">
+                    </div>
+                    <div class="pdf-text-box">
+                        <div class="pdf-title-text">${judul}</div>
+                        <div class="pdf-sub-text">${subjudul}</div>
+                    </div>
+                    <div class="badge-group">
+                        ${badgeHtml}
+                    </div>
+                `;
+
+                container.appendChild(btn);
+                itemCounter++;
+            }
+        }
+
+        // Pemuatan Utama dengan Strategi Cache-First (Instant Load 0ms)
         async function loadBiolinkData() {
+            const cachedData = localStorage.getItem(CACHE_KEY);
+            
+            // 1. Tampilkan dari memori internal jika ada cache
+            if (cachedData) {
+                renderBiolinkData(cachedData);
+            }
+
+            // 2. Ambil data terbaru di latar belakang
             try {
                 const response = await fetch(sheetCsvUrl);
-                const dataText = await response.text();
-                
-                const rows = dataText.split('\n').map(row => {
-                    return row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(field => field.replace(/^"\vert{}"$/g, '').trim());
-                });
+                const latestDataText = await response.text();
 
-                const container = document.getElementById('pdfListContainer');
-                container.innerHTML = '';
-
-                let itemCounter = 1;
-
-                for (let i = 1; i < rows.length; i++) {
-                    const row = rows[i];
-                    if (row.length < 7 || !row[0]) continue;
-
-                    const [judul, subjudul, deskripsi, foto, star, badge, link, tombolText] = row;
-
-                    const btn = document.createElement('div');
-                    btn.className = 'pdf-item-btn';
-                    
-                    const safeJudul = judul.replace(/'/g, "\\'");
-                    const safeSubjudul = subjudul.replace(/'/g, "\\'");
-                    const safeDeskripsi = deskripsi.replace(/'/g, "\\'").replace(/\n/g, ' ');
-                    const rawFoto = foto;
-                    const safeLink = link;
-                    const customTombol = (tombolText && tombolText.trim() !== '') ? tombolText.replace(/'/g, "\\'") : 'Download';
-
-                    const thumbImgUrl = getOptimizedImg(rawFoto, 200);
-                    const modalImgUrl = getOptimizedImg(rawFoto, 600);
-
-                    btn.setAttribute('onclick', `openModal('${modalImgUrl}', '${safeJudul}', '${safeSubjudul}', '${safeDeskripsi}', '${safeLink}', '${customTombol}')`);
-
-                    let badgeHtml = '';
-                    
-                    if (star && star.trim() !== '') {
-                        badgeHtml += `<span class="star-badge-free"><i class="fa-solid fa-star"></i> ${star.trim()}</span>`;
-                    }
-                    if (badge && badge.trim() !== '') {
-                        badgeHtml += `<span class="pdf-badge">${badge.trim()}</span>`;
-                    }
-
-                    btn.innerHTML = `
-                        <div class="pdf-thumb-1x1">
-                            <div class="item-number-badge">#${itemCounter}</div>
-                            <img src="${thumbImgUrl}" alt="${judul}" loading="lazy" onerror="this.src='https://via.placeholder.com/200x200/C5A059/FFFFFF?text=Image'">
-                        </div>
-                        <div class="pdf-text-box">
-                            <div class="pdf-title-text">${judul}</div>
-                            <div class="pdf-sub-text">${subjudul}</div>
-                        </div>
-                        <div class="badge-group">
-                            ${badgeHtml}
-                        </div>
-                    `;
-
-                    container.appendChild(btn);
-                    itemCounter++;
+                // Jika data berubah dari cache, perbarui memori & re-render
+                if (latestDataText !== cachedData) {
+                    localStorage.setItem(CACHE_KEY, latestDataText);
+                    renderBiolinkData(latestDataText);
                 }
             } catch (error) {
-                console.error('Gagal memuat data Google Sheets:', error);
-                document.getElementById('pdfListContainer').innerHTML = '<p style="text-align:center; font-size:13px; color:#E53935;">Gagal memuat data.</p>';
+                console.error('Gagal memperbarui data Google Sheets:', error);
+                if (!cachedData) {
+                    document.getElementById('pdfListContainer').innerHTML = '<p style="text-align:center; font-size:13px; color:#E53935;">Gagal memuat data.</p>';
+                }
             }
         }
 
         window.addEventListener('DOMContentLoaded', loadBiolinkData);
 
+        // Open Modal Pop Up
         function openModal(imgUrl, title, subtitle, desc, btnLink, btnText) {
             const modalImg = document.getElementById('modalImg');
             
@@ -644,6 +666,7 @@
             };
         }
 
+        // Close Modal Pop Up
         function closeModal() {
             document.getElementById('modalOverlay').classList.remove('active');
             document.getElementById('modalImg').classList.remove('loaded');
