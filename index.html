@@ -322,7 +322,7 @@
         .modal-card {
             background-color: var(--card-cream);
             width: 100%;
-            max-width: 380px; /* Ukuran pas untuk HP */
+            max-width: 380px;
             max-height: 90vh;
             overflow-y: auto;
             border-radius: 20px;
@@ -359,10 +359,10 @@
             background-color: rgba(0, 0, 0, 0.8);
         }
 
-        /* Container Foto Modal 1:1 Presisi */
+        /* Container Foto Modal 1:1 Presisi dengan Smooth Transition */
         .modal-img-wrapper {
             width: 100%;
-            aspect-ratio: 1 / 1; /* Memastikan rasio 1:1 persegi sempurna */
+            aspect-ratio: 1 / 1;
             background-color: #F3EFE9;
             display: flex;
             align-items: center;
@@ -373,8 +373,14 @@
         .modal-img-wrapper img {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* Foto memenuhi kotak 1:1 utuh tanpa gepeng */
+            object-fit: cover;
             display: block;
+            opacity: 0; /* Sembunyikan default sampai loading selesai */
+            transition: opacity 0.25s ease-in-out;
+        }
+
+        .modal-img-wrapper img.loaded {
+            opacity: 1; /* Tampilkan halus setelah loaded */
         }
 
         .modal-body {
@@ -588,8 +594,14 @@
 
         window.addEventListener('DOMContentLoaded', loadBiolinkData);
 
+        // Fungsi Open Modal dengan Perbaikan Kedipan Foto (Preloading)
         function openModal(imgUrl, title, subtitle, desc, btnLink, btnText) {
-            document.getElementById('modalImg').src = imgUrl;
+            const modalImg = document.getElementById('modalImg');
+            
+            // Reset foto lama
+            modalImg.classList.remove('loaded');
+            modalImg.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>'; 
+
             document.getElementById('modalTitle').innerText = title;
             document.getElementById('modalSubtitle').innerText = subtitle;
             document.getElementById('modalDesc').innerText = desc;
@@ -597,10 +609,19 @@
             document.getElementById('modalBtnText').innerText = btnText || 'Download';
 
             document.getElementById('modalOverlay').classList.add('active');
+
+            // Muat foto baru secara asinkron
+            const newImg = new Image();
+            newImg.src = imgUrl;
+            newImg.onload = function() {
+                modalImg.src = imgUrl;
+                modalImg.classList.add('loaded');
+            };
         }
 
         function closeModal() {
             document.getElementById('modalOverlay').classList.remove('active');
+            document.getElementById('modalImg').classList.remove('loaded');
         }
 
         function closeModalOnOuterClick(event) {
