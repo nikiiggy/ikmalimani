@@ -220,8 +220,9 @@
             transform: translateX(3px);
         }
 
-        /* Gambar Thumbnail 1:1 Full Height Mepet Kiri (100px x 100px) */
+        /* Gambar Thumbnail 1:1 Full Height Mepet Kiri */
         .pdf-thumb-1x1 {
+            position: relative;
             width: 100px;
             height: 100px;
             min-width: 100px;
@@ -233,6 +234,21 @@
             height: 100%;
             object-fit: cover;
             display: block;
+        }
+
+        /* Badge Nomor di Pojok Kiri Atas Gambar */
+        .item-number-badge {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: var(--text-dark);
+            color: #FFFFFF;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-bottom-right-radius: 10px;
+            box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+            z-index: 2;
         }
 
         .pdf-text-box {
@@ -256,7 +272,7 @@
             margin-top: 3px;
         }
 
-        /* Container untuk penataan Badge di Kanan */
+        /* Container penataan Badge di Kanan */
         .badge-group {
             display: flex;
             flex-direction: column;
@@ -359,7 +375,7 @@
             background-color: rgba(0, 0, 0, 0.8);
         }
 
-        /* Container Foto Modal 1:1 Presisi dengan Smooth Transition */
+        /* Container Foto Modal 1:1 Presisi */
         .modal-img-wrapper {
             width: 100%;
             aspect-ratio: 1 / 1;
@@ -375,12 +391,12 @@
             height: 100%;
             object-fit: cover;
             display: block;
-            opacity: 0; /* Sembunyikan default sampai loading selesai */
+            opacity: 0;
             transition: opacity 0.25s ease-in-out;
         }
 
         .modal-img-wrapper img.loaded {
-            opacity: 1; /* Tampilkan halus setelah loaded */
+            opacity: 1;
         }
 
         .modal-body {
@@ -480,7 +496,7 @@
             </a>
         </section>
 
-        <!-- PORTFOLIO & SERVICES LIST (DINAMIS DARI GOOGLE SHEETS) -->
+        <!-- PORTFOLIO & SERVICES LIST -->
         <section class="page-section">
             <div class="pdf-list" id="pdfListContainer">
                 <p style="text-align:center; font-size:13px; color:var(--text-muted);">Memuat data...</p>
@@ -520,7 +536,7 @@
         </div>
     </div>
 
-    <!-- ================= JAVASCRIPT FETCH & CUSTOM BUTTON TEXT ================= -->
+    <!-- ================= JAVASCRIPT FETCH & PENOMORAN OTOMATIS ================= -->
     <script>
         const sheetCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ-enavxOP-JDGc-D-yRUkrqMumpydoOJW4PtVmen4ZJtE9l8r-BX0wH0i3lWQi-G3wcU_sTixatKRE/pub?gid=0&single=true&output=csv';
 
@@ -541,6 +557,8 @@
 
                 const container = document.getElementById('pdfListContainer');
                 container.innerHTML = '';
+
+                let itemCounter = 1; // Counter untuk penomoran otomatis
 
                 for (let i = 1; i < rows.length; i++) {
                     const row = rows[i];
@@ -571,8 +589,10 @@
                         badgeHtml += `<span class="pdf-badge">${badge}</span>`;
                     }
 
+                    // Tampilan item dengan nomor (#1, #2, #3...) di pojok atas thumbnail
                     btn.innerHTML = `
                         <div class="pdf-thumb-1x1">
+                            <div class="item-number-badge">#${itemCounter}</div>
                             <img src="${thumbImgUrl}" alt="${judul}" loading="lazy" onerror="this.src='https://via.placeholder.com/200x200/C5A059/FFFFFF?text=Image'">
                         </div>
                         <div class="pdf-text-box">
@@ -585,6 +605,7 @@
                     `;
 
                     container.appendChild(btn);
+                    itemCounter++; // Tambah counter nomor untuk item berikutnya
                 }
             } catch (error) {
                 console.error('Gagal memuat data Google Sheets:', error);
@@ -594,11 +615,9 @@
 
         window.addEventListener('DOMContentLoaded', loadBiolinkData);
 
-        // Fungsi Open Modal dengan Perbaikan Kedipan Foto (Preloading)
         function openModal(imgUrl, title, subtitle, desc, btnLink, btnText) {
             const modalImg = document.getElementById('modalImg');
             
-            // Reset foto lama
             modalImg.classList.remove('loaded');
             modalImg.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>'; 
 
@@ -610,7 +629,6 @@
 
             document.getElementById('modalOverlay').classList.add('active');
 
-            // Muat foto baru secara asinkron
             const newImg = new Image();
             newImg.src = imgUrl;
             newImg.onload = function() {
