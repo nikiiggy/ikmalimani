@@ -35,22 +35,35 @@
 
         @keyframes floatSlow {
             0% { transform: translateY(0px) rotate(-3deg); }
-            100% { transform: translateY(-16px) rotate(3deg); }
+            100% { transform: translateY(-12px) rotate(3deg); }
         }
 
+        /* Responsive Balon menyesuaikan orientasi layar */
         .balloon {
-            width: clamp(85px, 14vw, 130px);
-            height: clamp(100px, 16vw, 150px);
+            width: clamp(65px, 11vw, 110px);
+            height: clamp(80px, 13vw, 130px);
             border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: clamp(2rem, 4vw, 3.5rem);
+            font-size: clamp(1.5rem, 3.5vw, 3rem);
             font-weight: 700;
             color: white;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            box-shadow: inset -8px -8px 14px rgba(0, 0, 0, 0.18), inset 8px 8px 14px rgba(255, 255, 255, 0.45);
+            box-shadow: inset -6px -6px 12px rgba(0, 0, 0, 0.18), inset 6px 6px 12px rgba(255, 255, 255, 0.45);
             position: relative;
+        }
+
+        @media (max-height: 500px) {
+            /* Penyesuaian khusus untuk HP Landscape */
+            .balloon {
+                width: 60px !important;
+                height: 72px !important;
+                font-size: 1.3rem !important;
+            }
+            .balloon-string {
+                height: 18px !important;
+            }
         }
 
         .balloon::before {
@@ -68,15 +81,15 @@
         .balloon-knot {
             width: 0;
             height: 0;
-            border-left: clamp(7px, 1.2vw, 12px) solid transparent;
-            border-right: clamp(7px, 1.2vw, 12px) solid transparent;
-            border-bottom: clamp(10px, 1.5vw, 16px) solid currentColor;
+            border-left: clamp(6px, 1vw, 10px) solid transparent;
+            border-right: clamp(6px, 1vw, 10px) solid transparent;
+            border-bottom: clamp(8px, 1.2vw, 14px) solid currentColor;
             margin-top: -2px;
         }
 
         .balloon-string {
             width: 3px;
-            height: clamp(25px, 4vw, 45px);
+            height: clamp(20px, 3vw, 35px);
             background-color: rgba(255, 255, 255, 0.75);
         }
 
@@ -110,23 +123,21 @@
             pointer-events: none;
         }
 
-        /* ==================== STYLES CETAK / PRINT (A4 LANDSCAPE, MARGIN 2CM, NO BLUE BG) ==================== */
+        /* ==================== STYLES CETAK / PRINT (A4 LANDSCAPE) ==================== */
         @media print {
             @page {
                 size: A4 landscape;
-                margin: 2cm !important; /* Margin 2cm di setiap sisi */
+                margin: 2cm !important;
             }
             body {
-                background: #ffffff !important; /* Latar belakang putih tanpa biru */
+                background: #ffffff !important;
                 -webkit-print-color-adjust: exact !important;
                 print-color-adjust: exact !important;
                 overflow: visible !important;
             }
-            /* Sembunyikan elemen game utama */
-            #popCanvas, .cloud, #startScreen, #topBar, #gameBoard, #feedback, #progressContainer, .modal-no-print {
+            #popCanvas, .cloud, #startScreen, #topBar, #gameBoard, #feedback, .modal-no-print {
                 display: none !important;
             }
-            /* Tampilkan container modal khusus print */
             #tableModal {
                 position: absolute !important;
                 inset: 0 !important;
@@ -160,8 +171,8 @@
             }
             th, td {
                 border: 2px solid #fde68a !important;
-                padding: 10px 4px !important; /* Padding cukup lapang */
-                font-size: 15pt !important;   /* Tulisan angka sangat besar untuk anak-anak */
+                padding: 10px 4px !important;
+                font-size: 15pt !important;
                 font-weight: 800 !important;
             }
             th {
@@ -206,23 +217,23 @@
     <canvas id="popCanvas"></canvas>
 
     <!-- CONTAINER UTAMA -->
-    <div class="w-full max-w-5xl h-full flex flex-col justify-between relative z-10 p-3 md:p-6">
+    <div class="w-full max-w-5xl h-full flex flex-col justify-between relative z-10 p-2 md:p-6">
 
         <!-- HEADER / TOP BAR -->
-        <header id="topBar" class="hidden flex justify-between items-center bg-white/80 backdrop-blur-md rounded-2xl md:rounded-3xl p-3 md:p-4 shadow-lg border-2 border-white/60">
+        <header id="topBar" class="hidden flex justify-between items-center bg-white/80 backdrop-blur-md rounded-2xl md:rounded-3xl p-2 md:p-4 shadow-lg border-2 border-white/60">
             <div class="flex items-center space-x-2 md:space-x-4">
-                <span class="text-3xl md:text-5xl">⭐</span>
+                <span class="text-2xl md:text-5xl">⭐</span>
                 <div>
-                    <div class="text-xs md:text-sm text-gray-500 font-semibold leading-none">SKOR</div>
-                    <div id="scoreDisplay" class="text-2xl md:text-4xl font-bold text-yellow-500 leading-none">0</div>
+                    <div class="text-[10px] md:text-sm text-gray-500 font-semibold leading-none">SKOR</div>
+                    <div id="scoreDisplay" class="text-xl md:text-4xl font-bold text-yellow-500 leading-none">0</div>
                 </div>
             </div>
 
-            <div id="modeTag" class="bg-blue-100 text-blue-700 font-bold px-4 py-1.5 md:px-6 md:py-2 rounded-full text-sm md:text-xl border border-blue-300">
+            <div id="modeTag" class="bg-blue-100 text-blue-700 font-bold px-3 py-1 md:px-6 md:py-2 rounded-full text-xs md:text-xl border border-blue-300">
                 1-10 Campur
             </div>
 
-            <button onclick="resetToStart()" class="bg-red-100 hover:bg-red-200 text-red-600 font-bold text-xs md:text-base px-4 py-2 rounded-full border border-red-200 transition">
+            <button onclick="resetToStart()" class="bg-red-100 hover:bg-red-200 text-red-600 font-bold text-xs md:text-base px-3 py-1.5 md:px-4 md:py-2 rounded-full border border-red-200 transition">
                 Keluar 🚪
             </button>
         </header>
@@ -231,11 +242,11 @@
         <main id="gameBoard" class="hidden flex-1 relative w-full flex flex-col items-center justify-center my-auto">
             
             <!-- KOTAK SOAL -->
-            <div id="questionBox" class="relative z-20 w-11/12 max-w-sm md:max-w-md text-center transform transition-transform">
-                <div class="bg-gradient-to-r from-yellow-300 via-orange-300 to-yellow-400 p-2 md:p-3 rounded-3xl md:rounded-[2.5rem] shadow-2xl border-4 md:border-8 border-white">
-                    <div class="bg-white rounded-2xl md:rounded-[2rem] py-5 md:py-8 px-6 shadow-inner">
-                        <p class="text-xs md:text-base font-bold text-gray-400 uppercase tracking-widest mb-1 md:mb-2">Berapa Hasilnya?</p>
-                        <div id="questionText" class="text-5xl md:text-7xl font-black text-blue-600 tracking-wider">
+            <div id="questionBox" class="relative z-20 w-10/12 max-w-xs md:max-w-md text-center transform transition-transform">
+                <div class="bg-gradient-to-r from-yellow-300 via-orange-300 to-yellow-400 p-1.5 md:p-3 rounded-2xl md:rounded-[2.5rem] shadow-2xl border-2 md:border-8 border-white">
+                    <div class="bg-white rounded-xl md:rounded-[2rem] py-3 md:py-8 px-4 shadow-inner">
+                        <p class="text-[10px] md:text-base font-bold text-gray-400 uppercase tracking-widest mb-0.5 md:mb-2">Berapa Hasilnya?</p>
+                        <div id="questionText" class="text-3xl sm:text-5xl md:text-7xl font-black text-blue-600 tracking-wider">
                             4 × 7 = ?
                         </div>
                     </div>
@@ -248,39 +259,29 @@
         </main>
 
         <!-- FEEDBACK BANNER -->
-        <div id="feedback" class="h-8 md:h-10 flex justify-center items-center relative z-20">
-            <span id="feedbackText" class="hidden text-base md:text-2xl font-bold px-6 py-1.5 rounded-full shadow-md transition-all duration-200"></span>
-        </div>
-
-        <!-- BAR PROGRES PERKALIAN -->
-        <div id="progressContainer" class="hidden relative z-20 w-full bg-white/80 backdrop-blur-md rounded-2xl p-2.5 md:p-4 shadow-lg border-2 border-white/60 mb-1">
-            <div class="text-[11px] md:text-sm font-bold text-gray-500 text-center mb-1.5 uppercase tracking-wide">
-                Progres Capaian Perkalian
-            </div>
-            <div id="progressGrid" class="grid grid-cols-10 gap-1 md:gap-2">
-                <!-- Angka 1-10 dirender lewat JS -->
-            </div>
+        <div id="feedback" class="h-6 md:h-10 flex justify-center items-center relative z-20">
+            <span id="feedbackText" class="hidden text-sm md:text-2xl font-bold px-4 py-1 rounded-full shadow-md transition-all duration-200"></span>
         </div>
 
         <!-- SCREEN START / UTAMA -->
-        <div id="startScreen" class="absolute inset-0 bg-white/95 backdrop-blur-md z-40 rounded-3xl md:rounded-[3rem] m-2 md:m-6 p-5 md:p-8 flex flex-col justify-between items-center text-center shadow-2xl border-4 md:border-8 border-blue-200 overflow-y-auto">
+        <div id="startScreen" class="absolute inset-0 bg-white/95 backdrop-blur-md z-40 rounded-3xl md:rounded-[3rem] m-2 md:m-6 p-4 md:p-8 flex flex-col justify-between items-center text-center shadow-2xl border-4 md:border-8 border-blue-200 overflow-y-auto">
             <div class="mt-1">
-                <div class="text-5xl md:text-7xl mb-1 animate-bounce">🎈</div>
-                <h1 class="text-2xl md:text-4xl font-extrabold text-blue-600 drop-shadow-sm">Balon Perkalian</h1>
-                <p class="text-xs md:text-lg font-bold text-gray-400 mt-0.5">by Ikmal Imani</p>
+                <div class="text-4xl md:text-7xl mb-1 animate-bounce">🎈</div>
+                <h1 class="text-xl md:text-4xl font-extrabold text-blue-600 drop-shadow-sm">Balon Perkalian</h1>
+                <p class="text-[10px] md:text-lg font-bold text-gray-400 mt-0.5">by Ikmal Imani</p>
             </div>
 
             <!-- Pilih Mode Perkalian -->
-            <div class="w-full max-w-xl my-auto py-2">
-                <label class="block text-xs md:text-base font-bold text-gray-700 mb-2">Pilih Angka Perkalian:</label>
-                <div class="grid grid-cols-3 gap-1.5 md:gap-2.5">
-                    <button onclick="selectMode('all')" id="btn-mode-all" class="mode-btn bg-blue-500 text-white font-bold py-2 md:py-3 text-xs md:text-base rounded-xl md:rounded-2xl shadow border-2 border-blue-600 col-span-3">
+            <div class="w-full max-w-xl my-auto py-1 md:py-2">
+                <label class="block text-xs md:text-base font-bold text-gray-700 mb-1.5 md:mb-2">Pilih Angka Perkalian:</label>
+                <div class="grid grid-cols-3 gap-1 md:gap-2.5">
+                    <button onclick="selectMode('all')" id="btn-mode-all" class="mode-btn bg-blue-500 text-white font-bold py-1.5 md:py-3 text-xs md:text-base rounded-xl md:rounded-2xl shadow border-2 border-blue-600 col-span-3">
                         🌟 1 - 10 Campur 🌟
                     </button>
                     <script>
                         for(let i=1; i<=10; i++){
                             document.write(`
-                                <button onclick="selectMode(${i})" id="btn-mode-${i}" class="mode-btn bg-white text-blue-600 font-bold py-2 md:py-3 text-xs md:text-base rounded-xl md:rounded-2xl shadow border-2 border-blue-200 hover:bg-blue-50">
+                                <button onclick="selectMode(${i})" id="btn-mode-${i}" class="mode-btn bg-white text-blue-600 font-bold py-1.5 md:py-3 text-xs md:text-base rounded-xl md:rounded-2xl shadow border-2 border-blue-200 hover:bg-blue-50">
                                     Perkalian ${i}
                                 </button>
                             `);
@@ -290,11 +291,11 @@
             </div>
 
             <!-- ACTION BUTTONS -->
-            <div class="w-full max-w-xl space-y-2">
-                <button onclick="startGame()" class="w-full py-3.5 md:py-4 bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white font-extrabold text-xl md:text-2xl rounded-2xl md:rounded-3xl shadow-lg transform active:scale-95 transition-all border-b-4 md:border-b-6 border-green-700">
+            <div class="w-full max-w-xl space-y-1.5 md:space-y-2">
+                <button onclick="startGame()" class="w-full py-2.5 md:py-4 bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white font-extrabold text-lg md:text-2xl rounded-xl md:rounded-3xl shadow-lg transform active:scale-95 transition-all border-b-4 md:border-b-6 border-green-700">
                     MULAI MAIN 🚀
                 </button>
-                <button onclick="openTableModal()" class="w-full py-2.5 md:py-3 bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold text-sm md:text-lg rounded-xl md:rounded-2xl shadow border-b-4 border-amber-600 transition-all flex items-center justify-center space-x-2">
+                <button onclick="openTableModal()" class="w-full py-2 md:py-3 bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold text-xs md:text-lg rounded-xl md:rounded-2xl shadow border-b-4 border-amber-600 transition-all flex items-center justify-center space-x-2">
                     <span>📖 Kunci Jawaban (Tabel Perkalian)</span>
                 </button>
             </div>
@@ -306,7 +307,7 @@
     <div id="tableModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 md:p-6">
         <div id="tableModalContent" class="bg-white rounded-3xl p-4 md:p-6 w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl border-4 border-amber-300">
             
-            <!-- HEADER CERIA UNTUK PRINT (BESAR & JELAS) -->
+            <!-- HEADER CERIA UNTUK PRINT -->
             <div class="print-header">
                 <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
                     <span style="font-size: 26pt;">🎈</span>
@@ -329,7 +330,7 @@
                 </button>
             </div>
 
-            <!-- Isi Tabel Perkalian Berwarna Ceria -->
+            <!-- Isi Tabel Perkalian -->
             <div class="overflow-auto flex-1 rounded-2xl border-2 border-amber-300 shadow-inner">
                 <table class="w-full text-center border-collapse">
                     <thead>
@@ -376,7 +377,6 @@
         let selectedMode = 'all';
         let currentQuestion = { num1: 0, num2: 0, answer: 0 };
         let activeBalloons = [];
-        let completedNumbers = new Set();
 
         const balloonColors = [
             { bg: '#ef4444' },
@@ -475,6 +475,18 @@
         }
         animateParticles();
 
+        /* FULLSCREEN FUNCTION */
+        function requestFullScreen() {
+            const elem = document.documentElement;
+            if (elem.requestFullscreen) {
+                elem.requestFullscreen().catch(() => {});
+            } else if (elem.webkitRequestFullscreen) { /* Safari */
+                elem.webkitRequestFullscreen();
+            } else if (elem.msRequestFullscreen) { /* IE11 */
+                elem.msRequestFullscreen();
+            }
+        }
+
         /* LOGIKA MODAL TABEL */
         function openTableModal() {
             document.getElementById('tableModal').classList.remove('hidden');
@@ -482,25 +494,6 @@
 
         function closeTableModal() {
             document.getElementById('tableModal').classList.add('hidden');
-        }
-
-        /* LOGIKA BAR PROGRES */
-        function renderProgressBar() {
-            const grid = document.getElementById('progressGrid');
-            grid.innerHTML = '';
-            for (let i = 1; i <= 10; i++) {
-                const isDone = completedNumbers.has(i);
-                grid.innerHTML += `
-                    <div class="flex flex-col items-center justify-center p-1 md:p-2 rounded-xl transition-all duration-300 ${
-                        isDone 
-                        ? 'bg-green-500 text-white shadow-md scale-105' 
-                        : 'bg-gray-100 text-gray-400 border border-gray-200'
-                    }">
-                        <span class="text-[10px] md:text-xs font-bold">×${i}</span>
-                        <span class="text-xs md:text-sm font-black mt-0.5">${isDone ? '✅' : '⚪'}</span>
-                    </div>
-                `;
-            }
         }
 
         /* KONTROL MODE & GAMEPLAY */
@@ -520,7 +513,7 @@
         function showFeedback(text, isSuccess) {
             const fb = document.getElementById('feedbackText');
             fb.innerText = text;
-            fb.className = `text-base md:text-2xl font-bold px-6 py-1.5 rounded-full shadow-md transition-all duration-200 ${
+            fb.className = `text-sm md:text-2xl font-bold px-6 py-1 rounded-full shadow-md transition-all duration-200 ${
                 isSuccess ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
             }`;
             fb.classList.remove('hidden');
@@ -529,19 +522,17 @@
 
         function startGame() {
             initAudio();
+            requestFullScreen(); // Mengaktifkan Fullscreen
             score = 0;
-            completedNumbers.clear();
             document.getElementById('scoreDisplay').innerText = score;
 
             document.getElementById('startScreen').classList.add('hidden');
             document.getElementById('topBar').classList.remove('hidden');
             document.getElementById('gameBoard').classList.remove('hidden');
-            document.getElementById('progressContainer').classList.remove('hidden');
 
             const modeTag = document.getElementById('modeTag');
             modeTag.innerText = selectedMode === 'all' ? '1-10 Campur' : `Perkalian ${selectedMode}`;
 
-            renderProgressBar();
             generateNewQuestion();
         }
 
@@ -570,11 +561,18 @@
             }
             answers.sort(() => Math.random() - 0.5);
 
-            const positions = [
-                { top: '4%', left: '4%' },
-                { top: '4%', right: '4%' },
-                { bottom: '8%', left: '4%' },
-                { bottom: '8%', right: '4%' }
+            // Posisi adaptif yang aman agar balon tidak saling bertumpuk (terutama di HP Landscape)
+            const isLandscape = window.innerWidth > window.innerHeight && window.innerHeight < 500;
+            const positions = isLandscape ? [
+                { top: '10%', left: '2%' },
+                { top: '10%', right: '2%' },
+                { bottom: '10%', left: '2%' },
+                { bottom: '10%', right: '2%' }
+            ] : [
+                { top: '2%', left: '2%' },
+                { top: '2%', right: '2%' },
+                { bottom: '5%', left: '2%' },
+                { bottom: '5%', right: '2%' }
             ];
 
             answers.forEach((val, idx) => {
@@ -620,10 +618,6 @@
                 createPopParticles(clickX, clickY, balloon.color);
                 score += 10;
                 document.getElementById('scoreDisplay').innerText = score;
-                
-                completedNumbers.add(currentQuestion.num2);
-                renderProgressBar();
-
                 showFeedback('Hore! Benar! 🎉', true);
                 generateNewQuestion();
             } else {
@@ -635,11 +629,19 @@
         }
 
         function resetToStart() {
+            if (document.exitFullscreen) {
+                document.exitFullscreen().catch(() => {});
+            }
             document.getElementById('startScreen').classList.remove('hidden');
             document.getElementById('topBar').classList.add('hidden');
             document.getElementById('gameBoard').classList.add('hidden');
-            document.getElementById('progressContainer').classList.add('hidden');
         }
+
+        window.addEventListener('resize', () => {
+            if (!document.getElementById('gameBoard').classList.contains('hidden')) {
+                renderBalloonsAroundBox();
+            }
+        });
     </script>
 </body>
 </html>
