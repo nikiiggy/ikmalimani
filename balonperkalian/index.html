@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Balon Perkalian by Ikmal Imani 🎈</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Google: Fredoka (Font ramah anak & ceria) -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Fredoka', cursive, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            background: linear-gradient(180deg, #60a5fa 0%, #93c5fd 60%, #bfdbfe 100%);
+            overflow: hidden;
+        }
+
+        /* Styling Balon & Tali (Ukuran Responsive) */
+        .balloon-wrapper {
+            position: absolute;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.2s ease-out;
+            animation: floatSlow 4s ease-in-out infinite alternate;
+        }
+
+        .balloon-wrapper:nth-child(2) { animation-delay: -1s; }
+        .balloon-wrapper:nth-child(3) { animation-delay: -2s; }
+        .balloon-wrapper:nth-child(4) { animation-delay: -3s; }
+
+        @keyframes floatSlow {
+            0% { transform: translateY(0px) rotate(-3deg); }
+            100% { transform: translateY(-16px) rotate(3deg); }
+        }
+
+        .balloon {
+            width: clamp(85px, 14vw, 130px);
+            height: clamp(100px, 16vw, 150px);
+            border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            font-weight: 700;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            box-shadow: inset -8px -8px 14px rgba(0, 0, 0, 0.18), inset 8px 8px 14px rgba(255, 255, 255, 0.45);
+            position: relative;
+        }
+
+        .balloon::before {
+            content: '';
+            position: absolute;
+            top: 12%;
+            left: 15%;
+            width: 20%;
+            height: 25%;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            transform: rotate(-30deg);
+        }
+
+        .balloon-knot {
+            width: 0;
+            height: 0;
+            border-left: clamp(7px, 1.2vw, 12px) solid transparent;
+            border-right: clamp(7px, 1.2vw, 12px) solid transparent;
+            border-bottom: clamp(10px, 1.5vw, 16px) solid currentColor;
+            margin-top: -2px;
+        }
+
+        .balloon-string {
+            width: 3px;
+            height: clamp(25px, 4vw, 45px);
+            background-color: rgba(255, 255, 255, 0.75);
+        }
+
+        /* Animasi Bergetar (Salah Jawab) */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+        .shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        /* Canvas Partikel Meletus */
+        #popCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 30;
+        }
+
+        /* Awan Latar Belakang */
+        .cloud {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.65);
+            border-radius: 50px;
+            opacity: 0.8;
+            pointer-events: none;
+        }
+
+        /* ==================== STYLES CETAK / PRINT (A4 LANDSCAPE, MARGIN 2CM, NO BLUE BG) ==================== */
+        @media print {
+            @page {
+                size: A4 landscape;
+                margin: 2cm !important; /* Margin 2cm di setiap sisi */
+            }
+            body {
+                background: #ffffff !important; /* Latar belakang putih tanpa biru */
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                overflow: visible !important;
+            }
+            /* Sembunyikan elemen game utama */
+            #popCanvas, .cloud, #startScreen, #topBar, #gameBoard, #feedback, #progressContainer, .modal-no-print {
+                display: none !important;
+            }
+            /* Tampilkan container modal khusus print */
+            #tableModal {
+                position: absolute !important;
+                inset: 0 !important;
+                background: #ffffff !important;
+                padding: 0 !important;
+                display: flex !important;
+                justify-content: center !important;
+                align-items: center !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            #tableModalContent {
+                border: 4px solid #fbbf24 !important;
+                box-shadow: none !important;
+                max-width: 100% !important;
+                width: 100% !important;
+                padding: 8px !important;
+                background: #ffffff !important;
+                border-radius: 16px !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            .print-header {
+                display: block !important;
+                text-align: center;
+                margin-bottom: 12px;
+            }
+            table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+            }
+            th, td {
+                border: 2px solid #fde68a !important;
+                padding: 10px 4px !important; /* Padding cukup lapang */
+                font-size: 15pt !important;   /* Tulisan angka sangat besar untuk anak-anak */
+                font-weight: 800 !important;
+            }
+            th {
+                background-color: #fbbf24 !important;
+                color: #78350f !important;
+                font-size: 16pt !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            td.highlight {
+                background-color: #fef08a !important;
+                color: #854d0e !important;
+                font-size: 16pt !important;
+                font-weight: 900 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            tr:nth-child(even) td:not(.highlight) {
+                background-color: #fefce8 !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+            tr:nth-child(odd) td:not(.highlight) {
+                background-color: #ffffff !important;
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+        }
+        .print-header {
+            display: none;
+        }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col items-center justify-between relative overflow-hidden">
+
+    <!-- Awan-Awan Dekoratif -->
+    <div class="cloud w-32 md:w-56 h-12 md:h-20 top-8 -left-8 animate-[bounce_8s_infinite]"></div>
+    <div class="cloud w-40 md:w-64 h-14 md:h-24 top-20 -right-10 animate-[bounce_10s_infinite]"></div>
+    <div class="cloud w-28 md:w-44 h-10 md:h-16 top-1/2 -left-6 opacity-50"></div>
+
+    <!-- Canvas Partikel Meletus -->
+    <canvas id="popCanvas"></canvas>
+
+    <!-- CONTAINER UTAMA -->
+    <div class="w-full max-w-5xl h-full flex flex-col justify-between relative z-10 p-3 md:p-6">
+
+        <!-- HEADER / TOP BAR -->
+        <header id="topBar" class="hidden flex justify-between items-center bg-white/80 backdrop-blur-md rounded-2xl md:rounded-3xl p-3 md:p-4 shadow-lg border-2 border-white/60">
+            <div class="flex items-center space-x-2 md:space-x-4">
+                <span class="text-3xl md:text-5xl">⭐</span>
+                <div>
+                    <div class="text-xs md:text-sm text-gray-500 font-semibold leading-none">SKOR</div>
+                    <div id="scoreDisplay" class="text-2xl md:text-4xl font-bold text-yellow-500 leading-none">0</div>
+                </div>
+            </div>
+
+            <div id="modeTag" class="bg-blue-100 text-blue-700 font-bold px-4 py-1.5 md:px-6 md:py-2 rounded-full text-sm md:text-xl border border-blue-300">
+                1-10 Campur
+            </div>
+
+            <button onclick="resetToStart()" class="bg-red-100 hover:bg-red-200 text-red-600 font-bold text-xs md:text-base px-4 py-2 rounded-full border border-red-200 transition">
+                Keluar 🚪
+            </button>
+        </header>
+
+        <!-- AREA PERMAINAN MAIN -->
+        <main id="gameBoard" class="hidden flex-1 relative w-full flex flex-col items-center justify-center my-auto">
+            
+            <!-- KOTAK SOAL -->
+            <div id="questionBox" class="relative z-20 w-11/12 max-w-sm md:max-w-md text-center transform transition-transform">
+                <div class="bg-gradient-to-r from-yellow-300 via-orange-300 to-yellow-400 p-2 md:p-3 rounded-3xl md:rounded-[2.5rem] shadow-2xl border-4 md:border-8 border-white">
+                    <div class="bg-white rounded-2xl md:rounded-[2rem] py-5 md:py-8 px-6 shadow-inner">
+                        <p class="text-xs md:text-base font-bold text-gray-400 uppercase tracking-widest mb-1 md:mb-2">Berapa Hasilnya?</p>
+                        <div id="questionText" class="text-5xl md:text-7xl font-black text-blue-600 tracking-wider">
+                            4 × 7 = ?
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AREA BALON -->
+            <div id="balloonArea" class="absolute inset-0 z-10 pointer-events-none"></div>
+
+        </main>
+
+        <!-- FEEDBACK BANNER -->
+        <div id="feedback" class="h-8 md:h-10 flex justify-center items-center relative z-20">
+            <span id="feedbackText" class="hidden text-base md:text-2xl font-bold px-6 py-1.5 rounded-full shadow-md transition-all duration-200"></span>
+        </div>
+
+        <!-- BAR PROGRES PERKALIAN -->
+        <div id="progressContainer" class="hidden relative z-20 w-full bg-white/80 backdrop-blur-md rounded-2xl p-2.5 md:p-4 shadow-lg border-2 border-white/60 mb-1">
+            <div class="text-[11px] md:text-sm font-bold text-gray-500 text-center mb-1.5 uppercase tracking-wide">
+                Progres Capaian Perkalian
+            </div>
+            <div id="progressGrid" class="grid grid-cols-10 gap-1 md:gap-2">
+                <!-- Angka 1-10 dirender lewat JS -->
+            </div>
+        </div>
+
+        <!-- SCREEN START / UTAMA -->
+        <div id="startScreen" class="absolute inset-0 bg-white/95 backdrop-blur-md z-40 rounded-3xl md:rounded-[3rem] m-2 md:m-6 p-5 md:p-8 flex flex-col justify-between items-center text-center shadow-2xl border-4 md:border-8 border-blue-200 overflow-y-auto">
+            <div class="mt-1">
+                <div class="text-5xl md:text-7xl mb-1 animate-bounce">🎈</div>
+                <h1 class="text-2xl md:text-4xl font-extrabold text-blue-600 drop-shadow-sm">Balon Perkalian</h1>
+                <p class="text-xs md:text-lg font-bold text-gray-400 mt-0.5">by Ikmal Imani</p>
+            </div>
+
+            <!-- Pilih Mode Perkalian -->
+            <div class="w-full max-w-xl my-auto py-2">
+                <label class="block text-xs md:text-base font-bold text-gray-700 mb-2">Pilih Angka Perkalian:</label>
+                <div class="grid grid-cols-3 gap-1.5 md:gap-2.5">
+                    <button onclick="selectMode('all')" id="btn-mode-all" class="mode-btn bg-blue-500 text-white font-bold py-2 md:py-3 text-xs md:text-base rounded-xl md:rounded-2xl shadow border-2 border-blue-600 col-span-3">
+                        🌟 1 - 10 Campur 🌟
+                    </button>
+                    <script>
+                        for(let i=1; i<=10; i++){
+                            document.write(`
+                                <button onclick="selectMode(${i})" id="btn-mode-${i}" class="mode-btn bg-white text-blue-600 font-bold py-2 md:py-3 text-xs md:text-base rounded-xl md:rounded-2xl shadow border-2 border-blue-200 hover:bg-blue-50">
+                                    Perkalian ${i}
+                                </button>
+                            `);
+                        }
+                    </script>
+                </div>
+            </div>
+
+            <!-- ACTION BUTTONS -->
+            <div class="w-full max-w-xl space-y-2">
+                <button onclick="startGame()" class="w-full py-3.5 md:py-4 bg-gradient-to-r from-green-400 to-emerald-500 hover:from-green-500 hover:to-emerald-600 text-white font-extrabold text-xl md:text-2xl rounded-2xl md:rounded-3xl shadow-lg transform active:scale-95 transition-all border-b-4 md:border-b-6 border-green-700">
+                    MULAI MAIN 🚀
+                </button>
+                <button onclick="openTableModal()" class="w-full py-2.5 md:py-3 bg-amber-400 hover:bg-amber-500 text-amber-950 font-bold text-sm md:text-lg rounded-xl md:rounded-2xl shadow border-b-4 border-amber-600 transition-all flex items-center justify-center space-x-2">
+                    <span>📖 Kunci Jawaban (Tabel Perkalian)</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL KUNCI JAWABAN (TABEL PERKALIAN 1-10) -->
+    <div id="tableModal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-3 md:p-6">
+        <div id="tableModalContent" class="bg-white rounded-3xl p-4 md:p-6 w-full max-w-3xl max-h-[90vh] flex flex-col shadow-2xl border-4 border-amber-300">
+            
+            <!-- HEADER CERIA UNTUK PRINT (BESAR & JELAS) -->
+            <div class="print-header">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 10px;">
+                    <span style="font-size: 26pt;">🎈</span>
+                    <h1 style="font-size: 24pt; font-weight: 900; color: #2563eb; margin: 0;">Balon Perkalian</h1>
+                    <span style="font-size: 26pt;">🎈</span>
+                </div>
+                <p style="font-size: 14pt; font-weight: 800; color: #d97706; margin-top: 2px; margin-bottom: 12px;">
+                    Kunci Jawaban Tabel Perkalian 1 - 10 • by Ikmal Imani
+                </p>
+            </div>
+
+            <!-- Header Modal Tampilan Web -->
+            <div class="modal-no-print flex justify-between items-center mb-3">
+                <div class="flex items-center space-x-2">
+                    <span class="text-2xl md:text-3xl">📖</span>
+                    <h2 class="text-lg md:text-2xl font-extrabold text-gray-800">Tabel Perkalian 1 - 10</h2>
+                </div>
+                <button onclick="closeTableModal()" class="bg-red-100 text-red-600 hover:bg-red-200 font-bold rounded-full w-8 h-8 md:w-10 md:h-10 flex items-center justify-center transition">
+                    ✕
+                </button>
+            </div>
+
+            <!-- Isi Tabel Perkalian Berwarna Ceria -->
+            <div class="overflow-auto flex-1 rounded-2xl border-2 border-amber-300 shadow-inner">
+                <table class="w-full text-center border-collapse">
+                    <thead>
+                        <tr class="bg-amber-400 text-amber-950 font-black text-xs md:text-base sticky top-0 z-10">
+                            <th class="p-2 border border-amber-300 bg-amber-500 text-white">×</th>
+                            <script>
+                                for(let col=1; col<=10; col++){
+                                    document.write(`<th class="p-2 border border-amber-300">${col}</th>`);
+                                }
+                            </script>
+                        </tr>
+                    </thead>
+                    <tbody class="text-xs md:text-sm font-bold text-gray-700">
+                        <script>
+                            for(let row=1; row<=10; row++){
+                                document.write(`<tr class="${row % 2 === 0 ? 'bg-amber-50/50' : 'bg-white'}">`);
+                                document.write(`<td class="p-2 border border-amber-200 bg-amber-200 font-extrabold text-amber-900 highlight">${row}</td>`);
+                                for(let col=1; col<=10; col++){
+                                    document.write(`<td class="p-2 border border-amber-100 hover:bg-amber-100 transition">${row * col}</td>`);
+                                }
+                                document.write(`</tr>`);
+                            }
+                        </script>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Footer Modal Buttons -->
+            <div class="modal-no-print mt-3 flex space-x-2">
+                <button onclick="window.print()" class="flex-1 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-white font-extrabold rounded-xl shadow transition flex items-center justify-center space-x-2">
+                    <span>🖨️ Cetak / Save PDF A4 (Besar)</span>
+                </button>
+                <button onclick="closeTableModal()" class="px-5 py-2.5 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-xl transition">
+                    Tutup
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        /* STATE GAME */
+        let score = 0;
+        let selectedMode = 'all';
+        let currentQuestion = { num1: 0, num2: 0, answer: 0 };
+        let activeBalloons = [];
+        let completedNumbers = new Set();
+
+        const balloonColors = [
+            { bg: '#ef4444' },
+            { bg: '#3b82f6' },
+            { bg: '#10b981' },
+            { bg: '#f59e0b' },
+            { bg: '#8b5cf6' },
+            { bg: '#ec4899' }
+        ];
+
+        /* WEB AUDIO API */
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        let audioCtx = null;
+
+        function initAudio() {
+            if (!audioCtx) audioCtx = new AudioContext();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+        }
+
+        function playPopSound() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(450, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(90, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.8, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        }
+
+        function playWrongSound() {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+            osc.frequency.linearRampToValueAtTime(110, audioCtx.currentTime + 0.2);
+            gain.gain.setValueAtTime(0.4, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.2);
+        }
+
+        /* EFEK PARTIKEL CANVAS */
+        const canvas = document.getElementById('popCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        function createPopParticles(x, y, color) {
+            for (let i = 0; i < 20; i++) {
+                particles.push({
+                    x: x, y: y,
+                    vx: (Math.random() - 0.5) * 12,
+                    vy: (Math.random() - 0.5) * 12,
+                    radius: Math.random() * 6 + 4,
+                    color: color,
+                    alpha: 1,
+                    life: 0.92
+                });
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha *= p.life;
+                p.radius *= 0.95;
+
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+
+                if (p.alpha < 0.05) particles.splice(i, 1);
+            }
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        /* LOGIKA MODAL TABEL */
+        function openTableModal() {
+            document.getElementById('tableModal').classList.remove('hidden');
+        }
+
+        function closeTableModal() {
+            document.getElementById('tableModal').classList.add('hidden');
+        }
+
+        /* LOGIKA BAR PROGRES */
+        function renderProgressBar() {
+            const grid = document.getElementById('progressGrid');
+            grid.innerHTML = '';
+            for (let i = 1; i <= 10; i++) {
+                const isDone = completedNumbers.has(i);
+                grid.innerHTML += `
+                    <div class="flex flex-col items-center justify-center p-1 md:p-2 rounded-xl transition-all duration-300 ${
+                        isDone 
+                        ? 'bg-green-500 text-white shadow-md scale-105' 
+                        : 'bg-gray-100 text-gray-400 border border-gray-200'
+                    }">
+                        <span class="text-[10px] md:text-xs font-bold">×${i}</span>
+                        <span class="text-xs md:text-sm font-black mt-0.5">${isDone ? '✅' : '⚪'}</span>
+                    </div>
+                `;
+            }
+        }
+
+        /* KONTROL MODE & GAMEPLAY */
+        function selectMode(mode) {
+            selectedMode = mode;
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-500', 'text-white', 'border-blue-600');
+                btn.classList.add('bg-white', 'text-blue-600', 'border-blue-200');
+            });
+            const selectedBtn = document.getElementById(`btn-mode-${mode}`);
+            if (selectedBtn) {
+                selectedBtn.classList.remove('bg-white', 'text-blue-600', 'border-blue-200');
+                selectedBtn.classList.add('bg-blue-500', 'text-white', 'border-blue-600');
+            }
+        }
+
+        function showFeedback(text, isSuccess) {
+            const fb = document.getElementById('feedbackText');
+            fb.innerText = text;
+            fb.className = `text-base md:text-2xl font-bold px-6 py-1.5 rounded-full shadow-md transition-all duration-200 ${
+                isSuccess ? 'bg-green-500 text-white' : 'bg-red-500 text-white'
+            }`;
+            fb.classList.remove('hidden');
+            setTimeout(() => fb.classList.add('hidden'), 900);
+        }
+
+        function startGame() {
+            initAudio();
+            score = 0;
+            completedNumbers.clear();
+            document.getElementById('scoreDisplay').innerText = score;
+
+            document.getElementById('startScreen').classList.add('hidden');
+            document.getElementById('topBar').classList.remove('hidden');
+            document.getElementById('gameBoard').classList.remove('hidden');
+            document.getElementById('progressContainer').classList.remove('hidden');
+
+            const modeTag = document.getElementById('modeTag');
+            modeTag.innerText = selectedMode === 'all' ? '1-10 Campur' : `Perkalian ${selectedMode}`;
+
+            renderProgressBar();
+            generateNewQuestion();
+        }
+
+        function generateNewQuestion() {
+            let n1 = selectedMode === 'all' ? Math.floor(Math.random() * 10) + 1 : parseInt(selectedMode);
+            let n2 = Math.floor(Math.random() * 10) + 1;
+
+            currentQuestion = { num1: n1, num2: n2, answer: n1 * n2 };
+            document.getElementById('questionText').innerText = `${n1} × ${n2} = ?`;
+
+            renderBalloonsAroundBox();
+        }
+
+        function renderBalloonsAroundBox() {
+            const balloonArea = document.getElementById('balloonArea');
+            balloonArea.innerHTML = '';
+            activeBalloons = [];
+
+            let answers = [currentQuestion.answer];
+            while (answers.length < 4) {
+                let offset = (Math.floor(Math.random() * 5) + 1) * (Math.random() < 0.5 ? 1 : -1);
+                let wrong = currentQuestion.answer + offset;
+                if (wrong > 0 && wrong <= 100 && !answers.includes(wrong)) {
+                    answers.push(wrong);
+                }
+            }
+            answers.sort(() => Math.random() - 0.5);
+
+            const positions = [
+                { top: '4%', left: '4%' },
+                { top: '4%', right: '4%' },
+                { bottom: '8%', left: '4%' },
+                { bottom: '8%', right: '4%' }
+            ];
+
+            answers.forEach((val, idx) => {
+                const colorObj = balloonColors[Math.floor(Math.random() * balloonColors.length)];
+                const pos = positions[idx];
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'balloon-wrapper pointer-events-auto';
+                
+                if (pos.top) wrapper.style.top = pos.top;
+                if (pos.bottom) wrapper.style.bottom = pos.bottom;
+                if (pos.left) wrapper.style.left = pos.left;
+                if (pos.right) wrapper.style.right = pos.right;
+
+                wrapper.innerHTML = `
+                    <div class="balloon" style="background-color: ${colorObj.bg}">
+                        ${val}
+                    </div>
+                    <div class="balloon-knot" style="border-bottom-color: ${colorObj.bg}"></div>
+                    <div class="balloon-string"></div>
+                `;
+
+                const balloonData = {
+                    element: wrapper,
+                    value: val,
+                    color: colorObj.bg,
+                    isCorrect: val === currentQuestion.answer
+                };
+
+                wrapper.addEventListener('pointerdown', (e) => {
+                    e.preventDefault();
+                    handleBalloonClick(balloonData, e.clientX, e.clientY);
+                });
+
+                balloonArea.appendChild(wrapper);
+                activeBalloons.push(balloonData);
+            });
+        }
+
+        function handleBalloonClick(balloon, clickX, clickY) {
+            if (balloon.isCorrect) {
+                playPopSound();
+                createPopParticles(clickX, clickY, balloon.color);
+                score += 10;
+                document.getElementById('scoreDisplay').innerText = score;
+                
+                completedNumbers.add(currentQuestion.num2);
+                renderProgressBar();
+
+                showFeedback('Hore! Benar! 🎉', true);
+                generateNewQuestion();
+            } else {
+                playWrongSound();
+                balloon.element.classList.add('shake');
+                setTimeout(() => balloon.element.classList.remove('shake'), 400);
+                showFeedback('Coba Lagi! ❌', false);
+            }
+        }
+
+        function resetToStart() {
+            document.getElementById('startScreen').classList.remove('hidden');
+            document.getElementById('topBar').classList.add('hidden');
+            document.getElementById('gameBoard').classList.add('hidden');
+            document.getElementById('progressContainer').classList.add('hidden');
+        }
+    </script>
+</body>
+</html>
