@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ikmal Imani — Graphic Designer & Digital Tools</title>
 
+    <!-- GoatCounter Web Analytics -->
+    <script data-goatcounter="https://ikmalimani.goatcounter.com/count"
+            async src="https://gc.zgo.at/count.js"></script>
+
     <!-- Meta Tags SEO -->
     <meta name="description" content="Ikmal Imani — Graphic Designer & Digital Tools Specialist. Membantu bisnis lebih gampang ditemukan & operasional lebih efisien.">
     <meta name="keywords" content="ikmal imani, graphic designer, digital tools, website bio link, ui ux designer">
@@ -478,8 +482,8 @@
                 <a class="social-icon-btn" target="_blank" title="TikTok" href="https://www.tiktok.com/@ikmalimanii">
                     <i class="fa-brands fa-tiktok"></i>
                 </a>
-                                <a class="social-icon-btn" target="_blank" title="Youtube" href="https://www.youtube.com/@ikmalimani">
-                    <i class="fa-brands fa-youtube-play"></i>
+                <a class="social-icon-btn" target="_blank" title="Youtube" href="https://www.youtube.com/@ikmalimani">
+                    <i class="fa-brands fa-youtube"></i>
                 </a>
             </div>
 
@@ -561,7 +565,7 @@
                 const container = document.getElementById('pdfListContainer');
                 container.innerHTML = '';
 
-                let itemCounter = 1; // Counter untuk penomoran otomatis
+                let itemCounter = 1;
 
                 for (let i = 1; i < rows.length; i++) {
                     const row = rows[i];
@@ -592,7 +596,6 @@
                         badgeHtml += `<span class="pdf-badge">${badge}</span>`;
                     }
 
-                    // Tampilan item dengan nomor (#1, #2, #3...) di pojok atas thumbnail
                     btn.innerHTML = `
                         <div class="pdf-thumb-1x1">
                             <div class="item-number-badge">#${itemCounter}</div>
@@ -608,7 +611,7 @@
                     `;
 
                     container.appendChild(btn);
-                    itemCounter++; // Tambah counter nomor untuk item berikutnya
+                    itemCounter++;
                 }
             } catch (error) {
                 console.error('Gagal memuat data Google Sheets:', error);
