@@ -54,7 +54,6 @@
             justify-content: center;
         }
 
-        /* Centered Mobile Container Layout (Max 480px) */
         .mobile-wrapper {
             width: 100%;
             max-width: 480px;
@@ -194,12 +193,6 @@
             transform: translateY(-1px);
         }
 
-        .btn-gold:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
         .btn-outline-danger {
             background: transparent;
             color: var(--danger-red);
@@ -327,13 +320,11 @@
             padding: 5px;
         }
 
-        /* Range Slider */
         input[type=range] {
             width: 100%;
             accent-color: var(--accent-gold);
         }
 
-        /* Form Grid for Settings */
         .settings-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -385,7 +376,6 @@
             margin-top: 4px;
         }
 
-        /* Alert Status */
         .alert-box {
             padding: 12px;
             border-radius: 12px;
@@ -398,12 +388,6 @@
             background-color: #FAF7F2;
             border: 1px solid var(--border-color);
             color: var(--text-muted);
-        }
-
-        .alert-success {
-            background-color: #E8F5E9;
-            color: #2E7D32;
-            border: 1px solid #C8E6C9;
         }
 
         /* Footer */
@@ -437,7 +421,7 @@
             <!-- 1. Upload Card -->
             <div class="card-box">
                 <h2 class="section-title">1. Tambah Foto</h2>
-                <div id="dropArea" class="drop-zone" role="button">
+                <div id="dropArea" class="drop-zone">
                     <i class="fa-solid fa-cloud-arrow-up drop-icon"></i>
                     <div class="drop-title">Pilih atau Tarik Foto</div>
                     <div class="drop-sub">Bisa pilih beberapa foto sekaligus</div>
@@ -552,7 +536,7 @@
     <script>
         const { jsPDF } = window.jspdf;
         const SIZE = { '2x3':[20,30], '3x4':[30,40], '4x6':[40,60] };
-        const INNER_BORDER = 1; // 1mm border putih per sisi
+        const INNER_BORDER = 1;
         
         let photos = [], generatedPdfBlob = null;
         const $ = id => document.getElementById(id);
@@ -564,16 +548,28 @@
               previewSection = $('previewSection'), 
               resultSection = $('resultSection');
 
-        $('chooseFilesButton').onclick = e => { e.stopPropagation(); fileInput.click(); };
-        dropArea.onclick = () => fileInput.click();
-        fileInput.onchange = () => { handleFiles(fileInput.files); fileInput.value = ''; };
+        // PERBAIKAN EVENT CLICK UPLOAD
+        dropArea.onclick = (e) => {
+            if (e.target !== fileInput) {
+                fileInput.click();
+            }
+        };
+
+        fileInput.onchange = () => { 
+            if (fileInput.files.length > 0) {
+                handleFiles(fileInput.files); 
+                fileInput.value = ''; 
+            }
+        };
         
         dropArea.ondragover = e => { e.preventDefault(); dropArea.style.borderColor = 'var(--text-dark)'; };
         dropArea.ondragleave = () => { dropArea.style.borderColor = 'var(--accent-gold)'; };
         dropArea.ondrop = e => { 
             e.preventDefault(); 
             dropArea.style.borderColor = 'var(--accent-gold)'; 
-            handleFiles(e.dataTransfer.files); 
+            if (e.dataTransfer.files.length > 0) {
+                handleFiles(e.dataTransfer.files); 
+            }
         };
 
         function handleFiles(files) {
