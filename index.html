@@ -295,7 +295,7 @@
             border-radius: 4px;
         }
 
-        /* Badge Bintang Merah FREE */
+        /* Badge Bintang Merah Fleksibel (FREE, HOT, NEW, dll) */
         .star-badge-free {
             background-color: #E53935;
             color: #FFFFFF;
@@ -589,11 +589,13 @@
                     btn.setAttribute('onclick', `openModal('${modalImgUrl}', '${safeJudul}', '${safeSubjudul}', '${safeDeskripsi}', '${safeLink}', '${customTombol}')`);
 
                     let badgeHtml = '';
-                    if (star && star.toUpperCase() === 'FREE') {
-                        badgeHtml += `<span class="star-badge-free"><i class="fa-solid fa-star"></i> FREE</span>`;
+                    
+                    // Fleksibel: Menampilkan badge bintang merah untuk teks apa saja (HOT, FREE, NEW, dll)
+                    if (star && star.trim() !== '') {
+                        badgeHtml += `<span class="star-badge-free"><i class="fa-solid fa-star"></i> ${star.trim()}</span>`;
                     }
-                    if (badge) {
-                        badgeHtml += `<span class="pdf-badge">${badge}</span>`;
+                    if (badge && badge.trim() !== '') {
+                        badgeHtml += `<span class="pdf-badge">${badge.trim()}</span>`;
                     }
 
                     btn.innerHTML = `
