@@ -25,14 +25,14 @@
         SEAL ONLINE ITEM ID FINDER
       </h1>
       <p class="text-slate-400 mt-2 text-sm md:text-base">
-        Database Item Seal Online (Auto-load dari <code class="text-amber-300">seal_id.txt</code>)
+        Database Item Seal Online (Auto-load dari <code class="text-amber-300">seal_id.txt</code> dengan Statistik Item)
       </p>
     </header>
 
     <!-- Status & Search Bar -->
     <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 md:p-6 mb-6 shadow-lg flex flex-col md:flex-row gap-4 justify-between items-center">
       <div class="relative w-full md:w-2/3">
-        <input type="text" id="searchInput" placeholder="Cari ID atau nama item (contoh: Geranium, Log, dll)..." 
+        <input type="text" id="searchInput" placeholder="Cari ID atau nama item (contoh: Helm of Daylight, 230, dll)..." 
           class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-3 text-slate-200 focus:outline-none focus:border-amber-400 transition" disabled>
       </div>
       <div class="flex gap-4 w-full md:w-1/3 justify-between md:justify-end items-center text-sm text-slate-400">
@@ -51,14 +51,17 @@
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="bg-slate-900 text-amber-400 text-sm uppercase tracking-wider border-b border-slate-700">
-              <th class="py-3 px-4 w-28">ID Item</th>
+              <th class="py-3 px-4 w-24">ID Item</th>
               <th class="py-3 px-4">Nama Item</th>
-              <th class="py-3 px-4 w-32 text-center">Aksi</th>
+              <th class="py-3 px-4 w-20 text-center">Req Lv</th>
+              <th class="py-3 px-4 w-24 text-center">DEF</th>
+              <th class="py-3 px-4 w-24 text-center">ASPD</th>
+              <th class="py-3 px-4 w-44 text-center">Aksi</th>
             </tr>
           </thead>
           <tbody id="itemTableBody" class="divide-y divide-slate-700 text-sm">
             <tr>
-              <td colspan="3" class="py-8 text-center text-slate-500">
+              <td colspan="6" class="py-8 text-center text-slate-500">
                 Memuat database <code class="text-amber-400">seal_id.txt</code>...
               </td>
             </tr>
@@ -86,8 +89,50 @@
     </div>
   </div>
 
+  <!-- Detail Modal -->
+  <div id="detailModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200 z-50">
+    <div class="bg-slate-800 border border-slate-700 rounded-xl p-6 max-w-md w-full shadow-2xl transform scale-95 transition-transform duration-200" id="modalContent">
+      <h3 id="modalTitle" class="text-xl font-bold text-amber-400 mb-2"></h3>
+      <div class="text-xs text-slate-400 mb-4">ID Item: <span id="modalId" class="font-mono text-amber-300"></span></div>
+      
+      <div class="space-y-3 text-sm">
+        <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-700/50">
+          <div class="text-amber-400 font-semibold mb-1 text-xs uppercase tracking-wider">Persyaratan Karakter</div>
+          <div class="grid grid-cols-2 gap-2 text-slate-300">
+            <div>Level Req: <span id="modalLevel" class="font-bold text-white"></span></div>
+            <div>Job Code: <span id="modalJob" class="font-bold text-white"></span></div>
+            <div>STR Req: <span id="modalStr" class="font-bold text-white"></span></div>
+            <div>AGI Req: <span id="modalAgi" class="font-bold text-white"></span></div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-700/50">
+          <div class="text-amber-400 font-semibold mb-1 text-xs uppercase tracking-wider">Atribut & Combat Stats</div>
+          <div class="grid grid-cols-2 gap-2 text-slate-300">
+            <div>Defense: <span id="modalDef" class="font-bold text-emerald-400"></span></div>
+            <div>Attack Speed: <span id="modalAspd" class="font-bold text-emerald-400"></span></div>
+            <div>Move Speed: <span id="modalMspd" class="font-bold text-emerald-400"></span></div>
+            <div>Slot/Type: <span id="modalType" class="font-bold text-white"></span></div>
+          </div>
+        </div>
+
+        <div class="bg-slate-900/60 p-3 rounded-lg border border-slate-700/50">
+          <div class="text-amber-400 font-semibold mb-1 text-xs uppercase tracking-wider">Ekonomi NPC</div>
+          <div class="grid grid-cols-2 gap-2 text-slate-300">
+            <div>Harga Jual: <span id="modalSell" class="font-bold text-amber-300"></span> Cegel</div>
+            <div>Harga Beli: <span id="modalBuy" class="font-bold text-amber-300"></span> Cegel</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-6 flex justify-end gap-2">
+        <button onclick="closeModal()" class="px-4 py-2 bg-slate-700 text-slate-200 rounded-lg text-xs font-bold hover:bg-slate-600 transition">Tutup</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Toast Notification -->
-  <div id="toast" class="toast fixed bottom-5 right-5 bg-amber-500 text-slate-950 px-4 py-2 rounded-lg font-bold shadow-lg opacity-0 pointer-events-none transform translate-y-2">
+  <div id="toast" class="toast fixed bottom-5 right-5 bg-amber-500 text-slate-950 px-4 py-2 rounded-lg font-bold shadow-lg opacity-0 pointer-events-none transform translate-y-2 z-50">
     ID berhasil dicopy!
   </div>
 
@@ -109,13 +154,10 @@
     const pageTotal = document.getElementById('pageTotal');
     const toast = document.getElementById('toast');
 
-    // Auto load file seal_id.txt saat halaman dibuka
     window.addEventListener('DOMContentLoaded', () => {
       fetch('seal_id.txt')
         .then(response => {
-          if (!response.ok) {
-            throw new Error('File seal_id.txt tidak ditemukan!');
-          }
+          if (!response.ok) throw new Error('File seal_id.txt tidak ditemukan!');
           return response.text();
         })
         .then(text => {
@@ -130,14 +172,14 @@
           statusText.className = 'text-rose-400 font-semibold';
           itemTableBody.innerHTML = `
             <tr>
-              <td colspan="3" class="py-8 text-center text-rose-400 font-semibold">
-                Gagal membaca file <code class="bg-slate-900 px-2 py-1 rounded">seal_id.txt</code>.<br> Pastikan file tersebut berada di folder yang sama dengan <code class="bg-slate-900 px-2 py-1 rounded">index.html</code>.
+              <td colspan="6" class="py-8 text-center text-rose-400 font-semibold">
+                Gagal membaca file <code class="bg-slate-900 px-2 py-1 rounded">seal_id.txt</code>.
               </td>
             </tr>`;
         });
     });
 
-    // Parsing data berdasarkan delimiter Pipe (|)
+    // Parsing data berdasarkan indeks struktur baris Seal Online
     function parseTxtData(text) {
       const lines = text.split(/\r?\n/);
       allItems = [];
@@ -147,13 +189,24 @@
         if (!trimmed) return;
 
         const parts = trimmed.split('|');
-        if (parts.length >= 2) {
-          const id = parts[0].trim();
-          const name = parts[1].trim();
+        if (parts.length >= 10) {
+          const id = parts[0] ? parts[0].trim() : '0';
+          const name = parts[1] ? parts[1].trim() : '';
+          const type = parts[2] ? parts[2].trim() : '0';
+          const level = parts[3] ? parts[3].trim() : '0';
+          const job = parts[4] ? parts[4].trim() : '0';
+          const def = parts[17] ? parts[17].trim() : '0';
+          const aspd = parts[23] ? parts[23].trim() : '0';
+          const mspd = parts[20] ? parts[20].trim() : '0';
+          const sellPrice = parts[35] ? parseInt(parts[35]).toLocaleString() : '0';
+          const buyPrice = parts[36] ? parseInt(parts[36]).toLocaleString() : '0';
+          const agi = parts[44] ? parts[44].trim() : '0';
+          const str = parts[70] ? parts[70].trim() : '0';
 
-          // Hanya masukkan item yang mempunyai nama valid (bukan 0)
           if (name !== '' && name !== '0') {
-            allItems.push({ id, name });
+            allItems.push({
+              id, name, type, level, job, def, aspd, mspd, sellPrice, buyPrice, agi, str
+            });
           }
         }
       });
@@ -163,7 +216,6 @@
       renderTable();
     }
 
-    // Live Filter
     searchInput.addEventListener('input', () => {
       const query = searchInput.value.toLowerCase().trim();
       filteredItems = allItems.filter(item => 
@@ -174,7 +226,6 @@
       renderTable();
     });
 
-    // Render Tabel
     function renderTable() {
       totalItemsEl.textContent = filteredItems.length.toLocaleString();
       pageTotal.textContent = filteredItems.length.toLocaleString();
@@ -182,7 +233,7 @@
       if (filteredItems.length === 0) {
         itemTableBody.innerHTML = `
           <tr>
-            <td colspan="3" class="py-8 text-center text-slate-500">
+            <td colspan="6" class="py-8 text-center text-slate-500">
               Tidak ada item yang cocok dengan pencarian.
             </td>
           </tr>`;
@@ -198,14 +249,20 @@
       const currentData = filteredItems.slice(startIndex, endIndex);
 
       let html = '';
-      currentData.forEach(item => {
+      currentData.forEach((item, index) => {
+        const itemIdx = startIndex + index;
         html += `
           <tr class="hover:bg-slate-750 border-b border-slate-700/50 transition">
             <td class="py-3 px-4 font-mono font-bold text-amber-400">${item.id}</td>
-            <td class="py-3 px-4 text-slate-200">${escapeHtml(item.name)}</td>
-            <td class="py-3 px-4 text-center">
-              <button onclick="copyToClipboard('${item.id}')" 
-                class="bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 px-3 py-1 rounded text-xs transition active:scale-95">
+            <td class="py-3 px-4 text-slate-200 font-medium">${escapeHtml(item.name)}</td>
+            <td class="py-3 px-4 text-center text-slate-300 font-mono">${item.level}</td>
+            <td class="py-3 px-4 text-center text-emerald-400 font-mono">${item.def !== '0' ? '+' + item.def : '-'}</td>
+            <td class="py-3 px-4 text-center text-emerald-400 font-mono">${item.aspd !== '0' ? '+' + item.aspd : '-'}</td>
+            <td class="py-3 px-4 text-center flex justify-center gap-2">
+              <button onclick="showDetail(${itemIdx})" class="bg-slate-700 hover:bg-slate-600 text-slate-200 px-2.5 py-1 rounded text-xs transition">
+                Detail
+              </button>
+              <button onclick="copyToClipboard('${item.id}')" class="bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 border border-amber-500/30 px-2.5 py-1 rounded text-xs transition active:scale-95">
                 Copy ID
               </button>
             </td>
@@ -214,6 +271,34 @@
 
       itemTableBody.innerHTML = html;
       updatePaginationInfo(startIndex + 1, endIndex, totalPages);
+    }
+
+    function showDetail(index) {
+      const item = filteredItems[index];
+      if (!item) return;
+
+      document.getElementById('modalTitle').textContent = item.name;
+      document.getElementById('modalId').textContent = item.id;
+      document.getElementById('modalLevel').textContent = item.level;
+      document.getElementById('modalJob').textContent = item.job;
+      document.getElementById('modalStr').textContent = item.str;
+      document.getElementById('modalAgi').textContent = item.agi;
+      document.getElementById('modalDef').textContent = item.def !== '0' ? '+' + item.def : '0';
+      document.getElementById('modalAspd').textContent = item.aspd !== '0' ? '+' + item.aspd : '0';
+      document.getElementById('modalMspd').textContent = item.mspd !== '0' ? '+' + item.mspd : '0';
+      document.getElementById('modalType').textContent = item.type;
+      document.getElementById('modalSell').textContent = item.sellPrice;
+      document.getElementById('modalBuy').textContent = item.buyPrice;
+
+      const modal = document.getElementById('detailModal');
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      modal.classList.add('opacity-100');
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('detailModal');
+      modal.classList.remove('opacity-100');
+      modal.classList.add('opacity-0', 'pointer-events-none');
     }
 
     function updatePaginationInfo(start, end, totalPages) {
