@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ikmal Imani — 55555</title>
+
+    <!-- Favicon (Initials II) -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23C5A059'/><text x='50%' y='65%' font-family='Georgia, serif' font-size='50' font-weight='bold' fill='%23FFFFFF' text-anchor='middle'>II</text></svg>">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        /* Variables & Color Palette */
+        :root {
+            --bg-cream: #FAF7F2;
+            --card-cream: #FFFFFF;
+            --text-dark: #33302E;
+            --text-muted: #66605C;
+            --accent-gold: #C5A059;
+            --accent-sage: #8A9A86;
+            --border-color: #E8E2D9;
+            --wa-green: #25D366;
+            --wa-green-hover: #20ba5a;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            background-color: #EAE6DF;
+            color: var(--text-dark);
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* Mobile Container Layout (Lebar maksimal 480px) */
+        .mobile-wrapper {
+            width: 100%;
+            max-width: 480px;
+            background-color: var(--bg-cream);
+            min-height: 100vh;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 35px 20px 20px;
+            text-align: center;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background-color: var(--card-cream);
+            color: var(--accent-sage);
+            padding: 4px 14px;
+            border-radius: 50px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Ikon Logo Sosmed di Atas Hero */
+        .social-hero {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .social-icon-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: var(--card-cream);
+            border: 1px solid var(--border-color);
+            border-radius: 50%;
+            font-size: 18px;
+            color: var(--text-dark);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+            transition: var(--transition);
+        }
+
+        .social-icon-btn:hover {
+            color: var(--accent-gold);
+            border-color: var(--accent-gold);
+            transform: translateY(-2px);
+        }
+
+        /* Judul Nama Besar */
+        .hero h1.hero-name {
+            font-size: 40px;
+            font-weight: 700;
+            color: var(--text-dark);
+            line-height: 1.1;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .hero p.hero-sub {
+            font-size: 13.5px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+            max-width: 320px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Wrapper Foto Profil Utama */
+        .profile-img-container {
+            position: relative;
+            width: 100%;
+            max-width: 100%;
+            height: 250px;
+            margin: 0 auto 20px auto;
+            border-radius: 24px;
+            overflow: hidden;
+            background-color: #E8E2D9;
+        }
+
+        .profile-img-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: top center;
+            display: block;
+        }
+
+        /* Global WhatsApp Button */
+        .btn-wa {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            background-color: var(--wa-green);
+            color: #FFFFFF !important;
+            text-align: center;
+            padding: 14px 20px;
+            font-size: 14.5px;
+            font-weight: 600;
+            border-radius: 30px;
+            box-shadow: 0 4px 14px rgba(37, 211, 102, 0.3);
+            transition: var(--transition);
+        }
+
+        .btn-wa:hover {
+            background-color: var(--wa-green-hover);
+            transform: translateY(-2px);
+        }
+
+        /* Section Wrappers */
+        .page-section {
+            padding: 10px 20px 30px;
+        }
+
+        /* List Tombol Link */
+        .pdf-list {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        /* Tombol Mepet Kiri Full Gambar 1:1 (Tinggi 100px) */
+        .pdf-item-btn {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background-color: var(--card-cream);
+            padding: 0 16px 0 0;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+            overflow: hidden;
+            height: 100px;
+            cursor: pointer;
+        }
+
+        .pdf-item-btn:hover {
+            border-color: var(--accent-gold);
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+            transform: translateX(3px);
+        }
+
+        /* Gambar Thumbnail 1:1 Full Height Mepet Kiri */
+        .pdf-thumb-1x1 {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            min-width: 100px;
+            background-color: #E8E2D9;
+        }
+
+        .pdf-thumb-1x1 img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* Badge Nomor di Pojok Kiri Atas Gambar (#1, #2, dst) */
+        .item-number-badge {
+            position: absolute;
+            top: 0;
+            left: 0;
+            background-color: var(--text-dark);
+            color: #FFFFFF;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-bottom-right-radius: 10px;
+            box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+            z-index: 2;
+        }
+
+        .pdf-text-box {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 8px 0;
+        }
+
+        .pdf-title-text {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            line-height: 1.35;
+        }
+
+        .pdf-sub-text {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 3px;
+        }
+
+        /* Container penataan Badge di Kanan */
+        .badge-group {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 6px;
+            margin-left: auto;
+        }
+
+        /* Badge Gold Bawaan */
+        .pdf-badge {
+            background-color: var(--accent-gold);
+            color: #FFF;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+
+        /* Badge Bintang Merah Fleksibel (HOT, FREE, NEW, dll) */
+        .star-badge-free {
+            background-color: #E53935;
+            color: #FFFFFF;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            box-shadow: 0 2px 6px rgba(229, 57, 53, 0.35);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .star-badge-free i {
+            font-size: 8px;
+        }
+
+        /* ================= POPUP MODAL STYLING ================= */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-card {
+            background-color: var(--card-cream);
+            width: 100%;
+            max-width: 380px;
+            max-height: 90vh;
+            overflow-y: auto;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            transform: scale(0.85);
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .modal-overlay.active .modal-card {
+            transform: scale(1);
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 32px;
+            height: 32px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: #FFF;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+            z-index: 10;
+            transition: var(--transition);
+        }
+
+        .modal-close-btn:hover {
+            background-color: rgba(0, 0, 0, 0.8);
+        }
+
+        /* Container Foto Modal 1:1 Presisi dengan Preloading Fade-In */
+        .modal-img-wrapper {
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            background-color: #F3EFE9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .modal-img-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            opacity: 0;
+            transition: opacity 0.25s ease-in-out;
+        }
+
+        .modal-img-wrapper img.loaded {
+            opacity: 1;
+        }
+
+        .modal-body {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        .modal-subtitle {
+            font-size: 0.85rem;
+            color: var(--accent-gold);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .modal-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            margin-bottom: 20px;
+            text-align: justify;
+        }
+
+        .modal-download-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            background-color: var(--accent-gold);
+            color: #FFFFFF !important;
+            padding: 13px 20px;
+            font-size: 14.5px;
+            font-weight: 600;
+            border-radius: 30px;
+            box-shadow: 0 4px 12px rgba(197, 160, 89, 0.3);
+            transition: var(--transition);
+        }
+
+        .modal-download-btn:hover {
+            background-color: #b08d4b;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--text-dark);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        footer span {
+            color: var(--accent-gold);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-wrapper">
+
+        <!-- Hero Section -->
+        <section class="hero">
+            <span class="hero-badge">Graphic Designer &amp; Digital Tools</span>
+            
+            <!-- Ikon Logo Sosmed di Atas Hero -->
+            <div class="social-hero">
+                <a class="social-icon-btn" target="_blank" title="Instagram" href="https://www.instagram.com/ikmalimanii">
+                    <i class="fa-brands fa-instagram"></i>
+                </a>
+                <a class="social-icon-btn" target="_blank" title="TikTok" href="https://www.tiktok.com/@ikmalimanii">
+                    <i class="fa-brands fa-tiktok"></i>
+                </a>
+                <a class="social-icon-btn" target="_blank" title="Youtube" href="https://www.youtube.com/@ikmalimani">
+                    <i class="fa-brands fa-youtube"></i>
+                </a>
+            </div>
+
+            <!-- Nama Utama Ukuran Besar -->
+            <h1 class="hero-name">Ikmal Imani</h1>
+            
+            <p class="hero-sub">Link Kerja</p>
+            
+            <!-- Container Foto Utama -->
+            <div class="profile-img-container">
+                <img id="mainProfileImg" src="https://i.ibb.co.com/208FDhCG/profil-link-01.webp" alt="Ikmal Imani">
+            </div>
+
+            <!-- Tombol WA Hero -->
+            <a class="btn-wa" target="_blank" href="https://wa.me/6281333302838">
+                <i class="fa-brands fa-whatsapp" style="font-size: 18px;"></i>Kalo Kebingungan Chat Sini!
+            </a>
+        </section>
+
+        <!-- PORTFOLIO & SERVICES LIST (DINAMIS DARI GOOGLE SHEETS) -->
+        <section class="page-section">
+            <div class="pdf-list" id="pdfListContainer">
+                <p style="text-align:center; font-size:13px; color:var(--text-muted);">Memuat data...</p>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>© 2026 <span>ikmalimanii</span>. All Rights Reserved.</p>
+        </footer>
+
+    </div>
+
+    <!-- ================= POPUP MODAL COMPONENT ================= -->
+    <div class="modal-overlay" id="modalOverlay" onclick="closeModalOnOuterClick(event)">
+        <div class="modal-card">
+            <button class="modal-close-btn" onclick="closeModal()">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <!-- Foto Preview Ukuran Besar 1:1 Presisi -->
+            <div class="modal-img-wrapper">
+                <img id="modalImg" src="" alt="Preview">
+            </div>
+
+            <!-- Konten Pop Out -->
+            <div class="modal-body">
+                <h3 class="modal-title" id="modalTitle">Judul Item</h3>
+                <div class="modal-subtitle" id="modalSubtitle">Sub Judul Item</div>
+                <p class="modal-desc" id="modalDesc">Deskripsi detail...</p>
+
+                <!-- Tombol Action Kustom dari Spreadsheet Kolom H -->
+                <a href="#" id="modalBtn" class="modal-download-btn" target="_blank">
+                    <i class="fa-solid fa-arrow-right-long" id="modalBtnIcon"></i> <span id="modalBtnText">Download</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= JAVASCRIPT FETCH, CACHING, & EVENT HANDLER ================= -->
+    <script>
+        const sheetCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ-enavxOP-JDGc-D-yRUkrqMumpydoOJW4PtVmen4ZJtE9l8r-BX0wH0i3lWQi-G3wcU_sTixatKRE/pub?gid=1065146352&single=true&output=csv';
+        const CACHE_KEY = '55555_data_cache';
+
+        // Fungsi Otomatis Kompres Foto ke format WebP ringan via CDN Wsrv
+        function getOptimizedImg(url, width = 300) {
+            if (!url) return 'https://via.placeholder.com/200x200/C5A059/FFFFFF?text=Image';
+            if (url.startsWith('data:image')) return url;
+            return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=${width}&output=webp&q=80`;
+        }
+
+        // Fungsi Render List Item
+        function renderBiolinkData(dataText) {
+            const rows = dataText.split('\n').map(row => {
+                return row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(field => field.replace(/^"\vert{}"$/g, '').trim());
+            });
+
+            const container = document.getElementById('pdfListContainer');
+            container.innerHTML = '';
+
+            let itemCounter = 1;
+
+            for (let i = 1; i < rows.length; i++) {
+                const row = rows[i];
+                if (row.length < 7 || !row[0]) continue;
+
+                const [judul, subjudul, deskripsi, foto, star, badge, link, tombolText] = row;
+
+                const btn = document.createElement('div');
+                btn.className = 'pdf-item-btn';
+                
+                const safeJudul = judul.replace(/'/g, "\\'");
+                const safeSubjudul = subjudul.replace(/'/g, "\\'");
+                const safeDeskripsi = deskripsi.replace(/'/g, "\\'").replace(/\n/g, ' ');
+                const rawFoto = foto;
+                const safeLink = link;
+                const customTombol = (tombolText && tombolText.trim() !== '') ? tombolText.replace(/'/g, "\\'") : 'Download';
+
+                const thumbImgUrl = getOptimizedImg(rawFoto, 200);
+                const modalImgUrl = getOptimizedImg(rawFoto, 600);
+
+                btn.setAttribute('onclick', `openModal('${modalImgUrl}', '${safeJudul}', '${safeSubjudul}', '${safeDeskripsi}', '${safeLink}', '${customTombol}')`);
+
+                let badgeHtml = '';
+                if (star && star.trim() !== '') {
+                    badgeHtml += `<span class="star-badge-free"><i class="fa-solid fa-star"></i> ${star.trim()}</span>`;
+                }
+                if (badge && badge.trim() !== '') {
+                    badgeHtml += `<span class="pdf-badge">${badge.trim()}</span>`;
+                }
+
+                btn.innerHTML = `
+                    <div class="pdf-thumb-1x1">
+                        <div class="item-number-badge">#${itemCounter}</div>
+                        <img src="${thumbImgUrl}" alt="${judul}" loading="lazy" onerror="this.src='https://via.placeholder.com/200x200/C5A059/FFFFFF?text=Image'">
+                    </div>
+                    <div class="pdf-text-box">
+                        <div class="pdf-title-text">${judul}</div>
+                        <div class="pdf-sub-text">${subjudul}</div>
+                    </div>
+                    <div class="badge-group">
+                        ${badgeHtml}
+                    </div>
+                `;
+
+                container.appendChild(btn);
+                itemCounter++;
+            }
+        }
+
+        // Pemuatan Utama dengan Strategi Cache-First (Instant Load 0ms)
+        async function loadBiolinkData() {
+            const cachedData = localStorage.getItem(CACHE_KEY);
+            
+            // 1. Tampilkan dari memori internal jika ada cache
+            if (cachedData) {
+                renderBiolinkData(cachedData);
+            }
+
+            // 2. Ambil data terbaru di latar belakang
+            try {
+                const response = await fetch(sheetCsvUrl);
+                const latestDataText = await response.text();
+
+                // Jika data berubah dari cache, perbarui memori & re-render
+                if (latestDataText !== cachedData) {
+                    localStorage.setItem(CACHE_KEY, latestDataText);
+                    renderBiolinkData(latestDataText);
+                }
+            } catch (error) {
+                console.error('Gagal memperbarui data Google Sheets:', error);
+                if (!cachedData) {
+                    document.getElementById('pdfListContainer').innerHTML = '<p style="text-align:center; font-size:13px; color:#E53935;">Gagal memuat data.</p>';
+                }
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', loadBiolinkData);
+
+        // Open Modal Pop Up
+        function openModal(imgUrl, title, subtitle, desc, btnLink, btnText) {
+            const modalImg = document.getElementById('modalImg');
+            
+            modalImg.classList.remove('loaded');
+            modalImg.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"/>'; 
+
+            document.getElementById('modalTitle').innerText = title;
+            document.getElementById('modalSubtitle').innerText = subtitle;
+            document.getElementById('modalDesc').innerText = desc;
+            document.getElementById('modalBtn').href = btnLink;
+            document.getElementById('modalBtnText').innerText = btnText || 'Download';
+
+            document.getElementById('modalOverlay').classList.add('active');
+
+            const newImg = new Image();
+            newImg.src = imgUrl;
+            newImg.onload = function() {
+                modalImg.src = imgUrl;
+                modalImg.classList.add('loaded');
+            };
+        }
+
+        // Close Modal Pop Up
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+            document.getElementById('modalImg').classList.remove('loaded');
+        }
+
+        function closeModalOnOuterClick(event) {
+            if (event.target.classList.contains('modal-overlay')) {
+                closeModal();
+            }
+        }
+    </script>
+
+</body>
+</html>
