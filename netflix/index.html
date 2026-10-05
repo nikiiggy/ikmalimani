@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sales Page - Website Ucapan Netflix</title>
+  <!-- Google Fonts & Font Awesome Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+  <style>
+    /* Reset & Base Styles */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: #141414;
+      color: #ffffff;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+      user-select: none;
+    }
+
+    /* STICKY TOP CTA BAR */
+    .cta-top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 52px;
+      background: rgba(18, 18, 18, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 5%;
+      z-index: 100;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .top-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      height: 36px;
+      padding: 0 18px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 13px;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .btn-info-modal {
+      background: rgba(229, 9, 20, 0.15);
+      color: #ff4d4d;
+      border: 1px solid rgba(229, 9, 20, 0.4);
+    }
+
+    .btn-info-modal:hover {
+      background: #e50914;
+      color: #ffffff;
+      box-shadow: 0 0 15px rgba(229, 9, 20, 0.4);
+    }
+
+    .btn-wa-direct {
+      background: #25d366;
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.25);
+    }
+
+    .btn-wa-direct:hover {
+      background: #20ba5a;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(37, 211, 102, 0.4);
+    }
+
+    /* Navbar Header */
+    .navbar {
+      position: fixed;
+      top: 52px;
+      width: 100%;
+      height: 68px;
+      padding: 0 5%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0) 100%);
+      z-index: 10;
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 25px;
+    }
+
+    .logo {
+      color: #e50914;
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      cursor: default;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 15px;
+      list-style: none;
+    }
+
+    .nav-links span {
+      color: #e5e5e5;
+      font-size: 13px;
+      cursor: default;
+      opacity: 0.9;
+    }
+
+    .nav-links span.active {
+      color: #ffffff;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 0.2);
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+
+    .nav-right {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-size: 14px;
+      color: #e5e5e5;
+      cursor: default;
+    }
+
+    .profile-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 4px;
+      background-color: #e50914;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      cursor: default;
+    }
+
+    /* Hero Section */
+    .hero {
+      position: relative;
+      height: 85vh;
+      min-height: 550px;
+      display: flex;
+      align-items: center;
+      padding: 52px 5% 0 5%;
+      background-size: cover;
+      background-position: center right;
+      background-repeat: no-repeat;
+      transition: background-image 0.3s ease;
+    }
+
+    .hero-content {
+      max-width: 520px;
+      z-index: 2;
+    }
+
+    .category-tags {
+      font-size: 12px;
+      letter-spacing: 2px;
+      color: #a3a3a3;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .main-title {
+      font-family: 'Great Vibes', cursive;
+      font-size: 64px;
+      font-weight: 400;
+      margin-bottom: 12px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.6);
+      line-height: 1.1;
+    }
+
+    .meta-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      color: #a3a3a3;
+      margin-bottom: 16px;
+    }
+
+    .badge {
+      border: 1px solid #a3a3a3;
+      padding: 1px 5px;
+      font-size: 10px;
+      border-radius: 2px;
+    }
+
+    .description {
+      font-size: 13px;
+      line-height: 1.6;
+      color: #cccccc;
+      margin-bottom: 24px;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.8);
+    }
+
+    .action-buttons {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 24px;
+      border-radius: 4px;
+      font-size: 15px;
+      font-weight: 600;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    .btn-play {
+      background-color: #ffffff;
+      color: #000000;
+      cursor: pointer;
+    }
+
+    .btn-play:hover {
+      background-color: rgba(255, 255, 255, 0.75);
+      transform: scale(1.03);
+    }
+
+    .btn-disabled {
+      background-color: rgba(109, 109, 110, 0.7);
+      color: #ffffff;
+      cursor: default;
+      opacity: 0.8;
+    }
+
+    .btn-icon-disabled {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      background: rgba(42, 42, 42, 0.6);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: default;
+      opacity: 0.8;
+    }
+
+    /* Gallery Section */
+    .memories-section {
+      padding: 20px 5%;
+      margin-top: -30px;
+      position: relative;
+      z-index: 3;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .card {
+      position: relative;
+      aspect-ratio: 4/3;
+      border-radius: 4px;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.3s ease, filter 0.3s ease;
+    }
+
+    .card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .card:hover {
+      transform: scale(1.05);
+      filter: brightness(1.1);
+    }
+
+    /* Base Modals */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-content-video {
+      position: relative;
+      width: 100%;
+      max-width: 900px;
+      aspect-ratio: 16/9;
+    }
+
+    .modal-content-video iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      border-radius: 12px;
+    }
+
+    .modal-content-image {
+      position: relative;
+      max-width: 90%;
+      max-height: 85vh;
+    }
+
+    .modal-content-image img {
+      max-width: 100%;
+      max-height: 85vh;
+      border-radius: 12px;
+      object-fit: contain;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: -40px;
+      right: 0;
+      color: #ffffff;
+      font-size: 32px;
+      cursor: pointer;
+    }
+
+    /* ============================================================= */
+    /* MODAL MODERN UI KETERANGAN PRODUK & CTA IN-POPUP             */
+    /* ============================================================= */
+    .modal-content-product {
+      position: relative;
+      width: 100%;
+      max-width: 920px;
+      max-height: 90vh;
+      background: #121214;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.85);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: modalFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; transform: scale(0.95) translateY(10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .modern-modal-header {
+      padding: 24px 30px;
+      background: #17171a;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .header-text-group h2 {
+      font-size: 20px;
+      font-weight: 800;
+      background: linear-gradient(90deg, #ffffff 0%, #a0a0a0 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 4px;
+    }
+
+    .header-text-group p {
+      font-size: 13px;
+      color: #888890;
+    }
+
+    .icon-close-modern {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #aaa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .icon-close-modern:hover {
+      background: rgba(229, 9, 20, 0.2);
+      color: #ff4d4d;
+      border-color: rgba(229, 9, 20, 0.4);
+    }
+
+    .modern-modal-body {
+      padding: 26px 30px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* Modern Cards Grid */
+    .packages-grid-modern {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+
+    .card-pkg-modern {
+      position: relative;
+      background: #1a1a1e;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .card-pkg-modern:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255, 255, 255, 0.2);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .card-pkg-modern.highlight-card {
+      background: linear-gradient(180deg, rgba(229, 9, 20, 0.08) 0%, #1a1a1e 100%);
+      border: 1px solid rgba(229, 9, 20, 0.4);
+    }
+
+    .badge-best-seller {
+      position: absolute;
+      top: -10px;
+      right: 14px;
+      background: linear-gradient(90deg, #ffb703 0%, #fb8500 100%);
+      color: #000;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 10px rgba(251, 133, 0, 0.3);
+    }
+
+    .img-wrapper-modern {
+      width: 100%;
+      height: 130px;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 14px;
+      background: #25252a;
+    }
+
+    .img-wrapper-modern img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .pkg-title-modern {
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 4px;
+    }
+
+    .pkg-price-modern {
+      font-size: 18px;
+      font-weight: 800;
+      color: #25d366;
+      margin-bottom: 12px;
+    }
+
+    .pkg-features-list {
+      list-style: none;
+      font-size: 12px;
+      color: #a0a0ab;
+      line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+      flex-grow: 1;
+    }
+
+    .pkg-features-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .pkg-features-list li i {
+      color: #e50914;
+      font-size: 11px;
+      margin-top: 3px;
+    }
+
+    /* TOMBOL CTA DALAM PAKET */
+    .btn-pkg-cta {
+      width: 100%;
+      padding: 10px 0;
+      border-radius: 8px;
+      background: rgba(37, 211, 102, 0.15);
+      color: #25d366;
+      border: 1px solid rgba(37, 211, 102, 0.4);
+      font-weight: 700;
+      font-size: 12px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-pkg-cta:hover {
+      background: #25d366;
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+    }
+
+    .highlight-card .btn-pkg-cta {
+      background: #25d366;
+      color: #ffffff;
+      box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+    }
+
+    .highlight-card .btn-pkg-cta:hover {
+      background: #20ba5a;
+    }
+
+    /* Section Modern Title */
+    .section-title-modern {
+      font-size: 15px;
+      font-weight: 700;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .section-title-modern i {
+      color: #e50914;
+    }
+
+    /* Modern Text Box & Copy */
+    .format-box-modern {
+      background: #0d0d0f;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 16px;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 12px;
+      color: #7efcf6;
+      line-height: 1.5;
+      white-space: pre-wrap;
+      user-select: text;
+      margin-bottom: 12px;
+    }
+
+    .btn-copy-modern {
+      background: linear-gradient(90deg, #e50914 0%, #b80710 100%);
+      color: #ffffff;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      box-shadow: 0 4px 12px rgba(229, 9, 20, 0.3);
+    }
+
+    .btn-copy-modern:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(229, 9, 20, 0.4);
+    }
+
+    /* Steps Timeline Modern */
+    .steps-timeline {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+    }
+
+    .timeline-item {
+      background: #1a1a1e;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .num-step {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: rgba(229, 9, 20, 0.15);
+      color: #e50914;
+      font-weight: 800;
+      font-size: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 8px;
+    }
+
+    .timeline-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 4px;
+    }
+
+    .timeline-desc {
+      font-size: 11px;
+      color: #888890;
+      line-height: 1.4;
+    }
+
+    /* FAQ Modern Grid */
+    .faq-grid-modern {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+
+    .faq-card-modern {
+      background: #1a1a1e;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+
+    .faq-card-modern h4 {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      margin-bottom: 6px;
+    }
+
+    .faq-card-modern p {
+      font-size: 11px;
+      color: #90909a;
+      line-height: 1.5;
+    }
+
+    /* FOOTER CTA BAR DI DALAM POPUP */
+    .popup-bottom-cta {
+      background: #17171a;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 16px 30px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+    }
+
+    .popup-bottom-cta-text {
+      font-size: 13px;
+      color: #ccc;
+    }
+
+    .btn-main-popup-wa {
+      background: #25d366;
+      color: #ffffff;
+      padding: 10px 24px;
+      border-radius: 50px;
+      font-weight: 800;
+      font-size: 13px;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 4px 14px rgba(37, 211, 102, 0.3);
+      transition: all 0.2s ease;
+    }
+
+    .btn-main-popup-wa:hover {
+      background: #20ba5a;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 18px rgba(37, 211, 102, 0.4);
+    }
+
+    /* Responsive Mobile Layout */
+    @media (max-width: 768px) {
+      .cta-top-bar {
+        padding: 0 12px;
+      }
+
+      .top-btn {
+        font-size: 11px;
+        padding: 0 12px;
+        height: 32px;
+      }
+
+      .navbar {
+        top: 52px;
+        padding: 0 15px;
+        height: 50px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      .logo {
+        font-size: 20px;
+      }
+
+      .hero {
+        height: auto;
+        min-height: 100vh;
+        padding: 100px 20px 30px 20px;
+        flex-direction: column;
+        justify-content: flex-end;
+        background-position: center top !important;
+      }
+
+      .hero-content {
+        max-width: 100%;
+        margin-top: 220px;
+      }
+
+      .main-title {
+        font-size: 40px;
+      }
+
+      .gallery-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+      }
+
+      .packages-grid-modern, .steps-timeline, .faq-grid-modern {
+        grid-template-columns: 1fr;
+      }
+
+      .modern-modal-header, .modern-modal-body, .popup-bottom-cta {
+        padding: 16px 20px;
+      }
+
+      .popup-bottom-cta {
+        flex-direction: column;
+        text-align: center;
+      }
+
+      .btn-main-popup-wa {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .modal-content-product {
+        max-height: 92vh;
+        border-radius: 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sticky CTA Top Bar -->
+  <div class="cta-top-bar">
+    <button class="top-btn btn-info-modal" id="btnOpenProductInfo">
+      <i class="fa-solid fa-sparkles"></i> Paket & Cara Order
+    </button>
+    <a href="#" id="waCtaBtnTop" target="_blank" class="top-btn btn-wa-direct">
+      <i class="fa-brands fa-whatsapp"></i> Order Via WA
+    </a>
+  </div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="nav-left">
+      <div class="logo">NETFLIX</div>
+      <div class="nav-links">
+        <span class="active">Home</span>
+        <span>Shows</span>
+        <span>Movies</span>
+        <span>Games</span>
+        <span>My Netflix</span>
+      </div>
+    </div>
+    <div class="nav-right">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      <div class="profile-avatar"><i class="fa-solid fa-smile"></i></div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero" id="heroBg">
+    <div class="hero-content">
+      <div class="category-tags" id="txtCategory">HAPPY BIRTHDAY from Araline</div>
+      <h1 class="main-title" id="txtTitle">Gabriel Tanjaya</h1>
+      <div class="meta-info">
+        <span id="txtYear">2026</span>
+        <span class="badge" id="txtBadge">G</span>
+        <span id="txtDuration">1h 3m</span>
+      </div>
+      <p class="description" id="txtDescription">...</p>
+      <div class="action-buttons">
+        <button class="btn btn-play" id="playBtn">
+          <i class="fa-solid fa-play"></i> Play
+        </button>
+        <button class="btn btn-disabled">
+          <i class="fa-solid fa-plus"></i> My List
+        </button>
+        <button class="btn-icon-disabled"><i class="fa-regular fa-thumbs-up"></i></button>
+        <button class="btn-icon-disabled"><i class="fa-regular fa-thumbs-down"></i></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Gallery Section -->
+  <section class="memories-section">
+    <h2 class="section-title">Other Memories</h2>
+    <div class="gallery-grid" id="galleryContainer"></div>
+  </section>
+
+  <!-- Modal 1: Video Player -->
+  <div class="modal" id="videoModal">
+    <div class="modal-content-video">
+      <span class="close-btn" id="closeVideoBtn">&times;</span>
+      <iframe id="youtubeIframe" src="" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    </div>
+  </div>
+
+  <!-- Modal 2: Image Lightbox -->
+  <div class="modal" id="imageModal">
+    <div class="modal-content-image">
+      <span class="close-btn" id="closeImageBtn">&times;</span>
+      <img id="modalImg" src="" alt="Enlarged Memory">
+    </div>
+  </div>
+
+  <!-- Modal 3: MODERN PRODUCT & ORDER INFO WITH IN-POPUP CTA -->
+  <div class="modal" id="productInfoModal">
+    <div class="modal-content-product">
+      
+      <!-- Modal Header -->
+      <div class="modern-modal-header">
+        <div class="header-text-group">
+          <h2>Pilihan Paket & Cara Order</h2>
+          <p>Hadiah spesial bertema UI Netflix eksklusif untuk orang tersayang.</p>
+        </div>
+        <div class="icon-close-modern" id="closeProductInfoBtn">
+          <i class="fa-solid fa-xmark"></i>
+        </div>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="modern-modal-body">
+
+        <!-- 1. Packages Grid -->
+        <div>
+          <div class="section-title-modern">
+            <i class="fa-solid fa-box-open"></i> Pilihan Paket Ucapan
+          </div>
+          <div class="packages-grid-modern">
+            
+            <!-- Paket 1 -->
+            <div class="card-pkg-modern">
+              <div class="img-wrapper-modern">
+                <img src="https://via.placeholder.com/300x200?text=Pigora+A4" alt="Paket 1" id="imgPkg1">
+              </div>
+              <div class="pkg-title-modern">Paket 1: Pigora Fisik</div>
+              <div class="pkg-price-modern" id="pricePkg1">Rp [Isi Harga]</div>
+              <ul class="pkg-features-list">
+                <li><i class="fa-solid fa-check"></i> Bingkai Ukuran A4 (Pigora Putih)</li>
+                <li><i class="fa-solid fa-check"></i> Bahan Tanpa Kaca (Aman Kirim)</li>
+                <li><i class="fa-solid fa-check"></i> Request Layout Portrait / Landscape</li>
+              </ul>
+              <a href="#" id="btnCtaPkg1" target="_blank" class="btn-pkg-cta">
+                <i class="fa-brands fa-whatsapp"></i> Pilih Paket 1
+              </a>
+            </div>
+
+            <!-- Paket 2 -->
+            <div class="card-pkg-modern">
+              <div class="img-wrapper-modern">
+                <img src="https://via.placeholder.com/300x200?text=Website+Digital" alt="Paket 2" id="imgPkg2">
+              </div>
+              <div class="pkg-title-modern">Paket 2: Digital Website</div>
+              <div class="pkg-price-modern" id="pricePkg2">Rp [Isi Harga]</div>
+              <ul class="pkg-features-list">
+                <li><i class="fa-solid fa-check"></i> Link Website Responsif (HP & PC)</li>
+                <li><i class="fa-solid fa-check"></i> Pop-up Play Video & Galeri Foto</li>
+                <li><i class="fa-solid fa-check"></i> FREE Jasa Edit Video Slideshow Simpel</li>
+              </ul>
+              <a href="#" id="btnCtaPkg2" target="_blank" class="btn-pkg-cta">
+                <i class="fa-brands fa-whatsapp"></i> Pilih Paket 2
+              </a>
+            </div>
+
+            <!-- Paket 3 (Highlight) -->
+            <div class="card-pkg-modern highlight-card">
+              <div class="badge-best-seller">Best Seller</div>
+              <div class="img-wrapper-modern">
+                <img src="https://via.placeholder.com/300x200?text=Bundle+Complete" alt="Paket 3" id="imgPkg3">
+              </div>
+              <div class="pkg-title-modern">Paket 3: Complete Bundle</div>
+              <div class="pkg-price-modern" id="pricePkg3">Rp [Isi Harga]</div>
+              <ul class="pkg-features-list">
+                <li><i class="fa-solid fa-check"></i> Pigora Fisik A4 + Desain Cetak</li>
+                <li><i class="fa-solid fa-check"></i> Website Ucapan Digital Interaktif</li>
+                <li><i class="fa-solid fa-check"></i> FREE QR Card (Scan Langsung ke Web)</li>
+              </ul>
+              <a href="#" id="btnCtaPkg3" target="_blank" class="btn-pkg-cta">
+                <i class="fa-brands fa-whatsapp"></i> Pilih Paket 3
+              </a>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- 2. Order Steps Timeline -->
+        <div>
+          <div class="section-title-modern">
+            <i class="fa-solid fa-list-check"></i> Alur Pemesanan
+          </div>
+          <div class="steps-timeline">
+            <div class="timeline-item">
+              <div class="num-step">1</div>
+              <div class="timeline-title">Chat WA</div>
+              <div class="timeline-desc">Klik order via WA dan pilih paket.</div>
+            </div>
+            <div class="timeline-item">
+              <div class="num-step">2</div>
+              <div class="timeline-title">Pembayaran</div>
+              <div class="timeline-desc">Transfer nominal paket + estimasi ongkir.</div>
+            </div>
+            <div class="timeline-item">
+              <div class="num-step">3</div>
+              <div class="timeline-title">Kirim Data</div>
+              <div class="timeline-desc">Isi format order & kirim foto/video.</div>
+            </div>
+            <div class="timeline-item">
+              <div class="num-step">4</div>
+              <div class="timeline-title">Pengiriman</div>
+              <div class="timeline-desc">Proses pengerjaan & pengiriman dari Sidoarjo.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Format Order + Copy Button -->
+        <div>
+          <div class="section-title-modern">
+            <i class="fa-solid fa-copy"></i> Format Order WhatsApp
+          </div>
+          <div class="format-box-modern" id="formatText">-- FORMAT ORDER WEBSITE NETFLIX --
+1. Nama Pemesan: 
+2. Paket yang Dipilih: (Paket 1 / Paket 2 / Paket 3)
+3. Orientation Pigora (Khusus Paket 1 & 3): (Portrait / Landscape)
+4. Teks Kategori (Atas): (Contoh: HAPPY BIRTHDAY / ROMANCE | LOVE)
+5. Nama Utama: (Contoh: Gabriel Tanjaya / Araline & Gabriel)
+6. Info Meta: (Tahun | Rating | Durasi)
+7. Teks Cerita/Ucapan: 
+8. Alamat Pengiriman (Khusus Paket 1 & 3): 
+   - Nama Penerima:
+   - No HP:
+   - Alamat Lengkap:
+   - Kecamatan & Kota:</div>
+          <button class="btn-copy-modern" id="btnCopyFormat">
+            <i class="fa-regular fa-clone"></i> Salin Format Order
+          </button>
+        </div>
+
+        <!-- 4. FAQ Section -->
+        <div>
+          <div class="section-title-modern">
+            <i class="fa-solid fa-circle-question"></i> Pertanyaan Umum (FAQ)
+          </div>
+          <div class="faq-grid-modern">
+            <div class="faq-card-modern">
+              <h4>Berapa lama pengerjaannya?</h4>
+              <p>Estimasi pengerjaan 1–2 hari kerja setelah data ucapan & foto diterima lengkap.</p>
+            </div>
+            <div class="faq-card-modern">
+              <h4>Berapa lama website aktif?</h4>
+              <p>Website aktif selamanya tanpa biaya perpanjangan atau langganan bulanan.</p>
+            </div>
+            <div class="faq-card-modern">
+              <h4>Bagaimana jika belum punya video?</h4>
+              <p>Sudah gratis pembuatan video slideshow dari beberapa foto + musik pilihanmu.</p>
+            </div>
+            <div class="faq-card-modern">
+              <h4>Pengiriman dari mana?</h4>
+              <p>Dikirim dari Sidoarjo, Jawa Timur. Ongkir diawal berupa estimasi resmi kurir.</p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- FOOTER CTA BAR DI DALAM POPUP -->
+      <div class="popup-bottom-cta">
+        <div class="popup-bottom-cta-text">
+          Siap buat momen ucapan Netflix milikmu sekarang?
+        </div>
+        <a href="#" id="btnCtaPopupBottom" target="_blank" class="btn-main-popup-wa">
+          <i class="fa-brands fa-whatsapp"></i> Chat Admin Sekarang
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- AREA CONFIG DATA (Dua Versi Foto Hero Tersedia) -->
+  <script>
+    const DATA_WEBSITE = {
+      // Data WhatsApp & Toko
+      noWhatsApp: "6285155091238",
+      pesanWhatsApp: "Halo, saya mau order Website Ucapan Tema Netflix seperti yang di preview dong!",
+
+      // Data Harga & Foto Produk di Pop-up Modal
+      hargaPaket1: "Rp 120.000",
+      hargaPaket2: "Rp 45.000",
+      hargaPaket3: "Rp 150.000",
+      fotoPaket1: "https://i.ibb.co.com/XZ0mfgTC/Gemini-Generated-Image-gb2v09gb2v09gb2v.jpg",
+      fotoPaket2: "https://i.ibb.co.com/8gVGMhCr/Gemini-Generated-Image-k70dc9k70dc9k70d.jpg",
+      fotoPaket3: "https://i.ibb.co.com/XfXtf2yN/Gemini-Generated-Image-dvd09ddvd09ddvd0.jpg",
+
+      // Konten Utama Preview Website Ucapan
+      kategori: "HAPPY BIRTHDAY from Araline",
+      namaPasangan: "Gabriel Tanjaya",
+      tahun: "2026",
+      badge: "G",
+      durasi: "1h 3m",
+      deskripsi: "Pertemuan pertama mereka terjadi di halaman belakang kompleks studio mereka yang gersang. Araline sedang duduk di bangku taman, membawa buku catatan dan meteran, mencoba merancang taman komunal yang sempurna. Tiba-tiba, sebuah pesawat kertas mendarat tepat di atas buku catatannya. Di sayap pesawat itu, ada coretan cat minyak berwarna kuning cerah berbentuk matahari kecil.",
+      youtubeVideoId: "YjwloyG3DGM",
+      
+      // 1. Foto Hero versi LANDSCAPE (Layar PC / Laptop 1920x1080 px)
+      fotoHeroPC: "https://i.ibb.co.com/xKMpx9L7/EDIT-FOTO-02.jpg",
+      
+      // 2. Foto Hero versi PORTRAIT (Layar HP / Mobile 1080x1920 px)
+      fotoHeroMobile: "https://i.ibb.co.com/q3p951dN/EDIT-FOTO-01.jpg",
+      
+      // 4 Foto Galeri Kenangan
+      fotoMemories: [
+        "https://i.ibb.co.com/392DNhjR/EDIT-FOTO-03.jpg",
+        "https://i.ibb.co.com/7x7wgrfz/EDIT-FOTO-04.jpg",
+        "https://i.ibb.co.com/LXDWyFCg/EDIT-FOTO-05.jpg",
+        "https://i.ibb.co.com/qqMwYzy/EDIT-FOTO-06.jpg"
+      ]
+    };
+
+    // System Handler
+    document.addEventListener("DOMContentLoaded", () => {
+      // Helper function generate link WA
+      const getWaUrl = (customText) => {
+        const msg = customText || DATA_WEBSITE.pesanWhatsApp;
+        return `https://wa.me/${DATA_WEBSITE.noWhatsApp}?text=${encodeURIComponent(msg)}`;
+      };
+
+      // Set WA Links
+      document.getElementById('waCtaBtnTop').href = getWaUrl();
+      document.getElementById('btnCtaPopupBottom').href = getWaUrl();
+      
+      document.getElementById('btnCtaPkg1').href = getWaUrl("Halo admin, saya berminat order Paket 1 (Pigora Fisik A4) Website Ucapan Netflix!");
+      document.getElementById('btnCtaPkg2').href = getWaUrl("Halo admin, saya berminat order Paket 2 (Digital Website) Ucapan Netflix!");
+      document.getElementById('btnCtaPkg3').href = getWaUrl("Halo admin, saya berminat order Paket 3 (Complete Bundle Fisik + Digital) Website Ucapan Netflix!");
+
+      // Set Modal Prices & Images
+      document.getElementById('pricePkg1').textContent = DATA_WEBSITE.hargaPaket1;
+      document.getElementById('pricePkg2').textContent = DATA_WEBSITE.hargaPaket2;
+      document.getElementById('pricePkg3').textContent = DATA_WEBSITE.hargaPaket3;
+
+      if(DATA_WEBSITE.fotoPaket1) document.getElementById('imgPkg1').src = DATA_WEBSITE.fotoPaket1;
+      if(DATA_WEBSITE.fotoPaket2) document.getElementById('imgPkg2').src = DATA_WEBSITE.fotoPaket2;
+      if(DATA_WEBSITE.fotoPaket3) document.getElementById('imgPkg3').src = DATA_WEBSITE.fotoPaket3;
+
+      // Set Preview Texts
+      document.getElementById('txtCategory').textContent = DATA_WEBSITE.kategori;
+      document.getElementById('txtTitle').textContent = DATA_WEBSITE.namaPasangan;
+      document.getElementById('txtYear').textContent = DATA_WEBSITE.tahun;
+      document.getElementById('txtBadge').textContent = DATA_WEBSITE.badge;
+      document.getElementById('txtDuration').textContent = DATA_WEBSITE.durasi;
+      document.getElementById('txtDescription').textContent = DATA_WEBSITE.deskripsi;
+
+      // System Switcher Background Image berdasarkan Ukuran Layar (Mobile vs PC)
+      const heroBg = document.getElementById('heroBg');
+      const setHeroBg = () => {
+        if (window.innerWidth <= 768) {
+          // HP Pakai Foto Portrait (1080x1920)
+          heroBg.style.backgroundImage = `linear-gradient(0deg, #141414 45%, rgba(20,20,20,0.6) 75%, rgba(20,20,20,0.1) 100%), url('${DATA_WEBSITE.fotoHeroMobile}')`;
+        } else {
+          // PC Pakai Foto Landscape (1920x1080)
+          heroBg.style.backgroundImage = `linear-gradient(90deg, #141414 0%, rgba(20,20,20,0.85) 40%, rgba(20,20,20,0) 75%), url('${DATA_WEBSITE.fotoHeroPC}')`;
+        }
+      };
+      setHeroBg();
+      window.addEventListener('resize', setHeroBg);
+
+      // Render Gallery
+      const galleryContainer = document.getElementById('galleryContainer');
+      galleryContainer.innerHTML = '';
+      DATA_WEBSITE.fotoMemories.forEach((url, idx) => {
+        const cardDiv = document.createElement('div');
+        cardDiv.className = 'card';
+        cardDiv.innerHTML = `<img src="${url}" alt="Memory ${idx + 1}" class="gallery-img">`;
+        galleryContainer.appendChild(cardDiv);
+      });
+
+      // Modals Logic
+      const playBtn = document.getElementById('playBtn');
+      const videoModal = document.getElementById('videoModal');
+      const closeVideoBtn = document.getElementById('closeVideoBtn');
+      const youtubeIframe = document.getElementById('youtubeIframe');
+
+      const imageModal = document.getElementById('imageModal');
+      const modalImg = document.getElementById('modalImg');
+      const closeImageBtn = document.getElementById('closeImageBtn');
+
+      const productInfoModal = document.getElementById('productInfoModal');
+      const btnOpenProductInfo = document.getElementById('btnOpenProductInfo');
+      const closeProductInfoBtn = document.getElementById('closeProductInfoBtn');
+
+      // Video Trigger
+      playBtn.addEventListener('click', () => {
+        youtubeIframe.src = `https://www.youtube.com/embed/${DATA_WEBSITE.youtubeVideoId}?autoplay=1&rel=0`;
+        videoModal.style.display = 'flex';
+      });
+
+      const closeVideo = () => {
+        videoModal.style.display = 'none';
+        youtubeIframe.src = '';
+      };
+      closeVideoBtn.addEventListener('click', closeVideo);
+
+      // Lightbox Trigger
+      document.querySelectorAll('.gallery-img').forEach(img => {
+        img.addEventListener('click', () => {
+          modalImg.src = img.src;
+          imageModal.style.display = 'flex';
+        });
+      });
+
+      const closeImage = () => {
+        imageModal.style.display = 'none';
+        modalImg.src = '';
+      };
+      closeImageBtn.addEventListener('click', closeImage);
+
+      // Product Info Trigger
+      btnOpenProductInfo.addEventListener('click', () => {
+        productInfoModal.style.display = 'flex';
+      });
+
+      const closeProductInfo = () => {
+        productInfoModal.style.display = 'none';
+      };
+      closeProductInfoBtn.addEventListener('click', closeProductInfo);
+
+      // Copy Format Text Handler
+      const btnCopyFormat = document.getElementById('btnCopyFormat');
+      const formatText = document.getElementById('formatText');
+
+      btnCopyFormat.addEventListener('click', () => {
+        navigator.clipboard.writeText(formatText.innerText).then(() => {
+          const originalHTML = btnCopyFormat.innerHTML;
+          btnCopyFormat.innerHTML = '<i class="fa-solid fa-check"></i> Format Disalin!';
+          btnCopyFormat.style.background = '#25d366';
+          setTimeout(() => {
+            btnCopyFormat.innerHTML = originalHTML;
+            btnCopyFormat.style.background = 'linear-gradient(90deg, #e50914 0%, #b80710 100%)';
+          }, 2000);
+        });
+      });
+
+      // Close Modals on Overlay Click
+      window.addEventListener('click', (e) => {
+        if (e.target === videoModal) closeVideo();
+        if (e.target === imageModal) closeImage();
+        if (e.target === productInfoModal) closeProductInfo();
+      });
+    });
+  </script>
+</body>
+</html>
