@@ -24,6 +24,9 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+    <!-- PapaParse CDN untuk Parsing CSV Super Cepat & Anti-Bug -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
     <style>
         /* Variables & Color Palette */
         :root {
@@ -466,6 +469,7 @@
             line-height: 1.5;
             margin-bottom: 20px;
             text-align: justify;
+            white-space: pre-line;
         }
 
         .modal-download-btn {
@@ -589,7 +593,7 @@
         </div>
     </div>
 
-    <!-- ================= JAVASCRIPT FETCH, CACHING, & TAB HANDLER ================= -->
+    <!-- ================= JAVASCRIPT FETCH, PARSING, CACHING, & TAB HANDLER ================= -->
     <script>
         const sheetUrls = {
             jualan: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ-enavxOP-JDGc-D-yRUkrqMumpydoOJW4PtVmen4ZJtE9l8r-BX0wH0i3lWQi-G3wcU_sTixatKRE/pub?gid=203268092&single=true&output=csv',
@@ -597,8 +601,8 @@
         };
 
         const cacheKeys = {
-            jualan: 'jualanku_data_cache',
-            aplikasi: 'aplikasi_data_cache'
+            jualan: 'jualanku_data_cache_v2',
+            aplikasi: 'aplikasi_data_cache_v2'
         };
 
         let currentActiveTab = 'jualan';
@@ -609,11 +613,14 @@
             return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=${width}&output=webp&q=80`;
         }
 
-        function renderBiolinkData(dataText) {
-            const rows = dataText.split('\n').map(row => {
-                return row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(field => field.replace(/^"\vert{}"$/g, '').trim());
+        // Fungsi Render List Item (Memakai PapaParse untuk Robust Parsing CSV)
+        function renderBiolinkData(csvString) {
+            const parsed = Papa.parse(csvString, {
+                skipEmptyLines: true,
+                relaxColumnCount: true
             });
 
+            const rows = parsed.data;
             const container = document.getElementById('pdfListContainer');
             container.innerHTML = '';
 
@@ -621,24 +628,37 @@
 
             for (let i = 1; i < rows.length; i++) {
                 const row = rows[i];
-                if (row.length < 7 || !row[0]) continue;
+                if (!row || row.length < 1 || !row[0] || !row[0].trim()) continue;
 
-                const [judul, subjudul, deskripsi, foto, star, badge, link, tombolText] = row;
+                const judul = row[0] || '';
+                const subjudul = row[1] || '';
+                const deskripsi = row[2] || '';
+                const foto = row[3] || '';
+                const star = row[4] || '';
+                const badge = row[5] || '';
+                const link = row[6] || '#';
+                const tombolText = row[7] || 'Download';
 
                 const btn = document.createElement('div');
                 btn.className = 'pdf-item-btn';
                 
-                const safeJudul = judul.replace(/'/g, "\\'");
-                const safeSubjudul = subjudul.replace(/'/g, "\\'");
-                const safeDeskripsi = deskripsi.replace(/'/g, "\\'").replace(/\n/g, ' ');
                 const rawFoto = foto;
-                const safeLink = link;
-                const customTombol = (tombolText && tombolText.trim() !== '') ? tombolText.replace(/'/g, "\\'") : 'Download';
+                const customTombol = (tombolText && tombolText.trim() !== '') ? tombolText : 'Download';
 
                 const thumbImgUrl = getOptimizedImg(rawFoto, 200);
                 const modalImgUrl = getOptimizedImg(rawFoto, 600);
 
-                btn.setAttribute('onclick', `openModal('${modalImgUrl}', '${safeJudul}', '${safeSubjudul}', '${safeDeskripsi}', '${safeLink}', '${customTombol}')`);
+                // Menggunakan Dataset untuk Mencegah Error Tanda Petik (Kutip Dua / Satu)
+                btn.dataset.img = modalImgUrl;
+                btn.dataset.title = judul;
+                btn.dataset.subtitle = subjudul;
+                btn.dataset.desc = deskripsi;
+                btn.dataset.link = link;
+                btn.dataset.btnText = customTombol;
+
+                btn.onclick = function() {
+                    openModal(this.dataset.img, this.dataset.title, this.dataset.subtitle, this.dataset.desc, this.dataset.link, this.dataset.btnText);
+                };
 
                 let badgeHtml = '';
                 if (star && star.trim() !== '') {
