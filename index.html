@@ -81,7 +81,7 @@
 
         /* Hero Section */
         .hero {
-            padding: 35px 20px 20px;
+            padding: 35px 20px 15px;
             text-align: center;
         }
 
@@ -188,6 +188,42 @@
         .btn-wa:hover {
             background-color: var(--wa-green-hover);
             transform: translateY(-2px);
+        }
+
+        /* Container Tab Kapsul Melengkung (Pill Switcher Layout) */
+        .tab-container {
+            display: flex;
+            align-items: center;
+            background-color: var(--card-cream);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            padding: 4px;
+            margin: 15px 20px 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px 16px;
+            font-size: 13.5px;
+            font-weight: 600;
+            text-align: center;
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .tab-btn.active {
+            background-color: var(--text-dark);
+            color: #FFFFFF;
+            box-shadow: 0 3px 10px rgba(51, 48, 46, 0.25);
+        }
+
+        .tab-btn:hover:not(.active) {
+            color: var(--text-dark);
         }
 
         /* Section Wrappers */
@@ -503,6 +539,16 @@
             </a>
         </section>
 
+        <!-- Tab Navigation (Container Kapsul Without Icons) -->
+        <div class="tab-container">
+            <button class="tab-btn active" id="tabJualan" onclick="switchTab('jualan')">
+                Jualanku
+            </button>
+            <button class="tab-btn" id="tabAplikasi" onclick="switchTab('aplikasi')">
+                Aplikasi Gratis
+            </button>
+        </div>
+
         <!-- PORTFOLIO & SERVICES LIST (DINAMIS DARI GOOGLE SHEETS) -->
         <section class="page-section">
             <div class="pdf-list" id="pdfListContainer">
@@ -543,19 +589,26 @@
         </div>
     </div>
 
-    <!-- ================= JAVASCRIPT FETCH, CACHING, & EVENT HANDLER ================= -->
+    <!-- ================= JAVASCRIPT FETCH, CACHING, & TAB HANDLER ================= -->
     <script>
-        const sheetCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ-enavxOP-JDGc-D-yRUkrqMumpydoOJW4PtVmen4ZJtE9l8r-BX0wH0i3lWQi-G3wcU_sTixatKRE/pub?gid=0&single=true&output=csv';
-        const CACHE_KEY = 'biolink_data_cache';
+        const sheetUrls = {
+            jualan: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ-enavxOP-JDGc-D-yRUkrqMumpydoOJW4PtVmen4ZJtE9l8r-BX0wH0i3lWQi-G3wcU_sTixatKRE/pub?gid=203268092&single=true&output=csv',
+            aplikasi: 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ-enavxOP-JDGc-D-yRUkrqMumpydoOJW4PtVmen4ZJtE9l8r-BX0wH0i3lWQi-G3wcU_sTixatKRE/pub?gid=0&single=true&output=csv'
+        };
 
-        // Fungsi Otomatis Kompres Foto ke format WebP ringan via CDN Wsrv
+        const cacheKeys = {
+            jualan: 'jualanku_data_cache',
+            aplikasi: 'aplikasi_data_cache'
+        };
+
+        let currentActiveTab = 'jualan';
+
         function getOptimizedImg(url, width = 300) {
             if (!url) return 'https://via.placeholder.com/200x200/C5A059/FFFFFF?text=Image';
             if (url.startsWith('data:image')) return url;
             return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=${width}&output=webp&q=80`;
         }
 
-        // Fungsi Render List Item
         function renderBiolinkData(dataText) {
             const rows = dataText.split('\n').map(row => {
                 return row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(field => field.replace(/^"\vert{}"$/g, '').trim());
@@ -614,36 +667,48 @@
             }
         }
 
-        // Pemuatan Utama dengan Strategi Cache-First (Instant Load 0ms)
-        async function loadBiolinkData() {
-            const cachedData = localStorage.getItem(CACHE_KEY);
+        async function loadBiolinkData(tabType) {
+            const cachedData = localStorage.getItem(cacheKeys[tabType]);
             
-            // 1. Tampilkan dari memori internal jika ada cache
             if (cachedData) {
                 renderBiolinkData(cachedData);
+            } else {
+                document.getElementById('pdfListContainer').innerHTML = '<p style="text-align:center; font-size:13px; color:var(--text-muted);">Memuat data...</p>';
             }
 
-            // 2. Ambil data terbaru di latar belakang
             try {
-                const response = await fetch(sheetCsvUrl);
+                const response = await fetch(sheetUrls[tabType]);
                 const latestDataText = await response.text();
 
-                // Jika data berubah dari cache, perbarui memori & re-render
                 if (latestDataText !== cachedData) {
-                    localStorage.setItem(CACHE_KEY, latestDataText);
-                    renderBiolinkData(latestDataText);
+                    localStorage.setItem(cacheKeys[tabType], latestDataText);
+                    if (currentActiveTab === tabType) {
+                        renderBiolinkData(latestDataText);
+                    }
                 }
             } catch (error) {
-                console.error('Gagal memperbarui data Google Sheets:', error);
-                if (!cachedData) {
+                console.error(`Gagal memperbarui data (${tabType}):`, error);
+                if (!cachedData && currentActiveTab === tabType) {
                     document.getElementById('pdfListContainer').innerHTML = '<p style="text-align:center; font-size:13px; color:#E53935;">Gagal memuat data.</p>';
                 }
             }
         }
 
-        window.addEventListener('DOMContentLoaded', loadBiolinkData);
+        function switchTab(tabType) {
+            if (currentActiveTab === tabType) return;
 
-        // Open Modal Pop Up
+            currentActiveTab = tabType;
+
+            document.getElementById('tabJualan').classList.toggle('active', tabType === 'jualan');
+            document.getElementById('tabAplikasi').classList.toggle('active', tabType === 'aplikasi');
+
+            loadBiolinkData(tabType);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadBiolinkData('jualan');
+        });
+
         function openModal(imgUrl, title, subtitle, desc, btnLink, btnText) {
             const modalImg = document.getElementById('modalImg');
             
@@ -666,7 +731,6 @@
             };
         }
 
-        // Close Modal Pop Up
         function closeModal() {
             document.getElementById('modalOverlay').classList.remove('active');
             document.getElementById('modalImg').classList.remove('loaded');

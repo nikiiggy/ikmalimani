@@ -1,0 +1,387 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Playfair+Display:ital,wght@0,600;1,600;1,700&display=swap');
+
+:root{
+  --bg:#09070d; --card:#15111c; --text:#f8f3f7; --muted:#a69eaa;
+  --pink:#ff5c93; --rose:#ff8db2; --line:rgba(255,255,255,.10);
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:#050407;color:var(--text);font-family:"DM Sans",sans-serif}
+body{overflow-x:hidden}
+button{font:inherit}
+.app{width:100%;max-width:520px;min-height:100svh;margin:auto;position:relative;background:
+radial-gradient(circle at 50% 0%,rgba(255,75,135,.12),transparent 35%),
+linear-gradient(180deg,#09070d,#0d0910 60%,#08060b)}
+.screen{min-height:100svh;padding:34px 22px 110px;display:none;position:relative;overflow:hidden}
+.screen.active{display:flex;flex-direction:column;animation:in .65s ease both}
+@keyframes in{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.center{width:100%;margin:auto;text-align:center;position:relative;z-index:2}
+.tiny,.eyebrow,.chapter{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#c9a9b7;font-weight:700}
+.tiny{margin-bottom:28px}.eyebrow{margin:0 0 14px}
+h1,h2,h3,p{margin-top:0}
+h1{font-size:clamp(58px,17vw,92px);line-height:.86;letter-spacing:-.06em;margin:0 0 22px}
+h1 em,h2 em{font-family:"Playfair Display",serif;font-weight:600;color:var(--rose)}
+h2{font-size:42px;line-height:1.02;letter-spacing:-.05em;margin-bottom:18px}
+h3{font-size:22px}
+p{line-height:1.7;color:var(--muted)}
+.muted{font-size:14px;max-width:300px;margin:0 auto 30px}
+.hint{font-size:10px;opacity:.55;margin-top:15px}
+.primary{position:relative;z-index:5;pointer-events:auto;border:0;border-radius:999px;background:var(--text);color:#120b11;padding:15px 22px;font-weight:700;min-height:50px;box-shadow:0 12px 35px rgba(255,255,255,.08);cursor:pointer;transition:.2s}
+.primary:active{transform:scale(.96)}
+.heart-orbit{width:150px;height:150px;border:1px solid rgba(255,141,178,.25);border-radius:50%;display:grid;place-items:center;margin:0 auto 35px;box-shadow:0 0 70px rgba(255,65,130,.12);animation:float 3s ease-in-out infinite}
+.heart-orbit span,.big-heart{font-size:65px;color:var(--pink);text-shadow:0 0 35px rgba(255,65,130,.65);animation:pulse 1.5s infinite}
+@keyframes float{50%{transform:translateY(-8px)}} @keyframes pulse{50%{transform:scale(1.08)}}
+.stars{position:absolute;inset:0;background-image:radial-gradient(#fff 1px,transparent 1px);background-size:42px 42px;opacity:.08;z-index:0;pointer-events:none}.intro-content{position:relative;z-index:2}
+.section-head{margin-top:25px;margin-bottom:25px}
+.section-head p{font-size:14px}
+.timeline{border-left:1px solid rgba(255,255,255,.16);margin:10px 0 28px;padding-left:20px}
+.timeline article{position:relative;padding:0 0 28px}
+.timeline article>span{position:absolute;left:-36px;top:0;width:30px;height:30px;border:1px solid var(--pink);border-radius:50%;background:var(--bg);display:grid;place-items:center;font-size:9px;color:var(--rose)}
+.timeline small{font-size:9px;color:var(--rose);letter-spacing:.15em}.timeline h3{margin:5px 0 6px;font-size:20px}.timeline p{font-size:13px;margin:0}
+/* Gallery Grid Layout */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+  margin-bottom: 25px;
+}
+
+.photo-card {
+  margin: 0;
+  background: #f7f3ed;
+  padding: 8px 8px 18px;
+  border-radius: 12px;
+  color: #222;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.photo-card:hover, .photo-card:active {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 15px 30px rgba(255, 92, 147, 0.25);
+}
+
+.photo-card figcaption {
+  font-family: "Playfair Display", serif;
+  text-align: center;
+  padding-top: 10px;
+  font-size: 13px;
+  color: #2b1a23;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.photo-placeholder {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background: linear-gradient(135deg, #3a2633, #17131c);
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  color: #8d7180;
+  font-size: 12px;
+  letter-spacing: 0.15em;
+  text-align: center;
+}
+
+/* Modal / Lightbox Pop-up */
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  background: rgba(9, 7, 13, 0.88);
+  backdrop-filter: blur(12px);
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.modal.show {
+  display: flex;
+  opacity: 1;
+}
+
+.modal-content-wrap {
+  max-width: 420px;
+  width: 100%;
+  background: #18131e;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 16px;
+  text-align: center;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+  transform: scale(0.85);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modal.show .modal-content-wrap {
+  transform: scale(1);
+}
+
+#modalImageContainer {
+  width: 100%;
+  max-height: 60vh;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #0d0910;
+}
+
+#modalImageContainer img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 12px;
+}
+
+.modal-caption {
+  margin-top: 14px;
+  font-family: "Playfair Display", serif;
+  font-size: 16px;
+  color: var(--rose);
+}
+
+.modal-close {
+  position: absolute;
+  top: 20px;
+  right: 25px;
+  color: var(--text);
+  font-size: 35px;
+  font-weight: bold;
+  cursor: pointer;
+  z-index: 101;
+  transition: color 0.2s;
+}
+
+.modal-close:hover {
+  color: var(--pink);
+}
+.reasons{display:grid;gap:8px;margin-bottom:25px}
+.reason{display:flex;align-items:center;gap:15px;background:rgba(255,255,255,.045);border:1px solid var(--line);border-radius:15px;color:var(--text);padding:14px;text-align:left;cursor:pointer}
+.reason b{font-size:10px;color:var(--rose);width:25px}.reason span{font-size:13px}.reason.special{border-color:rgba(255,92,147,.4);background:rgba(255,92,147,.08)}
+.game-card{margin:auto 0 25px;background:linear-gradient(145deg,#1b1421,#100c15);border:1px solid var(--line);border-radius:28px;padding:30px 20px;text-align:center;box-shadow:0 25px 70px rgba(0,0,0,.3)}
+.game-card h2{font-size:35px}.answers{display:grid;gap:10px;margin-top:25px}.answer{border:1px solid var(--line);background:#fff;color:#161017;border-radius:14px;padding:15px;font-weight:700;cursor:pointer}.game-result{min-height:25px;color:var(--rose);font-weight:700;margin:16px 0 0}
+.cake-wrap{height:220px;display:grid;place-items:center;position:relative;margin:10px 0}
+.cake{position:relative;margin-top:35px}.cake-body{width:190px;height:85px;border-radius:12px 12px 25px 25px;background:linear-gradient(#d99a9f,#9c526d);box-shadow:0 20px 40px rgba(255,50,120,.12)}.icing{position:absolute;z-index:2;width:200px;height:30px;background:#fff0f4;border-radius:20px 20px 10px 10px;top:-14px;left:-5px}.flame{font-size:38px;position:absolute;top:22px;z-index:3;animation:pulse .8s infinite}
+/* Container Amplop */
+.envelope {
+  width: 100%;
+  max-width: 340px;
+  height: 200px;
+  margin: 40px auto 25px;
+  position: relative;
+  background: #6a2741; /* Bagian dalam amplop */
+  border-radius: 12px;
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+  perspective: 1000px;
+}
+
+/* Lidah Amplop Atas */
+.flap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 110px;
+  background: #a84e6e;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  transform-origin: top;
+  transition: transform 0.5s ease 0.3s, z-index 0.2s ease 0.3s;
+  z-index: 4; /* Paling depan saat tertutup */
+}
+
+/* Kantong Depan Amplop */
+.pocket {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 120px;
+  background: #8e3a5a;
+  clip-path: polygon(0 100%, 100% 100%, 100% 0, 0 0);
+  border-radius: 0 0 12px 12px;
+  z-index: 3; /* Menutupi kertas surat saat di dalam */
+}
+
+/* Kertas Surat */
+.letter-paper {
+  position: absolute;
+  bottom: 10px;
+  left: 5%;
+  width: 90%;
+  height: 170px;
+  background: #fff7ef;
+  color: #2c1820;
+  padding: 16px;
+  text-align: left;
+  font-family: "Playfair Display", serif;
+  font-size: 11px;
+  line-height: 1.5;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  overflow-y: auto;
+  z-index: 2; /* Berada di dalam kantong */
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.1s, z-index 0.1s ease 0.4s, height 0.5s ease;
+}
+
+.letter-paper p {
+  color: #2c1820;
+  margin-bottom: 8px;
+}
+
+/* ESENSI ANIMASI SAAT TERBUKA (.open) */
+
+/* 1. Lidah amplop membuka ke atas */
+.envelope.open .flap {
+  transform: rotateX(180deg);
+  z-index: 1; /* Turun z-index agar berada di belakang */
+  transition: transform 0.5s ease, z-index 0.1s ease 0.5s;
+}
+
+/* 2. Kertas surat terangkat keluar dari kantong amplop */
+.envelope.open .letter-paper {
+  transform: translateY(-120px); /* Terangkat ke atas */
+  height: 240px; /* Menjadi lebih panjang agar mudah dibaca */
+  z-index: 10; /* Naik ke Paling depan */
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1) 0.4s, z-index 0.1s ease 0.4s, height 0.5s ease 0.4s;
+}
+.secret-heart{background:none;border:0;font-size:100px;color:var(--pink);text-shadow:0 0 40px rgba(255,80,140,.55);cursor:pointer;animation:pulse 1.5s infinite;margin:20px}.secret-text{min-height:30px}
+.final-screen{background:radial-gradient(circle at 50% 45%,rgba(255,65,130,.2),transparent 35%),#09070d}.final-screen h2{font-size:46px}.final-message{max-width:330px;margin:0 auto 25px}.final-screen h3{letter-spacing:.12em}
+.music-player{position:fixed;z-index:50;bottom:14px;left:50%;transform:translateX(-50%);width:min(calc(100% - 28px),490px);background:rgba(18,13,22,.88);border:1px solid rgba(255,255,255,.12);backdrop-filter:blur(18px);border-radius:18px;padding:9px 12px;display:flex;align-items:center;gap:10px;box-shadow:0 15px 40px rgba(0,0,0,.4)}
+.disc{width:40px;height:40px;border-radius:50%;background:radial-gradient(circle,#f8e8ee 0 8%,#333 9% 18%,#111 19% 100%);display:grid;place-items:center;color:#fff;font-size:14px;flex:none}.disc.playing{animation:spin 3s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.track{min-width:0;flex:1}.track strong,.track small{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.track strong{font-size:12px}.track small{font-size:9px;color:var(--muted)}#playBtn{border:0;width:40px;height:40px;border-radius:50%;background:#fff;color:#111;cursor:pointer}
+#hearts,#confetti{position:fixed;inset:0;pointer-events:none;z-index:20}.floating-heart{position:absolute;color:var(--pink);animation:rise 4s linear forwards}@keyframes rise{from{transform:translateY(30px) scale(.5);opacity:0}15%{opacity:1}to{transform:translateY(-110vh) rotate(25deg);opacity:0}}
+.conf{position:absolute;width:7px;height:12px;background:var(--rose);animation:fall 2.5s linear forwards}@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:0}}
+@media (min-width:700px){body{background:#050407}.app{box-shadow:0 0 100px rgba(0,0,0,.5)}}
+
+/* =========================================================
+   EXTRA EFFECTS (versi lebay)
+========================================================= */
+#fx{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:30}
+#flash{position:fixed;inset:0;pointer-events:none;z-index:40;opacity:0}
+#flash.on{animation:flashA .9s ease-out}
+@keyframes flashA{0%{opacity:.95}100%{opacity:0}}
+
+#progress{position:fixed;top:0;left:0;right:0;height:3px;z-index:60;background:rgba(255,255,255,.06)}
+#progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#ff5c93,#ffd166,#c77dff,#7bdff2,#ff5c93);background-size:400px 100%;animation:barslide 3s linear infinite;box-shadow:0 0 14px #ff5c93;transition:width .8s cubic-bezier(.2,.9,.2,1)}
+@keyframes barslide{to{background-position:400px 0}}
+@keyframes shimmer{to{background-position:300px 0}}
+
+/* Orb cahaya di latar */
+.orbs{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.orbs i{position:absolute;border-radius:50%;filter:blur(60px);opacity:.35;animation:drift 14s ease-in-out infinite alternate}
+.orbs i:nth-child(1){width:260px;height:260px;background:#ff2d78;top:-60px;left:-80px}
+.orbs i:nth-child(2){width:300px;height:300px;background:#7a3cff;bottom:5%;right:-120px;animation-duration:18s}
+.orbs i:nth-child(3){width:220px;height:220px;background:#ffb347;top:45%;left:-100px;animation-duration:22s;opacity:.2}
+@keyframes drift{to{transform:translate(60px,-90px) scale(1.3)}}
+
+/* Transisi halaman */
+.screen.active{animation:enter .9s cubic-bezier(.2,.9,.2,1) backwards}
+@keyframes enter{from{opacity:0;transform:scale(.92) translateY(30px);filter:blur(14px)}to{opacity:1;transform:none;filter:blur(0)}}
+.screen.active.shake{animation:shake .6s}
+@keyframes shake{0%,100%{transform:none}15%{transform:translate(-9px,5px) rotate(-.6deg)}30%{transform:translate(8px,-6px) rotate(.6deg)}45%{transform:translate(-7px,-4px)}60%{transform:translate(7px,5px)}75%{transform:translate(-4px,3px)}}
+
+/* Elemen muncul satu-satu */
+.screen.active .center>*:not(.big-heart):not(.secret-heart),
+.screen.active .intro-content>*:not(.heart-orbit),
+.screen.active .section-head,
+.screen.active .timeline article,
+.screen.active .reason,
+.screen.active .answer,
+.screen.active .photo-card,
+.screen.active .game-card>*,
+.screen.active .chapter{animation:pop .8s cubic-bezier(.2,1.3,.3,1) backwards;animation-delay:var(--d,0ms)}
+@keyframes pop{from{opacity:0;transform:translateY(40px) scale(.7) rotate(-3deg)}to{opacity:1;transform:none}}
+
+/* Teks berkilau */
+h1 em,h2 em{background:linear-gradient(90deg,#ff8db2,#ffd1e3,#ffb347,#ff8db2);background-size:300px 100%;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;animation:shimmer 3s linear infinite;filter:drop-shadow(0 0 18px rgba(255,92,147,.55))}
+
+/* Tombol */
+.primary{overflow:hidden;background:linear-gradient(135deg,#fff,#ffe3ee);box-shadow:0 0 30px rgba(255,92,147,.4),0 12px 35px rgba(255,255,255,.08)}
+.primary::after{content:"";position:absolute;top:0;left:-60%;width:40%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,92,147,.45),transparent);transform:skewX(-20deg);animation:shine 2.8s ease-in-out infinite;pointer-events:none}
+@keyframes shine{0%,60%{left:-60%}100%{left:130%}}
+.primary:hover{transform:translateY(-2px) scale(1.04)}
+.primary:active{transform:scale(.95)}
+.primary:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none}
+.primary:disabled::after{display:none}
+.primary.ghost,#micBtn{background:transparent;color:var(--text);border:1px solid rgba(255,255,255,.25);box-shadow:none}
+#micBtn::after{display:none}
+
+/* Cincin denyut di sekitar hati */
+.heart-orbit::before,.heart-orbit::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid rgba(255,92,147,.6);animation:ring 2.4s ease-out infinite;pointer-events:none}
+.heart-orbit::after{animation-delay:1.2s}
+@keyframes ring{from{transform:scale(1);opacity:.9}to{transform:scale(2.3);opacity:0}}
+.heart-orbit{position:relative;overflow:visible}
+
+/* Hati melayang */
+.floating-heart{text-shadow:0 0 12px currentColor;animation:rise 4.3s ease-in forwards}
+@keyframes rise{0%{transform:translate(0,30px) scale(.4) rotate(0);opacity:0}12%{opacity:1}100%{transform:translate(var(--sx,0),-115vh) scale(1.3) rotate(var(--rot,25deg));opacity:0}}
+
+/* Galeri: gaya polaroid */
+.photo-card{transition:transform .25s ease,box-shadow .25s ease,rotate .25s ease}
+.photo-card:nth-child(odd){rotate:-2.5deg}
+.photo-card:nth-child(even){rotate:2.5deg}
+.photo-card:hover,.photo-card:active{rotate:0deg}
+
+/* Alasan: blur sampai di-tap */
+.reason{transition:.25s;position:relative;overflow:hidden}
+.reason span{transition:filter .5s,opacity .5s}
+.reason:not(.tapped) span{filter:blur(6px);opacity:.6}
+.reason:hover{border-color:rgba(255,92,147,.5)}
+.reason.tapped{background:linear-gradient(90deg,rgba(255,92,147,.3),rgba(255,92,147,.06));border-color:rgba(255,92,147,.7);box-shadow:0 0 22px rgba(255,92,147,.25)}
+.reason.tapped span{color:#fff}
+
+/* Game */
+.answer{transition:.2s}
+.answer:hover{transform:scale(1.04)}
+.screen.active .answers .answer.nope{animation:nope .5s;background:#ffd6e0}
+.screen.active .answers .answer.win{animation:none;background:linear-gradient(135deg,#ff5c93,#ffb347);color:#fff;transform:scale(1.06);box-shadow:0 0 40px rgba(255,92,147,.7)}
+@keyframes nope{0%,100%{transform:none}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-7px)}80%{transform:translateX(7px)}}
+
+/* Kue & lilin */
+.cake-wrap{cursor:pointer}
+.cake-wrap::before{content:"";position:absolute;width:260px;height:260px;left:50%;margin-left:-130px;top:-20px;border-radius:50%;background:radial-gradient(circle,rgba(255,179,71,.35),transparent 65%);animation:pulse 1.2s infinite;transition:opacity .6s;pointer-events:none}
+.cake-wrap.dark::before{opacity:0}
+.cake-body{box-shadow:0 0 60px rgba(255,92,147,.35)}
+.flame{filter:drop-shadow(0 0 18px #ffb347) drop-shadow(0 0 40px #ff7a18);transition:opacity .5s,transform .5s}
+.flame.out{opacity:0;transform:translateY(-30px) scale(.4);animation:none}
+.smoke{position:absolute;top:30px;left:50%;width:18px;height:18px;border-radius:50%;background:rgba(220,220,230,.55);filter:blur(5px);pointer-events:none;animation:smoke 1.6s ease-out both;animation-delay:var(--dl,0s)}
+@keyframes smoke{from{transform:translate(-50%,0) scale(.5);opacity:.9}to{transform:translate(calc(-50% + var(--x,0px)),-120px) scale(3);opacity:0}}
+
+/* Surat */
+.envelope{transition:box-shadow .6s}
+.envelope.open{box-shadow:0 0 70px rgba(255,92,147,.55),0 15px 35px rgba(0,0,0,.4)}
+
+/* Rahasia */
+.secret-heart{transition:filter .3s}
+.secret-text.unlocked{color:#ffd1e3;font-weight:700;text-shadow:0 0 18px rgba(255,92,147,.8)}
+
+/* Final */
+.final-screen::before{content:"";position:absolute;inset:-50%;background:conic-gradient(from 0deg,rgba(255,92,147,0),rgba(255,92,147,.28),rgba(124,60,255,0),rgba(255,179,71,.22),rgba(255,92,147,0));animation:spin 14s linear infinite;z-index:0;pointer-events:none}
+.big-heart{font-size:95px;animation:heartbeat 1.2s infinite;text-shadow:0 0 50px rgba(255,65,130,.9),0 0 100px rgba(255,65,130,.5)}
+@keyframes heartbeat{0%,100%{transform:scale(1)}15%{transform:scale(1.25)}30%{transform:scale(1)}45%{transform:scale(1.18)}60%{transform:scale(1)}}
+.final-screen h2{text-shadow:0 0 30px rgba(255,92,147,.7)}
+.final-screen h3{color:#ffd1e3;text-shadow:0 0 25px rgba(255,92,147,.9)}
+
+/* Music player menyala saat main */
+.music-player.playing{border-color:rgba(255,92,147,.6);box-shadow:0 0 30px rgba(255,92,147,.35),0 15px 40px rgba(0,0,0,.4)}
+.disc.playing{box-shadow:0 0 18px #ff5c93}
+
+./* Pengunci Ukuran Gambar Frame Polaroid */
+.photo-card {
+  overflow: hidden; /* Mencegah gambar keluar dari frame */
+}
+
+.photo-img {
+  width: 100%;
+  aspect-ratio: 1 / 1; /* Membuat proporsi kotak presisi */
+  object-fit: cover;   /* Foto otomatis terpotong rapi tanpa gepeng/penyok */
+  border-radius: 8px;
+  display: block;
+}

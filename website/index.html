@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jasa Pembuatan Website — Ikmal Imani</title>
+
+    <!-- Meta SEO -->
+    <meta name="description" content="Jasa pembuatan website murah & berkualitas mulai Rp 45k. BISA CUSTOM sesuai kebutuhan.">
+    <meta name="keywords" content="jasa website murah, website 45k, ikmal imani, buat website custom">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23C5A059'/><text x='50%' y='65%' font-family='Georgia, serif' font-size='50' font-weight='bold' fill='%23FFFFFF' text-anchor='middle'>II</text></svg>">
+
+    <!-- Google Fonts & Font Awesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600;1,700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-cream: #FAF7F2;
+            --card-cream: #FFFFFF;
+            --text-dark: #33302E;
+            --text-muted: #66605C;
+            --accent-gold: #C5A059;
+            --accent-sage: #8A9A86;
+            --border-color: #E8E2D9;
+            --wa-green: #25D366;
+            --wa-green-hover: #20ba5a;
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #EAE6DF;
+            color: var(--text-dark);
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+        }
+
+        .mobile-wrapper {
+            width: 100%;
+            max-width: 480px;
+            background-color: var(--bg-cream);
+            min-height: 100vh;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.1);
+            position: relative;
+            padding-bottom: 30px;
+        }
+
+        h1, h2, h3, h4 {
+            font-family: 'Cormorant Garamond', serif;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* Top Bar Navigation */
+        .top-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            background-color: var(--bg-cream);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13.5px;
+            font-weight: 500;
+            color: var(--text-dark);
+            background: var(--card-cream);
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+        }
+
+        .btn-back:hover {
+            border-color: var(--accent-gold);
+            color: var(--accent-gold);
+        }
+
+        /* Header Section */
+        .header-sec {
+            padding: 24px 20px 16px;
+            text-align: center;
+        }
+
+        .price-badge {
+            display: inline-block;
+            background-color: var(--card-cream);
+            color: var(--accent-gold);
+            border: 1px solid var(--accent-gold);
+            padding: 4px 14px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .header-sec h1 {
+            font-size: 32px;
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 8px;
+        }
+
+        .header-sec p {
+            font-size: 13.5px;
+            color: var(--text-muted);
+            margin-bottom: 20px;
+        }
+
+        .btn-wa-main {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            background-color: var(--wa-green);
+            color: #FFFFFF !important;
+            padding: 13px 20px;
+            font-size: 14.5px;
+            font-weight: 600;
+            border-radius: 30px;
+            box-shadow: 0 4px 14px rgba(37, 211, 102, 0.3);
+            transition: var(--transition);
+        }
+
+        .btn-wa-main:hover {
+            background-color: var(--wa-green-hover);
+            transform: translateY(-2px);
+        }
+
+        /* Controls: Search & Tags */
+        .controls-sec {
+            padding: 10px 20px 20px;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 14px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px 12px 42px;
+            border-radius: 25px;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-cream);
+            font-family: inherit;
+            font-size: 13.5px;
+            color: var(--text-dark);
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .search-box input:focus {
+            border-color: var(--accent-gold);
+            box-shadow: 0 0 0 3px rgba(197, 160, 89, 0.15);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .tags-container {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding-bottom: 6px;
+            scrollbar-width: none;
+        }
+
+        .tags-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tag-btn {
+            background-color: var(--card-cream);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 5px 14px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .tag-btn.active, .tag-btn:hover {
+            background-color: var(--text-dark);
+            color: #FFFFFF;
+            border-color: var(--text-dark);
+        }
+
+        /* Gallery Cards Grid (Rasio 1080x1440 = 3:4) */
+        .gallery-grid {
+            padding: 0 20px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .gallery-card {
+            background-color: var(--card-cream);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .gallery-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--accent-gold);
+        }
+
+        /* Presisi Rasio Cover 1080x1440 (3:4) */
+        .card-cover {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1080 / 1440;
+            background-color: #E8E2D9;
+            overflow: hidden;
+        }
+
+        .card-cover img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .card-price-badge {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            background-color: rgba(51, 48, 46, 0.85);
+            color: #FFFFFF;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 3px 8px;
+            border-radius: 12px;
+            backdrop-filter: blur(4px);
+        }
+
+        .card-body {
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .card-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 4px;
+            color: var(--text-dark);
+        }
+
+        .card-sub {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            flex-grow: 1;
+        }
+
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+
+        .card-tag {
+            font-size: 9px;
+            background-color: #F0ECE1;
+            color: var(--text-dark);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        .btn-card-action {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            width: 100%;
+            background-color: var(--text-dark);
+            color: #FFFFFF;
+            font-size: 11.5px;
+            font-weight: 600;
+            padding: 8px 0;
+            border-radius: 10px;
+            transition: var(--transition);
+        }
+
+        .btn-card-action:hover {
+            background-color: var(--accent-gold);
+        }
+
+        footer {
+            margin-top: 30px;
+            background-color: var(--text-dark);
+            color: rgba(255, 255, 255, 0.7);
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+        }
+
+        footer span {
+            color: var(--accent-gold);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mobile-wrapper">
+        <!-- Top Navigation dengan Tombol Back -->
+        <div class="top-nav">
+            <a href="https://www.ikmalimani.my.id/" class="btn-back">
+                <i class="fa-solid fa-arrow-left"></i> Kembali
+            </a>
+            <span style="font-size: 12px; color: var(--text-muted); font-weight: 500;">Jasa Website</span>
+        </div>
+
+        <!-- Header Section -->
+        <section class="header-sec">
+            <span class="price-badge">Start Rp 45K • Bisa Custom</span>
+            <h1>Buat Website hanya di ikmalimani</h1>
+            <p>Semua kebutuhan bisnismu dan ucapan ada disini.</p>
+            
+            <a href="https://wa.me/6285155091238?text=Halo%20Mas%20Ikmal,%20saya%20mau%20tanya%20tentang%20jasa%20pembuatan%20website" class="btn-wa-main" target="_blank">
+                <i class="fa-brands fa-whatsapp" style="font-size: 18px;"></i> Order disini kak!
+            </a>
+        </section>
+
+        <!-- Search & Filter Tags -->
+        <section class="controls-sec">
+            <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="searchInput" placeholder="Cari contoh website..." onkeyup="filterGallery()">
+            </div>
+            
+            <div class="tags-container" id="tagsContainer">
+                <!-- Tag buttons akan dirender otomatis -->
+            </div>
+        </section>
+
+        <!-- Gallery Grid Container -->
+        <section class="gallery-grid" id="galleryGrid">
+            <!-- Galeri dirender via JavaScript -->
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>© 2026 <span>ikmalimanii</span>. All Rights Reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Panggil File Config Terpisah -->
+    <script src="website-config.js"></script>
+
+    <script>
+        let currentTag = 'All';
+
+        // Fungsi Otomatis Optimasi Gambar Cover ke WebP
+        function getOptimizedCover(url) {
+            if (!url) return 'https://via.placeholder.com/1080x1440/C5A059/FFFFFF?text=Preview';
+            return `https://wsrv.nl/?url=${encodeURIComponent(url)}&w=400&output=webp&q=80`;
+        }
+
+        // Generate Filter Tags Secara Dinamis dari Data
+        function initTags() {
+            const tagsSet = new Set(['All']);
+            websiteGalleryData.forEach(item => {
+                if (item.tags && Array.isArray(item.tags)) {
+                    item.tags.forEach(t => tagsSet.add(t));
+                }
+            });
+
+            const tagsContainer = document.getElementById('tagsContainer');
+            tagsContainer.innerHTML = '';
+
+            tagsSet.forEach(tag => {
+                const btn = document.createElement('button');
+                btn.className = `tag-btn ${tag === 'All' ? 'active' : ''}`;
+                btn.innerText = tag;
+                btn.onclick = () => filterByTag(tag, btn);
+                tagsContainer.appendChild(btn);
+            });
+        }
+
+        // Render Cards Gallery
+        function renderGallery(data) {
+            const grid = document.getElementById('galleryGrid');
+            grid.innerHTML = '';
+
+            if (data.length === 0) {
+                grid.innerHTML = `<p style="grid-column: span 2; text-align: center; color: var(--text-muted); font-size: 13px; padding: 20px 0;">Tidak ada website yang cocok.</p>`;
+                return;
+            }
+
+            data.forEach(item => {
+                const coverUrl = getOptimizedCover(item.cover);
+                const tagsHtml = item.tags.map(t => `<span class="card-tag">${t}</span>`).join('');
+
+                const card = document.createElement('div');
+                card.className = 'gallery-card';
+                card.innerHTML = `
+                    <div class="card-cover">
+                        <span class="card-price-badge">${item.price}</span>
+                        <img src="${coverUrl}" alt="${item.title}" loading="lazy" onerror="this.src='https://via.placeholder.com/1080x1440/C5A059/FFFFFF?text=Preview'">
+                    </div>
+                    <div class="card-body">
+                        <div class="card-title">${item.title}</div>
+                        <div class="card-sub">${item.subtitle}</div>
+                        <div class="card-tags">${tagsHtml}</div>
+                        <a href="${item.demoUrl}" target="_blank" class="btn-card-action">
+                            Lihat / Pesan <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        // Filter Fungsi Berdasarkan Pencarian Text & Tag
+        function filterGallery() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            
+            const filtered = websiteGalleryData.filter(item => {
+                const matchesSearch = item.title.toLowerCase().includes(query) || 
+                                      item.subtitle.toLowerCase().includes(query) ||
+                                      item.description.toLowerCase().includes(query);
+                
+                const matchesTag = (currentTag === 'All') || (item.tags && item.tags.includes(currentTag));
+
+                return matchesSearch && matchesTag;
+            });
+
+            renderGallery(filtered);
+        }
+
+        function filterByTag(tag, element) {
+            currentTag = tag;
+            document.querySelectorAll('.tag-btn').forEach(btn => btn.classList.remove('active'));
+            element.classList.add('active');
+            filterGallery();
+        }
+
+        // Inisialisasi saat Halaman Dimuat
+        window.addEventListener('DOMContentLoaded', () => {
+            initTags();
+            renderGallery(websiteGalleryData);
+        });
+    </script>
+</body>
+</html>

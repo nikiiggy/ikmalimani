@@ -1,0 +1,1 @@
+Taruh foto kalian di folder ini. Untuk versi berikutnya, nama file foto bisa disambungkan ke gallery.
